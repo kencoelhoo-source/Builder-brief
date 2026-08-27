@@ -189,14 +189,21 @@ h1, h2, h3, h4 {
 }
 
 .anim-beam {
-  background: linear-gradient(180deg, #16a34a, #f59e0b, #6366f1, #16a34a);
+  background: linear-gradient(180deg, #15803d, #b45309, #334155, #15803d);
   background-size: 100% 300%;
   animation: beam-flow 3.5s linear infinite;
 }
 
+.anim-beam-thin {
+  width: 1.5px;
+  background: linear-gradient(180deg, #15803d, #b45309, #334155, #15803d);
+  background-size: 100% 300%;
+  animation: beam-flow 4s linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .page-enter, .panel-enter, .animate-fadeIn, .toast-bar, .anim-pulse-ring, .anim-live-glow, .anim-beam { animation: none; }
+  .page-enter, .panel-enter, .animate-fadeIn, .toast-bar, .anim-pulse-ring, .anim-live-glow, .anim-beam, .anim-beam-thin { animation: none; }
 }
 
 .site-header {

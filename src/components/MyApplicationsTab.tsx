@@ -123,14 +123,14 @@ export const MyApplicationsTab: React.FC<MyApplicationsTabProps> = ({
             : 'If response is unverified within statutory SLA windows, the system automatically routes the dossier upwards:'}
         </p>
 
-        <div className="mt-6 space-y-4">
+        <div className="mt-6 relative space-y-4">
+          {/* Continuous Ultra-Thin Animated Connecting Line */}
+          <div className="absolute left-[13px] sm:left-[15px] top-8 bottom-8 anim-beam-thin z-0" />
+
           {/* Level 1: Immediate Nodal Dispatch */}
-          <div className="flex items-start gap-3.5 sm:gap-4">
-            <div className="flex flex-col items-center self-stretch flex-shrink-0 w-7">
-              <div className="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold font-mono leading-none ring-4 ring-card z-10 select-none shadow-sm">
-                1
-              </div>
-              <div className="w-0.5 flex-1 anim-beam my-1 rounded-full" />
+          <div className="relative flex items-center gap-3.5 sm:gap-4 z-10">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#15803d] text-white flex items-center justify-center text-xs font-bold font-mono leading-none ring-4 ring-card select-none shadow-sm flex-shrink-0">
+              1
             </div>
             <div className="flex-1 p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/5 min-w-0">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
@@ -153,12 +153,9 @@ export const MyApplicationsTab: React.FC<MyApplicationsTabProps> = ({
           </div>
 
           {/* Level 2: CISO & Senior Risk Desk */}
-          <div className="flex items-start gap-3.5 sm:gap-4">
-            <div className="flex flex-col items-center self-stretch flex-shrink-0 w-7">
-              <div className="w-7 h-7 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs font-bold font-mono leading-none ring-4 ring-card z-10 select-none shadow-sm">
-                2
-              </div>
-              <div className="w-0.5 flex-1 anim-beam my-1 rounded-full" />
+          <div className="relative flex items-center gap-3.5 sm:gap-4 z-10">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#b45309] text-white flex items-center justify-center text-xs font-bold font-mono leading-none ring-4 ring-card select-none shadow-sm flex-shrink-0">
+              2
             </div>
             <div className="flex-1 p-4 rounded-xl border border-line bg-soft/50 min-w-0 hover:border-amber-500/40 transition-colors">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
@@ -181,14 +178,11 @@ export const MyApplicationsTab: React.FC<MyApplicationsTabProps> = ({
           </div>
 
           {/* Level 3: RBI Ombudsman & Cyber SP */}
-          <div className="flex items-start gap-3.5 sm:gap-4">
-            <div className="flex flex-col items-center self-stretch flex-shrink-0 w-7">
-              <div className="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold font-mono leading-none ring-4 ring-card z-10 select-none shadow-sm">
-                3
-              </div>
-              <div className="w-0.5 flex-1 anim-beam my-1 rounded-full" />
+          <div className="relative flex items-center gap-3.5 sm:gap-4 z-10">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#334155] text-white flex items-center justify-center text-xs font-bold font-mono leading-none ring-4 ring-card select-none shadow-sm flex-shrink-0">
+              3
             </div>
-            <div className="flex-1 p-4 rounded-xl border border-line bg-soft/50 min-w-0 hover:border-indigo-500/40 transition-colors">
+            <div className="flex-1 p-4 rounded-xl border border-line bg-soft/50 min-w-0 hover:border-slate-500/40 transition-colors">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
                 <p className="text-sm font-bold text-ink">
                   {hi ? 'स्तर 3: RBI बैंकिंग लोकपाल एवं पुलिस अधीक्षक (साइबर क्राइम)' : 'Level 3: RBI Banking Ombudsman & Cyber Crime SP (72 Hours)'}
@@ -209,11 +203,9 @@ export const MyApplicationsTab: React.FC<MyApplicationsTabProps> = ({
           </div>
 
           {/* Level 4: Magistrate Court */}
-          <div className="flex items-start gap-3.5 sm:gap-4">
-            <div className="flex flex-col items-center self-stretch flex-shrink-0 w-7">
-              <div className="w-7 h-7 rounded-full bg-[#111827] dark:bg-white dark:text-ink text-white flex items-center justify-center text-xs font-bold font-mono leading-none ring-4 ring-card z-10 select-none shadow-sm">
-                4
-              </div>
+          <div className="relative flex items-center gap-3.5 sm:gap-4 z-10">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#0f172a] dark:bg-white dark:text-ink text-white flex items-center justify-center text-xs font-bold font-mono leading-none ring-4 ring-card select-none shadow-sm flex-shrink-0">
+              4
             </div>
             <div className="flex-1 p-4 rounded-xl border border-line bg-soft/50 min-w-0">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
