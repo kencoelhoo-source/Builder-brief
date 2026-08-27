@@ -123,16 +123,16 @@ export const MyApplicationsTab: React.FC<MyApplicationsTabProps> = ({
             : 'If response is unverified within statutory SLA windows, the system automatically routes the dossier upwards:'}
         </p>
 
-        <div className="mt-6 relative pl-6 sm:pl-8 space-y-6">
-          {/* Animated Vertical Connector Beam */}
-          <div className="absolute left-[11px] sm:left-[15px] top-4 bottom-4 w-0.5 anim-beam rounded-full" />
-
+        <div className="mt-6 space-y-4">
           {/* Level 1: Immediate Nodal Dispatch */}
-          <div className="relative group">
-            <div className="absolute -left-[23px] sm:-left-[27px] top-1 w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold ring-4 ring-card">
-              1
+          <div className="flex items-start gap-3.5 sm:gap-4">
+            <div className="flex flex-col items-center self-stretch flex-shrink-0 w-7">
+              <div className="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold font-mono leading-none ring-4 ring-card z-10 select-none shadow-sm">
+                1
+              </div>
+              <div className="w-0.5 flex-1 anim-beam my-1 rounded-full" />
             </div>
-            <div className="p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/5 transition-all">
+            <div className="flex-1 p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/5 min-w-0">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
                 <p className="text-sm font-bold text-ink">
                   {hi ? 'स्तर 1: बैंक / प्लेटफ़ॉर्म नोडल अधिकारी (तत्काल)' : 'Level 1: Designated Nodal Officer (Immediate)'}
@@ -153,11 +153,14 @@ export const MyApplicationsTab: React.FC<MyApplicationsTabProps> = ({
           </div>
 
           {/* Level 2: CISO & Senior Risk Desk */}
-          <div className="relative group">
-            <div className="absolute -left-[23px] sm:-left-[27px] top-1 w-6 h-6 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs font-bold ring-4 ring-card">
-              2
+          <div className="flex items-start gap-3.5 sm:gap-4">
+            <div className="flex flex-col items-center self-stretch flex-shrink-0 w-7">
+              <div className="w-7 h-7 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs font-bold font-mono leading-none ring-4 ring-card z-10 select-none shadow-sm">
+                2
+              </div>
+              <div className="w-0.5 flex-1 anim-beam my-1 rounded-full" />
             </div>
-            <div className="p-4 rounded-xl border border-line bg-soft/50 transition-all hover:border-amber-500/40">
+            <div className="flex-1 p-4 rounded-xl border border-line bg-soft/50 min-w-0 hover:border-amber-500/40 transition-colors">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
                 <p className="text-sm font-bold text-ink">
                   {hi ? 'स्तर 2: CISO एवं धोखाधड़ी नियंत्रण प्रमुख (24 घंटे)' : 'Level 2: CISO & Fraud Risk VP Desk (24 Hours)'}
@@ -166,7 +169,7 @@ export const MyApplicationsTab: React.FC<MyApplicationsTabProps> = ({
                   {hi ? 'समयबद्ध ऑटो-ट्रिगर' : 'Auto-Escalation Armed'}
                 </span>
               </div>
-              <p className="text-xs text-muted mt-1.5">
+              <p className="text-xs text-muted mt-1.5 break-all">
                 {officer.cyberCellHead} · <span className="font-mono text-ink">{officer.escalationEmail}</span>
               </p>
               <p className="text-xs text-muted mt-1">
@@ -178,11 +181,14 @@ export const MyApplicationsTab: React.FC<MyApplicationsTabProps> = ({
           </div>
 
           {/* Level 3: RBI Ombudsman & Cyber SP */}
-          <div className="relative group">
-            <div className="absolute -left-[23px] sm:-left-[27px] top-1 w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold ring-4 ring-card">
-              3
+          <div className="flex items-start gap-3.5 sm:gap-4">
+            <div className="flex flex-col items-center self-stretch flex-shrink-0 w-7">
+              <div className="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold font-mono leading-none ring-4 ring-card z-10 select-none shadow-sm">
+                3
+              </div>
+              <div className="w-0.5 flex-1 anim-beam my-1 rounded-full" />
             </div>
-            <div className="p-4 rounded-xl border border-line bg-soft/50 transition-all hover:border-indigo-500/40">
+            <div className="flex-1 p-4 rounded-xl border border-line bg-soft/50 min-w-0 hover:border-indigo-500/40 transition-colors">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
                 <p className="text-sm font-bold text-ink">
                   {hi ? 'स्तर 3: RBI बैंकिंग लोकपाल एवं पुलिस अधीक्षक (साइबर क्राइम)' : 'Level 3: RBI Banking Ombudsman & Cyber Crime SP (72 Hours)'}
@@ -203,11 +209,13 @@ export const MyApplicationsTab: React.FC<MyApplicationsTabProps> = ({
           </div>
 
           {/* Level 4: Magistrate Court */}
-          <div className="relative group">
-            <div className="absolute -left-[23px] sm:-left-[27px] top-1 w-6 h-6 rounded-full bg-[#111827] text-white flex items-center justify-center text-xs font-bold ring-4 ring-card">
-              4
+          <div className="flex items-start gap-3.5 sm:gap-4">
+            <div className="flex flex-col items-center self-stretch flex-shrink-0 w-7">
+              <div className="w-7 h-7 rounded-full bg-[#111827] dark:bg-white dark:text-ink text-white flex items-center justify-center text-xs font-bold font-mono leading-none ring-4 ring-card z-10 select-none shadow-sm">
+                4
+              </div>
             </div>
-            <div className="p-4 rounded-xl border border-line bg-soft/50 transition-all">
+            <div className="flex-1 p-4 rounded-xl border border-line bg-soft/50 min-w-0">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
                 <p className="text-sm font-bold text-ink">
                   {hi ? 'स्तर 4: मुख्य न्यायिक मजिस्ट्रेट न्यायालय (धन वापसी आदेश)' : 'Level 4: Judicial Magistrate Court (Sec 457 CrPC / 503 BNSS)'}
