@@ -19,7 +19,6 @@ import type { AppStep, Language, CyberIncident, FinancialIncident, SocialInciden
 import { parseScreenshotOCR, parseVoiceTranscription } from './services/ocrService';
 import {
   saveDraftToStorage,
-  getDraftFromStorage,
   saveLanguagePreference,
   getLanguagePreference,
   clearDraftFromStorage,
@@ -83,26 +82,8 @@ export const App: React.FC = () => {
   }, [currentStep]);
 
   useEffect(() => {
-    const saved = getDraftFromStorage();
-    if (saved && saved.transaction) {
-      setTransaction(saved.transaction);
-      if (saved.payload) {
-        if (saved.transaction.incidentType === 'FINANCIAL' && 'cfcfrmsToken' in saved.payload) {
-          setPayload(saved.payload);
-        } else if (saved.transaction.incidentType === 'SOCIAL' && 'takedownToken' in saved.payload) {
-          setSec79Payload(saved.payload);
-        }
-        setCurrentStep('radar');
-        setFurthestStep(3);
-        window.history.replaceState({ step: 'radar' }, '');
-      } else {
-        setCurrentStep('review');
-        setFurthestStep(1);
-        window.history.replaceState({ step: 'review' }, '');
-      }
-    } else {
-      window.history.replaceState({ step: 'intake' }, '');
-    }
+    // Always start at intake on fresh load/refresh
+    window.history.replaceState({ step: 'intake' }, '');
   }, []);
 
   const goToStep = (step: AppStep, source: 'nav' | 'flow' | 'pop' = 'nav') => {
