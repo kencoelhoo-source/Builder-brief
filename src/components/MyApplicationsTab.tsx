@@ -60,7 +60,7 @@ export const MyApplicationsTab: React.FC<MyApplicationsTabProps> = ({
   };
 
   return (
-    <div className="space-y-6 animate-fadeIn">
+    <div className="space-y-6">
       {/* Case Overview Card */}
       <div className="p-5 sm:p-6 rounded-2xl border border-line bg-card shadow-sm relative overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

@@ -30,35 +30,35 @@ export const EscalationTracker: React.FC<EscalationTrackerProps> = ({
       </p>
 
       {/* Segmented Tab Switcher */}
-      <div className="flex items-center p-1 rounded-xl bg-soft border border-line mb-6 w-full max-w-md">
+      <div className="inline-flex items-center p-1 rounded-full bg-soft border border-line mb-6 w-full max-w-md gap-1">
         <button
           type="button"
           onClick={() => setViewTab('status')}
-          className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-bold transition-all ${
+          className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 sm:px-4 rounded-full text-xs font-semibold transition-colors duration-150 ${
             viewTab === 'status'
-              ? 'bg-card text-ink shadow-sm border border-line'
+              ? 'bg-card text-ink shadow-sm'
               : 'text-muted hover:text-ink'
           }`}
         >
-          <Radio size={14} className={viewTab === 'status' ? 'text-[#15803d]' : ''} />
+          <Radio size={13} className={viewTab === 'status' ? 'text-[#15803d]' : 'text-muted'} />
           <span>{hi ? 'टेकडाउन स्थिति' : 'Takedown Status'}</span>
         </button>
         <button
           type="button"
           onClick={() => setViewTab('application')}
-          className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-bold transition-all ${
+          className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 sm:px-4 rounded-full text-xs font-semibold transition-colors duration-150 ${
             viewTab === 'application'
-              ? 'bg-card text-ink shadow-sm border border-line'
+              ? 'bg-card text-ink shadow-sm'
               : 'text-muted hover:text-ink'
           }`}
         >
-          <ShieldCheck size={14} className={viewTab === 'application' ? 'text-amber-600' : ''} />
-          <span>{hi ? 'मेरी शिकायत व एस्केलेशन' : 'My Application & Escalation'}</span>
+          <ShieldCheck size={13} className={viewTab === 'application' ? 'text-amber-600' : 'text-muted'} />
+          <span>{hi ? 'शिकायत व एस्केलेशन' : 'My Application & Escalation'}</span>
         </button>
       </div>
 
       {viewTab === 'status' ? (
-        <div className="animate-fadeIn">
+        <div>
           <p className="text-success font-bold text-sm">
             {hi ? 'नोटिस भेज दिया गया' : 'The notice has been sent'}
           </p>
