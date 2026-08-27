@@ -139,21 +139,21 @@ export const OfficialReceipt: React.FC<OfficialReceiptProps> = ({
         </div>
 
         {/* Footer Actions */}
-        <div className="flex items-center justify-between p-4 border-t border-[#e5e7eb] bg-[#f9fafb] rounded-b-lg no-print">
-          <span className="text-[11px] text-[#6b7280]">
+        <div className="flex flex-col-reverse sm:flex-row items-center justify-between p-4 border-t border-[#e5e7eb] bg-[#f9fafb] rounded-b-lg no-print gap-4 sm:gap-2">
+          <span className="text-[11px] text-[#6b7280] text-center sm:text-left w-full sm:w-auto">
             Helpline: <strong className="text-[#111827]">1930</strong> (Toll-Free National)
           </span>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-center sm:justify-end">
             <button
               onClick={handlePrint}
-              className="btn-primary text-xs py-2 px-4 flex items-center gap-1.5 font-bold"
+              className="btn-primary text-xs py-2 px-4 flex items-center justify-center gap-1.5 font-bold whitespace-nowrap flex-1 sm:flex-none"
             >
               <Printer size={14} />
-              <span>{currentLang === 'hi' ? 'रसीद प्रिंट / डाउनलोड करें' : 'Print / Download Slip'}</span>
+              <span>{currentLang === 'hi' ? 'रसीद डाउनलोड करें' : 'Download Slip'}</span>
             </button>
             <button
               onClick={onClose}
-              className="btn-secondary text-xs py-2 px-3.5"
+              className="btn-secondary text-xs py-2 px-3.5 flex-1 sm:flex-none justify-center whitespace-nowrap"
             >
               {currentLang === 'hi' ? 'बंद करें' : 'Close'}
             </button>
