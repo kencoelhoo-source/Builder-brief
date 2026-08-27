@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   Header,
 } from './components/Header';
-import { StepTracker } from './components/StepTracker';
 import { EmergencyIntake } from './components/EmergencyIntake';
 import { ExtractedDetailsCard } from './components/ExtractedDetailsCard';
 import { DualBankFreezeCard } from './components/DualBankFreezeCard';
@@ -29,6 +28,12 @@ import {
 
 type Theme = 'light' | 'dark';
 
+const STEP_ORDER: AppStep[] = ['intake', 'review', 'freeze', 'radar'];
+const stepIndex = (step: AppStep) => {
+  if (step === 'petition') return 3;
+  return Math.max(0, STEP_ORDER.indexOf(step));
+};
+
 const getInitialTheme = (): Theme => {
   try {
     const saved = localStorage.getItem('kavach_theme');
@@ -53,6 +58,7 @@ export const App: React.FC = () => {
   const [showReceiptModal, setShowReceiptModal] = useState<boolean>(false);
   const [showFIRModal, setShowFIRModal] = useState<boolean>(false);
   const [showMockedHub, setShowMockedHub] = useState<boolean>(false);
+  const [furthestStep, setFurthestStep] = useState<number>(0);
   const [sessionPhone, setSessionPhone] = useState<string | null>(() => {
     try {
       return sessionStorage.getItem('kavach_session');
@@ -85,10 +91,43 @@ export const App: React.FC = () => {
           setSec79Payload(saved.payload);
         }
         setCurrentStep('radar');
+        setFurthestStep(3);
+        window.history.replaceState({ step: 'radar' }, '');
       } else {
         setCurrentStep('review');
+        setFurthestStep(1);
+        window.history.replaceState({ step: 'review' }, '');
       }
+    } else {
+      window.history.replaceState({ step: 'intake' }, '');
     }
+  }, []);
+
+  const goToStep = (step: AppStep, source: 'nav' | 'flow' | 'pop' = 'nav') => {
+    const idx = stepIndex(step);
+    if (source === 'nav' && idx > furthestStep) return;
+    if (source !== 'flow') {
+      if ((step === 'review' || step === 'freeze') && !transaction) return;
+      if (step === 'radar' && !payload && !sec79Payload) return;
+    }
+    if (source === 'flow') {
+      setFurthestStep((n) => Math.max(n, idx));
+    }
+    setCurrentStep(step);
+    if (source !== 'pop') {
+      window.history.pushState({ step }, '');
+    }
+  };
+
+  useEffect(() => {
+    const onPop = (event: PopStateEvent) => {
+      const step = event.state?.step as AppStep | undefined;
+      if (step && STEP_ORDER.includes(step)) {
+        setCurrentStep(step);
+      }
+    };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
   }, []);
 
   const triggerToast = (msg: string) => {
@@ -108,7 +147,7 @@ export const App: React.FC = () => {
       const extracted = await parseScreenshotOCR(personaId);
       setTransaction(extracted);
       saveDraftToStorage(extracted, null);
-      setCurrentStep('review');
+      goToStep('review', 'flow');
       triggerToast(currentLang === 'hi' ? 'AI ने ट्रांसक्शन विवरण निकाल लिया है' : 'Vision AI parsed screenshot details');
     } catch (e) {
       console.error(e);
@@ -123,10 +162,27 @@ export const App: React.FC = () => {
       const extracted = await parseScreenshotOCR(file);
       setTransaction(extracted);
       saveDraftToStorage(extracted, null);
-      setCurrentStep('review');
-      triggerToast(currentLang === 'hi' ? 'स्क्रीनशॉट स्कैन पूर्ण' : 'Screenshot OCR extraction complete');
+      goToStep('review', 'flow');
+      const thin =
+        extracted.incidentType === 'FINANCIAL'
+          ? !extracted.utr && !extracted.amount && !extracted.beneficiaryVpa
+          : !extracted.suspectUrl;
+      triggerToast(
+        currentLang === 'hi'
+          ? thin
+            ? 'स्क्रीनशॉट पढ़ा गया — विवरण जाँचें और खाली फ़ील्ड भरें'
+            : 'स्क्रीनशॉट से विवरण निकाले गए'
+          : thin
+            ? 'Screenshot read — check details and fill anything missing'
+            : 'Details extracted from the screenshot'
+      );
     } catch (e) {
       console.error(e);
+      triggerToast(
+        currentLang === 'hi'
+          ? 'स्क्रीनशॉट पढ़ा नहीं जा सका। फिर कोशिश करें या मैन्युअल भरें।'
+          : 'Could not read that screenshot. Try again or enter details manually.'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -167,13 +223,13 @@ export const App: React.FC = () => {
     };
     setTransaction(manualTxn);
     saveDraftToStorage(manualTxn, null);
-    setCurrentStep('review');
+    goToStep('review', 'flow');
   };
 
   const handleProceedToAction = (updatedTxn: CyberIncident) => {
     setTransaction(updatedTxn);
     saveDraftToStorage(updatedTxn, null);
-    setCurrentStep('freeze');
+    goToStep('freeze', 'flow');
     triggerToast(currentLang === 'hi' ? 'कार्रवाई योजना तैयार' : 'Action Plan Ready');
   };
 
@@ -189,7 +245,7 @@ export const App: React.FC = () => {
     if (transaction) {
       saveDraftToStorage(transaction, generatedPayload);
     }
-    setCurrentStep('radar');
+    goToStep('radar', 'flow');
   };
 
   const handleResetToHome = () => {
@@ -197,7 +253,8 @@ export const App: React.FC = () => {
     setTransaction(null);
     setPayload(null);
     setSec79Payload(null);
-    setCurrentStep('intake');
+    setFurthestStep(0);
+    goToStep('intake', 'flow');
     triggerToast(currentLang === 'hi' ? 'नया केस शुरू किया गया' : 'Reset to new emergency intake');
   };
 
@@ -243,17 +300,15 @@ export const App: React.FC = () => {
 
       <Header
         currentLang={currentLang}
+        currentStep={currentStep}
         onToggleLang={handleToggleLang}
         onOpenMockedHub={() => setShowMockedHub(true)}
         onResetToHome={handleResetToHome}
         theme={theme}
         onToggleTheme={() => setTheme((t) => (t === 'light' ? 'dark' : 'light'))}
         onLogout={handleLogout}
-      />
-
-      <StepTracker
-        currentStep={currentStep}
-        currentLang={currentLang}
+        furthestStep={furthestStep}
+        onGoToStep={(step) => goToStep(step, 'nav')}
       />
 
       <main id="main" className="flex-1 page-enter" key={currentStep}>
@@ -274,14 +329,14 @@ export const App: React.FC = () => {
               transaction={transaction as FinancialIncident}
               currentLang={currentLang}
               onProceedToFreeze={handleProceedToAction}
-              onBackToIntake={() => setCurrentStep('intake')}
+              onBackToIntake={() => goToStep('intake', 'nav')}
             />
           ) : (
             <SocialVerificationCard
               transaction={transaction as SocialIncident}
               currentLang={currentLang}
               onProceedToTakedown={handleProceedToAction}
-              onBackToIntake={() => setCurrentStep('intake')}
+              onBackToIntake={() => goToStep('intake', 'nav')}
             />
           )
         )}
@@ -292,12 +347,14 @@ export const App: React.FC = () => {
               transaction={transaction as FinancialIncident}
               currentLang={currentLang}
               onDispatchComplete={handleDispatchComplete}
+              onBack={() => goToStep('review', 'nav')}
             />
           ) : (
             <TakedownDispatchCard
               transaction={transaction as SocialIncident}
               currentLang={currentLang}
               onDispatchComplete={handleDispatchComplete}
+              onBack={() => goToStep('review', 'nav')}
             />
           )
         )}
@@ -310,6 +367,7 @@ export const App: React.FC = () => {
               currentLang={currentLang}
               onOpenCourtPetition={() => setShowPetitionModal(true)}
               onViewReceipt={() => setShowReceiptModal(true)}
+              onBack={() => goToStep('freeze', 'nav')}
             />
           ) : transaction.incidentType === 'SOCIAL' && sec79Payload ? (
             <EscalationTracker
@@ -317,6 +375,7 @@ export const App: React.FC = () => {
               payload={sec79Payload}
               currentLang={currentLang}
               onGeneratePetition={() => setShowFIRModal(true)}
+              onBack={() => goToStep('freeze', 'nav')}
             />
           ) : null
         )}

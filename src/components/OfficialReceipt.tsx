@@ -8,6 +8,8 @@ import {
 import type { ExtractedTransaction, CFCFRMSPayload, Language } from '../types';
 import { formatINR, formatDateTimeIN } from '../utils/formatters';
 
+import html2pdf from 'html2pdf.js';
+
 interface OfficialReceiptProps {
   transaction: ExtractedTransaction;
   payload: CFCFRMSPayload;
@@ -22,7 +24,18 @@ export const OfficialReceipt: React.FC<OfficialReceiptProps> = ({
   onClose,
 }) => {
   const handlePrint = () => {
-    window.print();
+    const element = document.getElementById('receipt-document-content');
+    if (!element) return;
+    
+    const opt = {
+      margin:       15,
+      filename:     `Official_Receipt_${payload.ackNumber}.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2 },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    
+    html2pdf().set(opt).from(element).save();
   };
 
   return (
@@ -47,7 +60,7 @@ export const OfficialReceipt: React.FC<OfficialReceiptProps> = ({
         </div>
 
         {/* Printable Official Slip Body */}
-        <div className="p-5 overflow-y-auto flex flex-col gap-4 bg-white print-content">
+        <div id="receipt-document-content" className="p-5 overflow-y-auto flex flex-col gap-4 bg-white print-content">
           <div className="p-5 rounded-md border border-[#9ca3af] bg-white flex flex-col gap-4 text-[#111827]">
             {/* Government Title Header */}
             <div className="text-center border-b border-[#e5e7eb] pb-4">

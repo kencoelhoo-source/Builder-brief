@@ -6,6 +6,8 @@ import {
 } from 'lucide-react';
 import type { SocialIncident, Sec79Payload, Language } from '../types';
 
+import html2pdf from 'html2pdf.js';
+
 interface FIRDraftModalProps {
   transaction: SocialIncident;
   payload: Sec79Payload;
@@ -20,7 +22,18 @@ export const FIRDraftModal: React.FC<FIRDraftModalProps> = ({
   onClose,
 }) => {
   const handlePrint = () => {
-    window.print();
+    const element = document.getElementById('fir-document-content');
+    if (!element) return;
+    
+    const opt = {
+      margin:       15,
+      filename:     `FIR_Draft_${transaction.victimName.replace(/\s+/g, '_')}.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2 },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    
+    html2pdf().set(opt).from(element).save();
   };
 
   const currentDate = new Date().toLocaleDateString('en-IN');
@@ -47,7 +60,7 @@ export const FIRDraftModal: React.FC<FIRDraftModalProps> = ({
         </div>
 
         {/* Printable Legal Document Body */}
-        <div className="p-5 sm:p-8 overflow-y-auto bg-white flex flex-col gap-6 text-[#111827] print-content" style={{ fontFamily: '"Times New Roman", Times, serif' }}>
+        <div id="fir-document-content" className="p-5 sm:p-8 overflow-y-auto bg-white flex flex-col gap-6 text-[#111827] print-content" style={{ fontFamily: '"Times New Roman", Times, serif' }}>
           
           <div className="text-center">
             <h1 className="text-lg font-bold uppercase underline">

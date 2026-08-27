@@ -141,26 +141,70 @@ h1, h2, h3, h4 {
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--line);
 }
-.masthead {
+.topbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 1rem;
-  padding-block: 0.85rem;
+  min-height: 64px;
+  padding-block: 0.7rem;
 }
+.topbar-brand {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.topbar-steps {
+  display: none;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 13px;
+  color: var(--subtle);
+  flex: 1;
+  justify-content: center;
+}
+@media (min-width: 860px) {
+  .topbar-steps { display: flex; }
+}
+.topbar-steps span {
+  padding: 5px 11px;
+  border-radius: 999px;
+}
+.topbar-steps .is-done { color: var(--ink); }
+.topbar-steps .is-current {
+  color: var(--accent-fg);
+  background: var(--accent);
+  font-weight: 600;
+}
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-left: auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.topbar-text {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+.topbar-text:hover { color: var(--ink); }
 .wordmark {
   font-size: 15px;
   font-weight: 600;
   letter-spacing: -0.03em;
   color: var(--ink);
-}
-.wordmark-sub {
-  display: block;
-  font-size: 12px;
-  font-weight: 400;
-  color: var(--muted);
-  margin-top: 3px;
-  letter-spacing: 0;
 }
 .header-actions {
   display: flex;
@@ -221,26 +265,6 @@ h1, h2, h3, h4 {
   border-radius: 8px;
 }
 .skip-link:focus { top: 8px; }
-
-.steps { border-bottom: 1px solid var(--line); }
-.steps-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  padding-block: 0.85rem;
-  font-size: 13px;
-}
-.steps-row span {
-  color: var(--subtle);
-  padding: 6px 12px;
-  border-radius: 999px;
-}
-.steps-row .is-done { color: var(--ink); }
-.steps-row .is-current {
-  color: var(--accent-fg);
-  background: var(--accent);
-  font-weight: 600;
-}
 
 .btn-primary, .btn-emergency, .btn-secondary, .btn-ai {
   border-radius: 999px;
@@ -448,17 +472,6 @@ h1, h2, h3, h4 {
 }
 @media (min-width: 640px) {
   .login-card { padding: 2.25rem; }
-}
-
-.phase-banner {
-  font-size: 12px;
-  color: var(--muted);
-  border-bottom: 1px solid var(--line);
-}
-.phase-tag {
-  font-weight: 600;
-  color: var(--ink);
-  margin-right: 8px;
 }
 
 ::-webkit-scrollbar { width: 8px; }

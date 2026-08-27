@@ -7,6 +7,8 @@ import {
 import type { ExtractedTransaction, CFCFRMSPayload, Language } from '../types';
 import { formatINR, formatDateTimeIN } from '../utils/formatters';
 
+import html2pdf from 'html2pdf.js';
+
 interface CourtPetitionModalProps {
   transaction: ExtractedTransaction;
   payload: CFCFRMSPayload;
@@ -21,7 +23,18 @@ export const CourtPetitionModal: React.FC<CourtPetitionModalProps> = ({
   onClose,
 }) => {
   const handlePrint = () => {
-    window.print();
+    const element = document.getElementById('petition-document-content');
+    if (!element) return;
+    
+    const opt = {
+      margin:       15,
+      filename:     `Court_Petition_${transaction.victimName.replace(/\s+/g, '_')}.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2 },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    
+    html2pdf().set(opt).from(element).save();
   };
 
   const currentDate = new Date().toLocaleDateString('en-IN');
@@ -48,7 +61,7 @@ export const CourtPetitionModal: React.FC<CourtPetitionModalProps> = ({
         </div>
 
         {/* Printable Legal Document Body */}
-        <div className="p-5 sm:p-8 overflow-y-auto bg-white flex flex-col gap-6 text-[#111827] print-content" style={{ fontFamily: '"Times New Roman", Times, serif' }}>
+        <div id="petition-document-content" className="p-5 sm:p-8 overflow-y-auto bg-white flex flex-col gap-6 text-[#111827] print-content" style={{ fontFamily: '"Times New Roman", Times, serif' }}>
           
           <div className="text-center">
             <h1 className="text-lg font-bold uppercase underline">

@@ -1,9 +1,10 @@
 import React from 'react';
-import type { Language } from '../types';
+import type { AppStep, Language } from '../types';
 import { ThemeToggle } from './ThemeToggle';
 
 interface HeaderProps {
   currentLang: Language;
+  currentStep: AppStep;
   onToggleLang: (lang: Language) => void;
   onOpenMockedHub: () => void;
   onResetToHome: () => void;
@@ -14,6 +15,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({
   currentLang,
+  currentStep,
   onToggleLang,
   onOpenMockedHub,
   onResetToHome,
@@ -22,36 +24,42 @@ export const Header: React.FC<HeaderProps> = ({
   onLogout,
 }) => {
   const hi = currentLang === 'hi';
+  const steps: { id: AppStep; en: string; hi: string }[] = [
+    { id: 'intake', en: 'Report', hi: 'शिकायत' },
+    { id: 'review', en: 'Check', hi: 'जाँच' },
+    { id: 'freeze', en: 'Act', hi: 'कार्रवाई' },
+    { id: 'radar', en: 'Track', hi: 'स्थिति' },
+  ];
+  const currentIndex =
+    currentStep === 'petition'
+      ? steps.length - 1
+      : steps.findIndex((s) => s.id === currentStep);
 
   return (
     <header className="site-header">
       <a href="#main" className="skip-link">Skip to content</a>
-      <div className="phase-banner">
-        <div className="page-wrap py-2 flex flex-wrap items-center justify-between gap-2">
-          <p>
-            <span className="phase-tag">{hi ? 'प्रोटोटाइप' : 'Prototype'}</span>
-            {hi ? 'सिमुलेटेड · आधिकारिक सरकारी साइट नहीं' : 'Simulated · not an official government website'}
-          </p>
-          <button type="button" onClick={onOpenMockedHub} className="btn-link" style={{ fontSize: 12 }}>
-            {hi ? 'क्या मॉक है' : 'What’s mocked'}
-          </button>
-        </div>
-      </div>
-      <div className="page-wrap masthead">
+      <div className="page-wrap topbar">
         <button
           type="button"
           onClick={onResetToHome}
-          className="text-left bg-transparent border-0 cursor-pointer p-0"
+          className="topbar-brand"
         >
-          <span className="wordmark">Kavach Omni</span>
-          <span className="wordmark-sub">
-            {hi ? 'साइबर अपराध रिपोर्ट' : 'Cybercrime report'}
-          </span>
+          Kavach Omni
         </button>
-        <div className="header-actions">
-          <a href="tel:1930" className="helpline">
-            1930 <small>{hi ? 'हेल्पलाइन' : 'Helpline'}</small>
-          </a>
+
+        <nav className="topbar-steps" aria-label="Progress">
+          {steps.map((step, idx) => (
+            <span
+              key={step.id}
+              className={idx === currentIndex ? 'is-current' : idx < currentIndex ? 'is-done' : ''}
+            >
+              {hi ? step.hi : step.en}
+            </span>
+          ))}
+        </nav>
+
+        <div className="topbar-actions">
+          <a href="tel:1930" className="helpline">1930</a>
           <div className="lang-switch">
             <button type="button" className={currentLang === 'en' ? 'is-active' : ''} onClick={() => onToggleLang('en')}>
               EN
@@ -61,7 +69,10 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
           </div>
           <ThemeToggle theme={theme} onToggle={onToggleTheme} />
-          <button type="button" onClick={onLogout} className="btn-link" style={{ fontSize: 13 }}>
+          <button type="button" onClick={onOpenMockedHub} className="topbar-text">
+            {hi ? 'मॉक' : 'Mocked'}
+          </button>
+          <button type="button" onClick={onLogout} className="topbar-text">
             {hi ? 'बाहर' : 'Sign out'}
           </button>
         </div>
