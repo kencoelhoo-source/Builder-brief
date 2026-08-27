@@ -80,38 +80,40 @@ export const TakedownDispatchCard: React.FC<TakedownDispatchCardProps> = ({
         </p>
       </div>
 
-      <div className="notice mt-6 text-sm text-muted">
-        <p className="font-semibold text-ink">
-          {hi ? 'कानूनी कार्रवाई कैसे काम करती है?' : 'How this takedown notice works:'}
-        </p>
-        <p className="mt-1">
-          {hi
-            ? 'यह नोटिस सोशल मीडिया प्लेटफॉर्म के नोडल ग्रीवेंस ऑफिसर को भेजा जाता है। IT नियम 2021 के अनुसार प्लेटफॉर्म को 36 घंटे के भीतर अवैध सामग्री हटानी होगी।'
-            : 'This formal notice is dispatched to the platform’s designated Grievance Officer. Under IT Rules 2021, the intermediary is legally mandated to take down the unlawful content within 36 hours of receipt.'}
-        </p>
-        <p className="mt-2 text-xs text-subtle">
-          {hi ? 'प्रोटोटाइप नोट: ईमेल व एपीआई प्रेषण सिमुलेटेड है।' : 'Prototype note: Platform API & email dispatch is simulated for demonstration.'}
-        </p>
-      </div>
+      <div className="p-5 sm:p-6 rounded-2xl border border-line bg-card mt-8 space-y-5">
+        <div>
+          <p className="font-semibold text-sm text-ink">
+            {hi ? 'कानूनी कार्रवाई कैसे काम करती है?' : 'How this takedown notice works:'}
+          </p>
+          <p className="mt-1.5 text-xs sm:text-sm text-muted leading-relaxed">
+            {hi
+              ? 'यह नोटिस सोशल मीडिया प्लेटफॉर्म के नोडल ग्रीवेंस ऑफिसर को भेजा जाता है। IT नियम 2021 के अनुसार प्लेटफॉर्म को 36 घंटे के भीतर अवैध सामग्री हटानी होगी।'
+              : 'This formal notice is dispatched to the platform’s designated Grievance Officer. Under IT Rules 2021, the intermediary is legally mandated to take down the unlawful content within 36 hours of receipt.'}
+          </p>
+          <p className="mt-2 text-xs text-subtle">
+            {hi ? 'प्रोटोटाइप नोट: ईमेल व एपीआई प्रेषण सिमुलेटेड है।' : 'Prototype note: Platform API & email dispatch is simulated for demonstration.'}
+          </p>
+        </div>
 
-      <div className="btn-group mt-8">
-        <button
-          type="button"
-          onClick={handleExecuteDispatch}
-          disabled={isDispatching}
-          className="btn-emergency"
-        >
-          {isDispatching
-            ? hi
-              ? 'भेजा जा रहा है…'
-              : 'Sending…'
-            : hi
-            ? 'टेकडाउन नोटिस जारी करें'
-            : 'Issue takedown notice'}
-        </button>
-        <button type="button" onClick={onBack} className="btn-secondary">
-          {hi ? 'पीछे' : 'Back'}
-        </button>
+        <div className="btn-group pt-1">
+          <button
+            type="button"
+            onClick={handleExecuteDispatch}
+            disabled={isDispatching}
+            className="btn-emergency"
+          >
+            {isDispatching
+              ? hi
+                ? 'भेजा जा रहा है…'
+                : 'Sending…'
+              : hi
+              ? 'टेकडाउन नोटिस जारी करें'
+              : 'Issue takedown notice'}
+          </button>
+          <button type="button" onClick={onBack} className="btn-secondary">
+            {hi ? 'पीछे' : 'Back'}
+          </button>
+        </div>
       </div>
 
       <p className="mt-6">

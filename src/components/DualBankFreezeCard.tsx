@@ -89,38 +89,40 @@ export const DualBankFreezeCard: React.FC<DualBankFreezeCardProps> = ({
         </p>
       </div>
 
-      <div className="notice mt-6 text-sm text-muted">
-        <p className="font-semibold text-ink">
-          {hi ? 'कार्रवाई कैसे काम करती है?' : 'How this freeze action works:'}
-        </p>
-        <p className="mt-1">
-          {hi
-            ? 'धारा 91 CrPC / 94 BNSS के तहत दोनों बैंकों के नोडल अधिकारियों को आधिकारिक निर्देश भेजा जाता है ताकि संदिग्ध खाते से किसी भी प्रकार की निकासी (ATM / ट्रांसफर) तत्काल रोकी जा सके।'
-            : 'An official statutory directive under Section 91 Cr.P.C / Section 94 BNSS is transmitted simultaneously to the designated Nodal Officers of both banks to enforce an immediate debit freeze & lien before funds are cashed out.'}
-        </p>
-        <p className="mt-2 text-xs text-subtle">
-          {hi ? 'प्रोटोटाइप नोट: बैंकिंग गेटवे प्रेषण सिमुलेटेड है।' : 'Prototype note: Banking gateway dispatch is simulated for demonstration.'}
-        </p>
-      </div>
+      <div className="p-5 sm:p-6 rounded-2xl border border-line bg-card mt-8 space-y-5">
+        <div>
+          <p className="font-semibold text-sm text-ink">
+            {hi ? 'कार्रवाई कैसे काम करती है?' : 'How this freeze action works:'}
+          </p>
+          <p className="mt-1.5 text-xs sm:text-sm text-muted leading-relaxed">
+            {hi
+              ? 'धारा 91 CrPC / 94 BNSS के तहत दोनों बैंकों के नोडल अधिकारियों को आधिकारिक निर्देश भेजा जाता है ताकि संदिग्ध खाते से किसी भी प्रकार की निकासी (ATM / ट्रांसफर) तत्काल रोकी जा सके।'
+              : 'An official statutory directive under Section 91 Cr.P.C / Section 94 BNSS is transmitted simultaneously to the designated Nodal Officers of both banks to enforce an immediate debit freeze & lien before funds are cashed out.'}
+          </p>
+          <p className="mt-2 text-xs text-subtle">
+            {hi ? 'प्रोटोटाइप नोट: बैंकिंग गेटवे प्रेषण सिमुलेटेड है।' : 'Prototype note: Banking gateway dispatch is simulated for demonstration.'}
+          </p>
+        </div>
 
-      <div className="btn-group mt-8">
-        <button
-          type="button"
-          onClick={handleExecuteDispatch}
-          disabled={isDispatching}
-          className="btn-emergency"
-        >
-          {isDispatching
-            ? hi
-              ? 'भेजा जा रहा है…'
-              : 'Sending…'
-            : hi
-            ? 'फ्रीज आदेश जारी करें'
-            : 'Issue freeze directive'}
-        </button>
-        <button type="button" onClick={onBack} className="btn-secondary">
-          {hi ? 'पीछे' : 'Back'}
-        </button>
+        <div className="btn-group pt-1">
+          <button
+            type="button"
+            onClick={handleExecuteDispatch}
+            disabled={isDispatching}
+            className="btn-emergency"
+          >
+            {isDispatching
+              ? hi
+                ? 'भेजा जा रहा है…'
+                : 'Sending…'
+              : hi
+              ? 'फ्रीज आदेश जारी करें'
+              : 'Issue freeze directive'}
+          </button>
+          <button type="button" onClick={onBack} className="btn-secondary">
+            {hi ? 'पीछे' : 'Back'}
+          </button>
+        </div>
       </div>
 
       <p className="mt-6">
