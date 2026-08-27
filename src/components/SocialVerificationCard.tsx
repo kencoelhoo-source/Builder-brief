@@ -43,8 +43,8 @@ export const SocialVerificationCard: React.FC<SocialVerificationCardProps> = ({
       </h1>
       <p className="mt-4 text-lg text-muted max-w-2xl">
         {hi
-          ? 'धारा 79 टेकडाउन नोटिस भेजने से पहले इन्हें सही करें।'
-          : 'Correct anything that looks wrong before the Section 79 notice is sent.'}
+          ? 'धारा 79 IT Act टेकडाउन नोटिस भेजने से पहले संदिग्ध प्रोफ़ाइल लिंक व विवरण की पुष्टि करें।'
+          : 'Verify the suspect URL and incident category before dispatching the formal Section 79 IT Act takedown demand.'}
       </p>
 
       <form onSubmit={handleSubmit} className="mt-8">
@@ -113,6 +113,17 @@ export const SocialVerificationCard: React.FC<SocialVerificationCardProps> = ({
             <p className="text-lg leading-relaxed">{formData.incidentSummary}</p>
           )}
         </Field>
+
+        <div className="notice mt-6 text-sm text-muted">
+          <p className="font-semibold text-ink">
+            {hi ? 'कानूनी प्रावधान:' : 'Statutory Mandate:'}
+          </p>
+          <p className="mt-1">
+            {hi
+              ? 'IT नियम 2021 के अनुसार सोशल मीडिया प्लेटफॉर्म नोटिस प्राप्त होने के 36 घंटे के भीतर अवैध सामग्री हटाने के लिए बाध्य हैं।'
+              : 'Under IT Rules 2021, social media intermediaries are legally obligated to act within 36 hours of receipt of notice.'}
+          </p>
+        </div>
 
         <div className="btn-group mt-8">
           <button type="submit" className="btn-emergency">

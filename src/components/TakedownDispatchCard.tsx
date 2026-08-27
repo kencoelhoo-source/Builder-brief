@@ -56,8 +56,8 @@ export const TakedownDispatchCard: React.FC<TakedownDispatchCardProps> = ({
       </h1>
       <p className="mt-4 text-lg text-muted">
         {hi
-          ? `${formatTimeRemaining(secondsLeft)} शेष · धारा 79 IT Act`
-          : `${formatTimeRemaining(secondsLeft)} remaining · Section 79 IT Act`}
+          ? `${formatTimeRemaining(secondsLeft)} समय शेष · धारा 79 IT Act वैधानिक नोटिस`
+          : `${formatTimeRemaining(secondsLeft)} compliance window · Section 79 IT Act Statutory Notice`}
       </p>
 
       <div className="mt-8 py-5 border-t border-line">
@@ -80,11 +80,19 @@ export const TakedownDispatchCard: React.FC<TakedownDispatchCardProps> = ({
         </p>
       </div>
 
-      <p className="notice mt-6 text-sm text-muted">
-        {hi
-          ? 'मध्यस्थों को 36 घंटे में कार्रवाई करनी होती है। इस प्रोटोटाइप में भेजना सिमुलेटेड है।'
-          : 'Intermediaries must act within 36 hours of actual knowledge. Dispatch in this prototype is simulated.'}
-      </p>
+      <div className="notice mt-6 text-sm text-muted">
+        <p className="font-semibold text-ink">
+          {hi ? 'कानूनी कार्रवाई कैसे काम करती है?' : 'How this takedown notice works:'}
+        </p>
+        <p className="mt-1">
+          {hi
+            ? 'यह नोटिस सोशल मीडिया प्लेटफॉर्म के नोडल ग्रीवेंस ऑफिसर को भेजा जाता है। IT नियम 2021 के अनुसार प्लेटफॉर्म को 36 घंटे के भीतर अवैध सामग्री हटानी होगी।'
+            : 'This formal notice is dispatched to the platform’s designated Grievance Officer. Under IT Rules 2021, the intermediary is legally mandated to take down the unlawful content within 36 hours of receipt.'}
+        </p>
+        <p className="mt-2 text-xs text-subtle">
+          {hi ? 'प्रोटोटाइप नोट: ईमेल व एपीआई प्रेषण सिमुलेटेड है।' : 'Prototype note: Platform API & email dispatch is simulated for demonstration.'}
+        </p>
+      </div>
 
       <button
         type="button"

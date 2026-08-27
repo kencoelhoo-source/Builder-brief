@@ -61,8 +61,8 @@ export const DualBankFreezeCard: React.FC<DualBankFreezeCardProps> = ({
       </h1>
       <p className="mt-4 text-lg text-muted">
         {hi
-          ? `${formatTimeRemaining(secondsLeft)} शेष · ${formatINR(transaction.amount)} · धारा 91 CrPC`
-          : `${formatTimeRemaining(secondsLeft)} remaining · ${formatINR(transaction.amount)} · Section 91 CrPC`}
+          ? `${formatTimeRemaining(secondsLeft)} गोल्डन ऑवर समय शेष · ${formatINR(transaction.amount)} · धारा 91 CrPC`
+          : `${formatTimeRemaining(secondsLeft)} golden hour window remaining · ${formatINR(transaction.amount)} · Section 91 CrPC`}
       </p>
 
       <div className="mt-8 py-5 border-t border-line">
@@ -89,11 +89,19 @@ export const DualBankFreezeCard: React.FC<DualBankFreezeCardProps> = ({
         </p>
       </div>
 
-      <p className="notice mt-6 text-sm text-muted">
-        {hi
-          ? 'यह नोटिस CrPC धारा 91 / BNSS धारा 94, 2023 के अंतर्गत है। इस प्रोटोटाइप में भेजना सिमुलेटेड है।'
-          : 'This notice is framed under Section 91 Cr.P.C / Section 94 BNSS, 2023. Dispatch in this prototype is simulated.'}
-      </p>
+      <div className="notice mt-6 text-sm text-muted">
+        <p className="font-semibold text-ink">
+          {hi ? 'कार्रवाई कैसे काम करती है?' : 'How this freeze action works:'}
+        </p>
+        <p className="mt-1">
+          {hi
+            ? 'धारा 91 CrPC / 94 BNSS के तहत दोनों बैंकों के नोडल अधिकारियों को आधिकारिक निर्देश भेजा जाता है ताकि संदिग्ध खाते से किसी भी प्रकार की निकासी (ATM / ट्रांसफर) तत्काल रोकी जा सके।'
+            : 'An official statutory directive under Section 91 Cr.P.C / Section 94 BNSS is transmitted simultaneously to the designated Nodal Officers of both banks to enforce an immediate debit freeze & lien before funds are cashed out.'}
+        </p>
+        <p className="mt-2 text-xs text-subtle">
+          {hi ? 'प्रोटोटाइप नोट: बैंकिंग गेटवे प्रेषण सिमुलेटेड है।' : 'Prototype note: Banking gateway dispatch is simulated for demonstration.'}
+        </p>
+      </div>
 
       <button
         type="button"

@@ -99,8 +99,8 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
           <h1>{hi ? 'रिपोर्ट करें' : 'Report'}</h1>
           <p className="lede">
             {hi
-              ? 'पेमेंट या फर्जी प्रोफाइल का स्क्रीनशॉट डालें।'
-              : 'Drop a payment or fake-profile screenshot.'}
+              ? 'पेमेंट या फर्जी प्रोफाइल का स्क्रीनशॉट डालें। पहले 60 मिनट (गोल्डन ऑवर) में रिपोर्ट करने से बैंक खाता तुरंत फ्रीज किया जा सकता है।'
+              : 'Drop a payment or fake-profile screenshot. Reporting during the first 60 minutes (Golden Hour) enables instant account freeze before cash is withdrawn.'}
           </p>
 
           <input
@@ -135,17 +135,18 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
               <>
                 <Upload size={20} strokeWidth={1.75} className="mx-auto mb-2 text-muted" />
                 <p className="font-semibold">{hi ? 'स्क्रीनशॉट अपलोड' : 'Upload screenshot'}</p>
+                <p className="text-xs text-muted mt-1">{hi ? 'UPI रसीद, बैंक SMS, या संदिग्ध चैट' : 'UPI receipt, bank SMS, or suspect chat'}</p>
               </>
             )}
           </div>
 
           <div className="alt-row">
             <button type="button" className="btn-link" onClick={() => setPanel('voice')}>
-              {hi ? 'आवाज़' : 'Voice'}
+              {hi ? 'आवाज़ से बोलें' : 'Report by voice'}
             </button>
             <span aria-hidden="true">·</span>
             <button type="button" className="btn-link" onClick={() => setPanel('manual')}>
-              {hi ? 'UTR' : 'UTR'}
+              {hi ? 'UTR नंबर लिखें' : 'Enter UTR manually'}
             </button>
           </div>
 
@@ -169,6 +170,11 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
       {panel === 'voice' && (
         <div className="panel-enter max-w-xl">
           <h1>{hi ? 'आवाज़ से रिपोर्ट' : 'Report by voice'}</h1>
+          <p className="lede">
+            {hi
+              ? 'हिन्दी या अंग्रेज़ी में घटना बताएं (उदा. "गूगल पे पर मेरे साथ ₹48,500 का फ्रॉड हुआ...")।'
+              : 'Speak naturally in Hindi or English (e.g. "I was defrauded of ₹48,500 on Google Pay...").'}
+          </p>
           <button
             type="button"
             onClick={handleToggleVoice}
@@ -183,13 +189,18 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
               ? 'रिकॉर्ड करें'
               : 'Record'}
           </button>
-          {spokenText && <p className="mt-6">{spokenText}</p>}
+          {spokenText && <p className="mt-6 p-4 rounded bg-soft text-ink">{spokenText}</p>}
         </div>
       )}
 
       {panel === 'manual' && (
         <form onSubmit={handleManualFormSubmit} className="panel-enter max-w-xl">
           <h1>{hi ? 'UTR दर्ज करें' : 'Enter UTR'}</h1>
+          <p className="lede">
+            {hi
+              ? '12 अंकों का UTR नंबर आपके बैंक SMS या UPI ऐप की रसीद पर मिलता है।'
+              : 'The 12-digit UTR (Unique Transaction Reference) is in your Bank SMS or UPI receipt.'}
+          </p>
           <div className="mt-8">
             <label className="field-label" htmlFor="utr">UTR</label>
             <input

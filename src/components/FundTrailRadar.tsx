@@ -118,12 +118,12 @@ export const FundTrailRadar: React.FC<FundTrailRadarProps> = ({
       </ol>
 
       <h2 className="text-xl font-bold mt-10">
-        {hi ? 'धन वापसी' : 'Get the money back'}
+        {hi ? 'धन वापसी (अगला कानूनी कदम)' : 'Get the money back (Next Legal Step)'}
       </h2>
-      <p className="mt-2 text-muted text-lg">
+      <p className="mt-2 text-muted text-lg leading-relaxed">
         {hi
-          ? 'मजिस्ट्रेट याचिका से फ्रीज राशि आपके खाते में लौट सकती है।'
-          : 'A magistrate petition is needed to restore the frozen amount to your account.'}
+          ? 'राशि बैंकिंग लेयर में सुरक्षित फ्रीज हो चुकी है। अब धारा 457 CrPC / 503 BNSS के तहत मजिस्ट्रेट याचिका द्वारा यह रकम आपके खाते में लौटाई जाएगी।'
+          : 'Funds are securely locked in the banking layer. A Magistrate Restoration Petition (under Section 457 CrPC / 503 BNSS) is now required to legally release and restore the frozen money directly to your account.'}
       </p>
       <div className="btn-group mt-8">
         <button type="button" onClick={onOpenCourtPetition} className="btn-primary">

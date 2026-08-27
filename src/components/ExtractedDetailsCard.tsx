@@ -47,8 +47,8 @@ export const ExtractedDetailsCard: React.FC<ExtractedDetailsCardProps> = ({
       </h1>
       <p className="mt-4 text-lg text-muted max-w-2xl">
         {hi
-          ? 'फ्रीज नोटिस भेजने से पहले इन्हें सही करें।'
-          : 'Correct anything that looks wrong before the freeze notice is sent.'}
+          ? 'निकाले गए UTR और बैंक विवरण की पुष्टि करें। यही कानूनी फ्रीज आदेश में उपयोग होंगे।'
+          : 'Verify the extracted UTR and bank details. These will be dispatched directly in the legal freeze directive.'}
       </p>
 
       <form onSubmit={handleSubmit} className="mt-8">
@@ -131,6 +131,17 @@ export const ExtractedDetailsCard: React.FC<ExtractedDetailsCardProps> = ({
             <p className="text-lg leading-relaxed">{formData.incidentSummary}</p>
           )}
         </Field>
+
+        <div className="notice mt-6 text-sm text-muted">
+          <p className="font-semibold text-ink">
+            {hi ? 'जाँच क्यों जरूरी है?' : 'Why verification matters:'}
+          </p>
+          <p className="mt-1">
+            {hi
+              ? 'सटीक UTR होने से संदिग्ध बैंक खाते पर तुरंत लियन (डेबिट रोक) लगाकर रकम सुरक्षित की जा सकती है।'
+              : 'An accurate UTR allows the beneficiary bank to immediately place a debit freeze/lien before cash is cashed out.'}
+          </p>
+        </div>
 
         <div className="btn-group mt-8">
           <button type="submit" className="btn-primary">

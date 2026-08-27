@@ -67,7 +67,18 @@ export const EscalationTracker: React.FC<EscalationTrackerProps> = ({
         </li>
       </ol>
 
-      <button type="button" onClick={onGeneratePetition} className="btn-primary mt-8">
+      <div className="notice mt-8 text-sm text-muted">
+        <p className="font-semibold text-ink">
+          {hi ? 'आगे क्या करना है?' : 'What to do next:'}
+        </p>
+        <p className="mt-1">
+          {hi
+            ? 'यदि 36 घंटे के भीतर सामग्री नहीं हटाई जाती, तो धारा 154 CrPC / 173 BNSS के तहत तैयार FIR ड्राफ्ट डाउनलोड करके अपने स्थानीय साइबर सेल में शिकायत दर्ज कराएं।'
+            : 'If the platform fails to take down the content within 36 hours, download the pre-formatted FIR draft (compliant with Sec 154 CrPC / 173 BNSS) to submit at your nearest Cyber Police Station.'}
+        </p>
+      </div>
+
+      <button type="button" onClick={onGeneratePetition} className="btn-primary mt-6">
         {hi ? 'FIR ड्राफ्ट तैयार करें' : 'Generate FIR draft'}
       </button>
     </div>
