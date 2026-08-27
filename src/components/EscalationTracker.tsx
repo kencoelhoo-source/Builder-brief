@@ -30,30 +30,30 @@ export const EscalationTracker: React.FC<EscalationTrackerProps> = ({
       </p>
 
       {/* Segmented Tab Switcher */}
-      <div className="inline-flex items-center p-1 rounded-full bg-soft border border-line mb-6 w-full max-w-md gap-1">
+      <div className="inline-flex items-center p-1 rounded-full bg-soft border border-line mb-6 w-full max-w-sm gap-1">
         <button
           type="button"
           onClick={() => setViewTab('status')}
-          className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 sm:px-4 rounded-full text-xs font-semibold transition-colors duration-150 ${
+          className={`flex-1 h-9 flex items-center justify-center gap-1.5 px-3 rounded-full text-xs font-semibold whitespace-nowrap transition-colors duration-150 ${
             viewTab === 'status'
               ? 'bg-card text-ink shadow-sm'
               : 'text-muted hover:text-ink'
           }`}
         >
           <Radio size={13} className={viewTab === 'status' ? 'text-[#15803d]' : 'text-muted'} />
-          <span>{hi ? 'टेकडाउन स्थिति' : 'Takedown Status'}</span>
+          <span>{hi ? 'टेकडाउन रडार' : 'Takedown Radar'}</span>
         </button>
         <button
           type="button"
           onClick={() => setViewTab('application')}
-          className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 sm:px-4 rounded-full text-xs font-semibold transition-colors duration-150 ${
+          className={`flex-1 h-9 flex items-center justify-center gap-1.5 px-3 rounded-full text-xs font-semibold whitespace-nowrap transition-colors duration-150 ${
             viewTab === 'application'
               ? 'bg-card text-ink shadow-sm'
               : 'text-muted hover:text-ink'
           }`}
         >
           <ShieldCheck size={13} className={viewTab === 'application' ? 'text-amber-600' : 'text-muted'} />
-          <span>{hi ? 'शिकायत व एस्केलेशन' : 'My Application & Escalation'}</span>
+          <span>{hi ? 'मेरी शिकायत' : 'My Application'}</span>
         </button>
       </div>
 
