@@ -125,7 +125,7 @@ export const FundTrailRadar: React.FC<FundTrailRadarProps> = ({
           ? 'मजिस्ट्रेट याचिका से फ्रीज राशि आपके खाते में लौट सकती है।'
           : 'A magistrate petition is needed to restore the frozen amount to your account.'}
       </p>
-      <div className="mt-8 flex flex-col sm:flex-row gap-4">
+      <div className="btn-group mt-8">
         <button type="button" onClick={onOpenCourtPetition} className="btn-primary">
           {hi ? 'न्यायालय याचिका' : 'Generate court petition'}
         </button>

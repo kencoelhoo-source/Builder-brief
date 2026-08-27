@@ -11,38 +11,37 @@ The primary goals are:
 
 ---
 
-## 2. Color Palette (Tailwind)
+## 2. Color Palette & Theming (CSS Custom Properties)
 
-### Primary Colors (Authority)
-*   **Navy Blue:** `#1e3a8a` (Tailwind `blue-900`) - Used for headers, primary buttons, and official badges.
-*   **Deep Gray:** `#111827` (Tailwind `gray-900`) - Used for all primary text and critical headings.
+### Primary Colors (Warm Paper & Ink)
+*   **Canvas:** `#f4efe6` (Light mode) / `#0a0908` (Dark mode) - Warm, paper-like background.
+*   **Card:** `#fffaf3` (Light mode) / `#141210` (Dark mode) - Solid background for data containers.
+*   **Ink / Accent:** `#1c1c1c` (Light mode) / `#f3efe8` (Dark mode) - Used for primary buttons, active text, and high-contrast elements.
 
 ### Semantic Colors (Action & Status)
-*   **Urgent Red:** `#b91c1c` (Tailwind `red-700`) - Used for the 1930 Hotline, Takedown Actions, and critical warnings.
-*   **Success Green:** `#15803d` (Tailwind `green-700`) - Used to indicate successful freezes, dispatches, and secure elements.
-*   **Neutral Borders:** `#e5e7eb` (Tailwind `gray-200`) - Used for structural dividers and card outlines.
-
-### Backgrounds
-*   **Canvas:** `#f9fafb` (Tailwind `gray-50`) - Light gray background behind cards.
-*   **Cards:** `#ffffff` (White) - Solid white backgrounds for data containers.
-*   **Subtle Highlights:** `#eff6ff` (Tailwind `blue-50`) - Used for information banners or subtle selections.
+*   **Urgent Red:** `#d4351c` (Emergency / Danger) - Used for the 1930 Hotline, Takedown Actions, and critical warnings.
+*   **Success Green:** `#1e9a52` (Success) - Used to indicate successful freezes, dispatches, and secure elements.
+*   **Neutral Borders:** `var(--line)` and `var(--line-strong)` - Used for structural dividers.
 
 ---
 
 ## 3. Typography
 The application uses modern sans-serif fonts for maximum legibility.
-- **Inter / San Francisco / Roboto:** Depending on the OS, native stack is preferred.
-- Headings are mostly bold and tight (`tracking-tight`).
-- Legal text and disclaimers are small (`text-xs`) but high contrast (`text-gray-600` or `text-gray-800`).
+- **Inter Tight / Noto Sans Devanagari:** Font stack used for both English and Hindi.
+- Headings are mostly bold and tight (`letter-spacing: -0.04em`).
+- Legal text and disclaimers use `text-muted` and `text-subtle` colors for hierarchy.
 
 ---
 
 ## 4. Component Standards
 
 ### Buttons
-*   **Primary Action (`btn-primary`):** Solid Navy Blue (`bg-[#1e3a8a]`), white text, no border radius rounding (`rounded`), slight hover state.
-*   **Secondary Action (`btn-secondary`):** White background, gray border, gray text. Used for "Cancel", "Back", or "Close".
-*   **Destructive Action:** Solid Red (`bg-[#b91c1c]`), used for "Dispatch Notice" or "Initiate Freeze".
+All buttons rely on strict geometric CSS tokens (`--btn-height-md`, `--btn-pad-x`, etc.) to enforce consistency. Do not use ad-hoc Tailwind classes (`px-*`, `py-*`, `h-*`) for button anatomy.
+*   **Primary Action (`btn-primary`, `btn-ai`):** Solid Ink/Accent background (`var(--accent)`), fully rounded pill (`border-radius: 999px`), bold text.
+*   **Secondary Action (`btn-secondary`):** Transparent background with `var(--line-strong)` border, text color `var(--ink)`. Used for "Cancel", "Back", or "Change details".
+*   **Emergency / Destructive (`btn-emergency`):** Solid Red (`#d4351c`), fully rounded pill. Used for "Dispatch Notice" or "Initiate Freeze".
+*   **Icon Buttons (`btn-icon`):** Square `44px x 44px` with pill radius, used for modal close controls and theme toggles.
+*   **Button Groups (`btn-group`):** A flex container that handles responsive stacking (side-by-side on desktop, full-width stacked on mobile).
 
 ### Cards
 *   Flat white backgrounds (`bg-white`).

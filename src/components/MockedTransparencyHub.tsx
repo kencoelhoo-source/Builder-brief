@@ -31,7 +31,7 @@ export const MockedTransparencyHub: React.FC<MockedTransparencyHubProps> = ({
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="p-1 bg-transparent border-0 cursor-pointer text-ink"
+            className="btn-icon"
           >
             <X size={20} strokeWidth={1.75} />
           </button>
@@ -71,11 +71,13 @@ export const MockedTransparencyHub: React.FC<MockedTransparencyHubProps> = ({
           </div>
         </div>
 
-        <div className="p-5 border-t border-line flex items-center justify-between">
-          <span className="text-sm text-muted">Kavach Omni · hackathon build</span>
-          <button type="button" onClick={onClose} className="btn-primary">
-            {hi ? 'ठीक है' : 'Back to the service'}
-          </button>
+        <div className="p-5 border-t border-line flex flex-col sm:flex-row items-center justify-between gap-4">
+          <span className="text-sm text-muted text-center sm:text-left">Kavach Omni · hackathon build</span>
+          <div className="btn-group sm:ml-auto w-full sm:w-auto">
+            <button type="button" onClick={onClose} className="btn-primary">
+              {hi ? 'ठीक है' : 'Back to the service'}
+            </button>
+          </div>
         </div>
       </div>
     </div>

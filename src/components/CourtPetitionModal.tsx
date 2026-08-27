@@ -133,23 +133,17 @@ export const CourtPetitionModal: React.FC<CourtPetitionModalProps> = ({
         </div>
 
         {/* Footer Actions */}
-        <div className="flex flex-col-reverse sm:flex-row items-center justify-between p-4 border-t border-[#e5e7eb] bg-[#f9fafb] rounded-b-lg no-print gap-4 sm:gap-2">
-          <span className="text-[11px] text-[#6b7280] text-center sm:text-left w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row items-center justify-between p-4 border-t border-[#e5e7eb] bg-[#f9fafb] rounded-b-lg no-print gap-4">
+          <span className="text-[11px] text-[#6b7280] text-center sm:text-left">
             Format compliant with Sec 457 CrPC / 503 BNSS
           </span>
-          <div className="flex items-center gap-2 w-full sm:w-auto justify-center sm:justify-end">
-            <button
-              onClick={handlePrint}
-              className="btn-primary text-xs py-2 px-4 flex items-center justify-center gap-1.5 font-bold whitespace-nowrap flex-1 sm:flex-none"
-            >
-              <Printer size={14} />
-              <span>{currentLang === 'hi' ? 'याचिका डाउनलोड करें' : 'Download Petition'}</span>
-            </button>
-            <button
-              onClick={onClose}
-              className="btn-secondary text-xs py-2 px-3.5 flex-1 sm:flex-none justify-center whitespace-nowrap"
-            >
+          <div className="btn-group sm:ml-auto">
+            <button onClick={onClose} className="btn-secondary">
               {currentLang === 'hi' ? 'बंद करें' : 'Close'}
+            </button>
+            <button onClick={handlePrint} className="btn-primary">
+              <Printer size={18} />
+              <span>{currentLang === 'hi' ? 'याचिका डाउनलोड करें' : 'Download Petition'}</span>
             </button>
           </div>
         </div>

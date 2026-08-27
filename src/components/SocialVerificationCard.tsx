@@ -114,7 +114,7 @@ export const SocialVerificationCard: React.FC<SocialVerificationCardProps> = ({
           )}
         </Field>
 
-        <div className="mt-8 flex flex-col sm:flex-row gap-4">
+        <div className="btn-group mt-8">
           <button type="submit" className="btn-emergency">
             {hi ? 'जारी रखें' : 'Continue'}
           </button>
@@ -125,7 +125,7 @@ export const SocialVerificationCard: React.FC<SocialVerificationCardProps> = ({
           >
             {isEditing ? (hi ? 'सहेजें' : 'Save') : (hi ? 'बदलें' : 'Change details')}
           </button>
-          <button type="button" onClick={onBackToIntake} className="btn-link self-center">
+          <button type="button" onClick={onBackToIntake} className="btn-link sm:ml-4">
             {hi ? '← वापस' : '← Back'}
           </button>
         </div>

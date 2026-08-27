@@ -86,6 +86,14 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
         </div>
       </div>
+      <div className="meta-row">
+        <div className="page-wrap">
+          <span>{hi ? 'प्रोटोटाइप' : 'Prototype'}</span>
+          <button type="button" onClick={onOpenMockedHub}>
+            {hi ? 'क्या मॉक है' : "What's mocked"}
+          </button>
+        </div>
+      </div>
     </header>
   );
 };

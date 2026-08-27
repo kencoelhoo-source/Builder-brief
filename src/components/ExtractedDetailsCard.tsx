@@ -132,7 +132,7 @@ export const ExtractedDetailsCard: React.FC<ExtractedDetailsCardProps> = ({
           )}
         </Field>
 
-        <div className="mt-8 flex flex-col sm:flex-row gap-4">
+        <div className="btn-group mt-8">
           <button type="submit" className="btn-primary">
             {hi ? 'जारी रखें' : 'Continue'}
           </button>
@@ -143,7 +143,7 @@ export const ExtractedDetailsCard: React.FC<ExtractedDetailsCardProps> = ({
           >
             {isEditing ? (hi ? 'सहेजें' : 'Save') : (hi ? 'बदलें' : 'Change details')}
           </button>
-          <button type="button" onClick={onBackToIntake} className="btn-link self-center">
+          <button type="button" onClick={onBackToIntake} className="btn-link sm:ml-4">
             {hi ? '← वापस' : '← Back'}
           </button>
         </div>
