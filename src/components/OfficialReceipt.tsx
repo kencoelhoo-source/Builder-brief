@@ -28,12 +28,11 @@ export const OfficialReceipt: React.FC<OfficialReceiptProps> = ({
     if (!element) return;
     
     const opt = {
-      margin:       10,
+      margin:       12,
       filename:     `Official_Receipt_${payload.ackNumber}.pdf`,
       image:        { type: 'jpeg' as const, quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true, logging: false },
-      jsPDF:        { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const },
-      pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+      html2canvas:  { scale: 2, useCORS: true, logging: false, windowWidth: 800 },
+      jsPDF:        { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
     };
     
     html2pdf().set(opt).from(element).save();
