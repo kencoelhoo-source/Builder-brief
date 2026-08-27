@@ -92,14 +92,22 @@ export const FundTrailRadar: React.FC<FundTrailRadarProps> = ({
         </button>
       </p>
 
-      {/* Segmented Tab Switcher */}
-      <div className="inline-flex items-center p-1 rounded-full bg-soft border border-line mb-6 w-full max-w-sm gap-1">
+      {/* Segmented Tab Switcher with Smooth Sliding Indicator */}
+      <div className="relative inline-flex items-center p-1 rounded-full bg-soft border border-line mb-6 w-full max-w-sm">
+        {/* Sliding Pill Indicator */}
+        <div
+          className="absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-full bg-card shadow-sm transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
+          style={{
+            left: viewTab === 'radar' ? '4px' : 'calc(50%)',
+          }}
+        />
+
         <button
           type="button"
           onClick={() => setViewTab('radar')}
-          className={`flex-1 h-9 flex items-center justify-center gap-1.5 px-3 rounded-full text-xs font-semibold whitespace-nowrap transition-colors duration-150 ${
+          className={`relative z-10 flex-1 h-9 flex items-center justify-center gap-1.5 px-3 rounded-full text-xs font-semibold whitespace-nowrap transition-colors duration-200 ${
             viewTab === 'radar'
-              ? 'bg-card text-ink shadow-sm'
+              ? 'text-ink'
               : 'text-muted hover:text-ink'
           }`}
         >
@@ -109,9 +117,9 @@ export const FundTrailRadar: React.FC<FundTrailRadarProps> = ({
         <button
           type="button"
           onClick={() => setViewTab('application')}
-          className={`flex-1 h-9 flex items-center justify-center gap-1.5 px-3 rounded-full text-xs font-semibold whitespace-nowrap transition-colors duration-150 ${
+          className={`relative z-10 flex-1 h-9 flex items-center justify-center gap-1.5 px-3 rounded-full text-xs font-semibold whitespace-nowrap transition-colors duration-200 ${
             viewTab === 'application'
-              ? 'bg-card text-ink shadow-sm'
+              ? 'text-ink'
               : 'text-muted hover:text-ink'
           }`}
         >
@@ -121,7 +129,7 @@ export const FundTrailRadar: React.FC<FundTrailRadarProps> = ({
       </div>
 
       {viewTab === 'radar' ? (
-        <div>
+        <div className="anim-slide-left">
           <p className="text-success font-bold text-sm">
             {hi ? 'आदेश लागू हो गया' : 'The order has been applied'}
           </p>
@@ -173,13 +181,15 @@ export const FundTrailRadar: React.FC<FundTrailRadarProps> = ({
           </div>
         </div>
       ) : (
-        <MyApplicationsTab
-          transaction={transaction}
-          payload={payload}
-          currentLang={currentLang}
-          onOpenCourtPetition={onOpenCourtPetition}
-          onViewReceipt={onViewReceipt}
-        />
+        <div className="anim-slide-right">
+          <MyApplicationsTab
+            transaction={transaction}
+            payload={payload}
+            currentLang={currentLang}
+            onOpenCourtPetition={onOpenCourtPetition}
+            onViewReceipt={onViewReceipt}
+          />
+        </div>
       )}
     </div>
   );

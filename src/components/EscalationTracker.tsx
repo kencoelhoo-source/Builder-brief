@@ -29,14 +29,22 @@ export const EscalationTracker: React.FC<EscalationTrackerProps> = ({
         </button>
       </p>
 
-      {/* Segmented Tab Switcher */}
-      <div className="inline-flex items-center p-1 rounded-full bg-soft border border-line mb-6 w-full max-w-sm gap-1">
+      {/* Segmented Tab Switcher with Smooth Sliding Indicator */}
+      <div className="relative inline-flex items-center p-1 rounded-full bg-soft border border-line mb-6 w-full max-w-sm">
+        {/* Sliding Pill Indicator */}
+        <div
+          className="absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-full bg-card shadow-sm transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
+          style={{
+            left: viewTab === 'status' ? '4px' : 'calc(50%)',
+          }}
+        />
+
         <button
           type="button"
           onClick={() => setViewTab('status')}
-          className={`flex-1 h-9 flex items-center justify-center gap-1.5 px-3 rounded-full text-xs font-semibold whitespace-nowrap transition-colors duration-150 ${
+          className={`relative z-10 flex-1 h-9 flex items-center justify-center gap-1.5 px-3 rounded-full text-xs font-semibold whitespace-nowrap transition-colors duration-200 ${
             viewTab === 'status'
-              ? 'bg-card text-ink shadow-sm'
+              ? 'text-ink'
               : 'text-muted hover:text-ink'
           }`}
         >
@@ -46,9 +54,9 @@ export const EscalationTracker: React.FC<EscalationTrackerProps> = ({
         <button
           type="button"
           onClick={() => setViewTab('application')}
-          className={`flex-1 h-9 flex items-center justify-center gap-1.5 px-3 rounded-full text-xs font-semibold whitespace-nowrap transition-colors duration-150 ${
+          className={`relative z-10 flex-1 h-9 flex items-center justify-center gap-1.5 px-3 rounded-full text-xs font-semibold whitespace-nowrap transition-colors duration-200 ${
             viewTab === 'application'
-              ? 'bg-card text-ink shadow-sm'
+              ? 'text-ink'
               : 'text-muted hover:text-ink'
           }`}
         >
@@ -58,7 +66,7 @@ export const EscalationTracker: React.FC<EscalationTrackerProps> = ({
       </div>
 
       {viewTab === 'status' ? (
-        <div>
+        <div className="anim-slide-left">
           <p className="text-success font-bold text-sm">
             {hi ? 'नोटिस भेज दिया गया' : 'The notice has been sent'}
           </p>
@@ -117,13 +125,15 @@ export const EscalationTracker: React.FC<EscalationTrackerProps> = ({
           </button>
         </div>
       ) : (
-        <MyApplicationsTab
-          transaction={transaction}
-          payload={payload}
-          currentLang={currentLang}
-          onOpenCourtPetition={onGeneratePetition}
-          onViewReceipt={() => {}}
-        />
+        <div className="anim-slide-right">
+          <MyApplicationsTab
+            transaction={transaction}
+            payload={payload}
+            currentLang={currentLang}
+            onOpenCourtPetition={onGeneratePetition}
+            onViewReceipt={() => {}}
+          />
+        </div>
       )}
     </div>
   );
