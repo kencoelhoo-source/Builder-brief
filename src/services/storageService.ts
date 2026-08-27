@@ -1,4 +1,4 @@
-import type { CyberIncident, CFCFRMSPayload, Sec79Payload, Language } from '../types';
+import type { CyberIncident, CFCFRMSPayload, Sec79Payload, Language, AppStep } from '../types';
 
 const DRAFT_KEY = 'kavach60_emergency_draft';
 const LANG_KEY = 'kavach60_user_lang';
@@ -7,17 +7,20 @@ const ACK_KEY = 'kavach60_last_ack';
 export interface SavedDraft {
   transaction: CyberIncident | null;
   payload: CFCFRMSPayload | Sec79Payload | null;
+  step?: AppStep;
   updatedAt: string;
 }
 
 export const saveDraftToStorage = (
   transaction: CyberIncident | null,
-  payload: CFCFRMSPayload | Sec79Payload | null
+  payload: CFCFRMSPayload | Sec79Payload | null,
+  step?: AppStep
 ) => {
   try {
     const draft: SavedDraft = {
       transaction,
       payload,
+      step,
       updatedAt: new Date().toISOString(),
     };
     localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));

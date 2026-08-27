@@ -1,8 +1,10 @@
-import React, { useState, useRef } from 'react';
-import { Upload, Mic } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Upload, Mic, RefreshCw, Trash2, ArrowRight } from 'lucide-react';
 import type { Language, FraudPersona } from '../types';
+import type { SavedDraft } from '../services/storageService';
 import { MOCK_PERSONAS } from '../data/mockPersonas';
 import { speechService } from '../services/speechService';
+import { formatINR } from '../utils/formatters';
 
 interface EmergencyIntakeProps {
   currentLang: Language;
@@ -11,6 +13,9 @@ interface EmergencyIntakeProps {
   onVoiceTranscribe: (transcript: string) => void;
   onManualSubmit: (utr: string, amount: number) => void;
   isLoading: boolean;
+  savedDraft?: SavedDraft | null;
+  onResumeDraft?: () => void;
+  onClearDraft?: () => void;
 }
 
 type Panel = 'home' | 'voice' | 'manual';
@@ -35,15 +40,39 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
   onVoiceTranscribe,
   onManualSubmit,
   isLoading,
+  savedDraft,
+  onResumeDraft,
+  onClearDraft,
 }) => {
   const [panel, setPanel] = useState<Panel>('home');
   const [isListening, setIsListening] = useState(false);
   const [spokenText, setSpokenText] = useState('');
-  const [manualUtr, setManualUtr] = useState('');
-  const [manualAmount, setManualAmount] = useState('');
+  const [manualUtr, setManualUtr] = useState(() => {
+    try {
+      return sessionStorage.getItem('kavach_manual_utr') || '';
+    } catch {
+      return '';
+    }
+  });
+  const [manualAmount, setManualAmount] = useState(() => {
+    try {
+      return sessionStorage.getItem('kavach_manual_amt') || '';
+    } catch {
+      return '';
+    }
+  });
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const hi = currentLang === 'hi';
+
+  useEffect(() => {
+    try {
+      if (manualUtr) sessionStorage.setItem('kavach_manual_utr', manualUtr);
+      if (manualAmount) sessionStorage.setItem('kavach_manual_amt', manualAmount);
+    } catch {
+      /* ignore */
+    }
+  }, [manualUtr, manualAmount]);
 
   const handleToggleVoice = () => {
     if (isListening) {
@@ -84,6 +113,8 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
     }
   };
 
+  const draftTx = savedDraft?.transaction;
+
   return (
     <div className="page-wrap page-stack intake">
       {panel !== 'home' && (
@@ -96,6 +127,50 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
 
       {panel === 'home' && (
         <div className="panel-enter intake-home">
+          {/* Active Saved Draft Banner if page was refreshed */}
+          {draftTx && onResumeDraft && (
+            <div className="mb-6 p-4 rounded-xl border-2 border-emerald-500/40 bg-emerald-500/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#15803d] text-white flex items-center justify-center shrink-0 mt-0.5">
+                  <RefreshCw size={15} />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                      {hi ? 'सक्रिय शिकायत सुरक्षित है' : 'Active Case Restored'}
+                    </span>
+                  </div>
+                  <p className="text-sm font-bold text-ink mt-0.5">
+                    {'amount' in draftTx ? formatINR(draftTx.amount) : draftTx.platform} · {draftTx.fraudCategoryLabel}
+                  </p>
+                  <p className="text-xs text-muted">
+                    {hi ? 'आपका भरा हुआ डेटा सुरक्षित है। सीधे वहीं से जारी रखें:' : 'Your filled details are preserved. Continue where you left off:'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 self-end sm:self-center">
+                {onClearDraft && (
+                  <button
+                    type="button"
+                    onClick={onClearDraft}
+                    className="btn-secondary !text-xs !py-1.5 !px-2.5 text-muted hover:text-danger"
+                    title={hi ? 'ड्राफ्ट हटाएं' : 'Discard draft'}
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={onResumeDraft}
+                  className="btn-primary !text-xs !py-1.5 !px-3"
+                >
+                  <span>{hi ? 'शिकायत जारी रखें' : 'Resume Complaint'}</span>
+                  <ArrowRight size={13} />
+                </button>
+              </div>
+            </div>
+          )}
+
           <h1>{hi ? 'रिपोर्ट करें' : 'Report'}</h1>
           <p className="lede">
             {hi
@@ -178,56 +253,67 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
           <button
             type="button"
             onClick={handleToggleVoice}
-            className={isListening ? 'btn-emergency mt-8' : 'btn-primary mt-8'}
+            className={`btn-primary w-full justify-center ${isListening ? 'btn-listening' : ''}`}
           >
-            <Mic size={18} strokeWidth={1.75} />
-            {isListening
-              ? hi
-                ? 'रोकें'
-                : 'Stop'
-              : hi
-              ? 'रिकॉर्ड करें'
-              : 'Record'}
+            <Mic size={16} />
+            <span>{isListening ? (hi ? 'सुन रहे हैं… रोकें' : 'Listening… Tap to stop') : (hi ? 'बोलना शुरू करें' : 'Start speaking')}</span>
           </button>
-          {spokenText && <p className="mt-6 p-4 rounded bg-soft text-ink">{spokenText}</p>}
+          {spokenText && (
+            <div className="notice mt-4">
+              <p className="text-xs font-semibold text-muted mb-1">{hi ? 'पहचाना गया:' : 'Recognized:'}</p>
+              <p className="text-sm italic text-ink">"{spokenText}"</p>
+            </div>
+          )}
         </div>
       )}
 
       {panel === 'manual' && (
-        <form onSubmit={handleManualFormSubmit} className="panel-enter max-w-xl">
-          <h1>{hi ? 'UTR दर्ज करें' : 'Enter UTR'}</h1>
+        <div className="panel-enter max-w-xl">
+          <h1>{hi ? 'UTR दर्ज करें' : 'Enter transaction UTR'}</h1>
           <p className="lede">
             {hi
-              ? '12 अंकों का UTR नंबर आपके बैंक SMS या UPI ऐप की रसीद पर मिलता है।'
-              : 'The 12-digit UTR (Unique Transaction Reference) is in your Bank SMS or UPI receipt.'}
+              ? '12 अंकों का UPI संदर्भ या UTR नंबर और राशि डालें।'
+              : 'Enter the 12-digit UPI reference / UTR number and amount.'}
           </p>
-          <div className="mt-8">
-            <label className="field-label" htmlFor="utr">UTR</label>
-            <input
-              id="utr"
-              type="text"
-              inputMode="numeric"
-              maxLength={12}
-              value={manualUtr}
-              onChange={(e) => setManualUtr(e.target.value)}
-              className="input-field"
-              autoComplete="off"
-            />
-          </div>
-          <div className="mt-5">
-            <label className="field-label" htmlFor="amount">{hi ? 'राशि' : 'Amount'}</label>
-            <input
-              id="amount"
-              type="number"
-              value={manualAmount}
-              onChange={(e) => setManualAmount(e.target.value)}
-              className="input-field"
-            />
-          </div>
-          <button type="submit" disabled={manualUtr.length < 10} className="btn-primary mt-8">
-            {hi ? 'जारी रखें' : 'Continue'}
-          </button>
-        </form>
+          <form onSubmit={handleManualFormSubmit} className="space-y-4">
+            <div>
+              <label htmlFor="manual-utr" className="block text-xs font-semibold text-muted mb-1">
+                {hi ? '12 अंकों का UTR / संदर्भ संख्या' : '12-digit UTR / Ref Number'}
+              </label>
+              <input
+                id="manual-utr"
+                type="text"
+                value={manualUtr}
+                onChange={(e) => setManualUtr(e.target.value.replace(/[^0-9A-Za-z]/g, ''))}
+                placeholder="e.g. 412938472910"
+                className="input-field w-full font-mono text-base"
+                maxLength={16}
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="manual-amount" className="block text-xs font-semibold text-muted mb-1">
+                {hi ? 'धोखाधड़ी की राशि (₹)' : 'Disputed Amount (₹)'}
+              </label>
+              <input
+                id="manual-amount"
+                type="number"
+                value={manualAmount}
+                onChange={(e) => setManualAmount(e.target.value)}
+                placeholder="e.g. 48500"
+                className="input-field w-full font-mono text-base"
+                required
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={manualUtr.trim().length < 10 || isLoading}
+              className="btn-primary w-full justify-center"
+            >
+              {isLoading ? (hi ? 'प्रोसेसिंग…' : 'Processing…') : (hi ? 'शिकायत आगे बढ़ाएं' : 'Proceed to verify')}
+            </button>
+          </form>
+        </div>
       )}
     </div>
   );

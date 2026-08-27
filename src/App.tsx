@@ -19,9 +19,11 @@ import type { AppStep, Language, CyberIncident, FinancialIncident, SocialInciden
 import { parseScreenshotOCR, parseVoiceTranscription } from './services/ocrService';
 import {
   saveDraftToStorage,
+  getDraftFromStorage,
   saveLanguagePreference,
   getLanguagePreference,
   clearDraftFromStorage,
+  type SavedDraft,
 } from './services/storageService';
 
 
@@ -54,6 +56,7 @@ export const App: React.FC = () => {
   const [isToastLeaving, setIsToastLeaving] = useState<boolean>(false);
   const toastTimerRef = React.useRef<{ hide?: number; clear?: number }>({});
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
+  const [savedDraft, setSavedDraft] = useState<SavedDraft | null>(() => getDraftFromStorage());
 
   const [showPetitionModal, setShowPetitionModal] = useState<boolean>(false);
   const [showReceiptModal, setShowReceiptModal] = useState<boolean>(false);
@@ -97,6 +100,10 @@ export const App: React.FC = () => {
       setFurthestStep((n) => Math.max(n, idx));
     }
     setCurrentStep(step);
+    if (transaction) {
+      saveDraftToStorage(transaction, payload || sec79Payload, step);
+      setSavedDraft(getDraftFromStorage());
+    }
     if (source !== 'pop') {
       window.history.pushState({ step }, '');
     }
@@ -140,7 +147,8 @@ export const App: React.FC = () => {
     try {
       const extracted = await parseScreenshotOCR(personaId);
       setTransaction(extracted);
-      saveDraftToStorage(extracted, null);
+      saveDraftToStorage(extracted, null, 'review');
+      setSavedDraft(getDraftFromStorage());
       goToStep('review', 'flow');
       triggerToast(currentLang === 'hi' ? 'AI ने ट्रांसक्शन विवरण निकाल लिया है' : 'Vision AI parsed screenshot details');
     } catch (e) {
@@ -155,7 +163,8 @@ export const App: React.FC = () => {
     try {
       const extracted = await parseScreenshotOCR(file);
       setTransaction(extracted);
-      saveDraftToStorage(extracted, null);
+      saveDraftToStorage(extracted, null, 'review');
+      setSavedDraft(getDraftFromStorage());
       goToStep('review', 'flow');
       const thin =
         extracted.incidentType === 'FINANCIAL'
@@ -187,7 +196,8 @@ export const App: React.FC = () => {
     try {
       const extracted = await parseVoiceTranscription(transcript);
       setTransaction(extracted);
-      saveDraftToStorage(extracted, null);
+      saveDraftToStorage(extracted, null, 'review');
+      setSavedDraft(getDraftFromStorage());
       goToStep('review', 'flow');
       triggerToast(currentLang === 'hi' ? 'आवाज़ से विवरण दर्ज हुआ' : 'Voice input processed');
     } catch (e) {
@@ -216,13 +226,15 @@ export const App: React.FC = () => {
       extractedVia: 'MANUAL',
     };
     setTransaction(manualTxn);
-    saveDraftToStorage(manualTxn, null);
+    saveDraftToStorage(manualTxn, null, 'review');
+    setSavedDraft(getDraftFromStorage());
     goToStep('review', 'flow');
   };
 
   const handleProceedToAction = (updatedTxn: CyberIncident) => {
     setTransaction(updatedTxn);
-    saveDraftToStorage(updatedTxn, null);
+    saveDraftToStorage(updatedTxn, null, 'freeze');
+    setSavedDraft(getDraftFromStorage());
     goToStep('freeze', 'flow');
     triggerToast(currentLang === 'hi' ? 'कार्रवाई योजना तैयार' : 'Action Plan Ready');
   };
@@ -237,13 +249,42 @@ export const App: React.FC = () => {
     }
 
     if (transaction) {
-      saveDraftToStorage(transaction, generatedPayload);
+      saveDraftToStorage(transaction, generatedPayload, 'radar');
+      setSavedDraft(getDraftFromStorage());
     }
     goToStep('radar', 'flow');
   };
 
+  const handleResumeDraft = () => {
+    const draft = getDraftFromStorage();
+    if (!draft?.transaction) return;
+    setTransaction(draft.transaction);
+    if (draft.payload) {
+      if (draft.transaction.incidentType === 'FINANCIAL') {
+        setPayload(draft.payload as CFCFRMSPayload);
+      } else {
+        setSec79Payload(draft.payload as Sec79Payload);
+      }
+    }
+    const targetStep = draft.step || (draft.payload ? 'radar' : 'review');
+    setFurthestStep((n) => Math.max(n, stepIndex(targetStep)));
+    setCurrentStep(targetStep);
+    triggerToast(currentLang === 'hi' ? 'सुरक्षित ड्राफ्ट लोड हो गया' : 'Draft restored successfully');
+  };
+
+  const handleClearDraft = () => {
+    clearDraftFromStorage();
+    setSavedDraft(null);
+    setTransaction(null);
+    setPayload(null);
+    setSec79Payload(null);
+    setFurthestStep(0);
+    triggerToast(currentLang === 'hi' ? 'ड्राफ्ट हटा दिया गया' : 'Draft cleared');
+  };
+
   const handleResetToHome = () => {
     clearDraftFromStorage();
+    setSavedDraft(null);
     setTransaction(null);
     setPayload(null);
     setSec79Payload(null);
@@ -313,6 +354,9 @@ export const App: React.FC = () => {
             onVoiceTranscribe={handleVoiceTranscribe}
             onManualSubmit={handleManualSubmit}
             isLoading={isLoading}
+            savedDraft={savedDraft}
+            onResumeDraft={handleResumeDraft}
+            onClearDraft={handleClearDraft}
           />
         )}
 
