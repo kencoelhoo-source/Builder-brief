@@ -28,11 +28,12 @@ export const OfficialReceipt: React.FC<OfficialReceiptProps> = ({
     if (!element) return;
     
     const opt = {
-      margin:       15,
+      margin:       10,
       filename:     `Official_Receipt_${payload.ackNumber}.pdf`,
       image:        { type: 'jpeg' as const, quality: 0.98 },
-      html2canvas:  { scale: 2 },
-      jsPDF:        { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
+      html2canvas:  { scale: 2, useCORS: true, logging: false },
+      jsPDF:        { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const },
+      pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
     };
     
     html2pdf().set(opt).from(element).save();
@@ -40,12 +41,12 @@ export const OfficialReceipt: React.FC<OfficialReceiptProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-fadeIn">
-      <div className="bg-white border border-[#e5e7eb] rounded-lg w-full max-w-xl max-h-[92vh] flex flex-col p-0 shadow-2xl relative">
+      <div className="bg-card border border-line rounded-lg w-full max-w-xl max-h-[92vh] flex flex-col p-0 shadow-2xl relative">
         {/* Header Bar */}
-        <div className="flex items-center justify-between p-4 border-b border-[#e5e7eb] bg-[#f9fafb] rounded-t-lg no-print">
+        <div className="flex items-center justify-between p-4 border-b border-line bg-soft rounded-t-lg no-print">
           <div className="flex items-center gap-2">
             <ShieldCheck size={18} className="text-[#15803d]" />
-            <h3 className="text-sm font-bold text-[#111827]">
+            <h3 className="text-sm font-bold text-ink">
               {currentLang === 'hi'
                 ? 'राष्ट्रीय साइबर अपराध पावती रसीद'
                 : 'Official NCRP Intercept Acknowledgment'}
@@ -53,7 +54,8 @@ export const OfficialReceipt: React.FC<OfficialReceiptProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="text-[#6b7280] hover:text-[#111827] p-1 rounded-lg hover:bg-[#e5e7eb] transition-colors"
+            className="btn-icon"
+            aria-label="Close"
           >
             <X size={18} />
           </button>
@@ -61,7 +63,11 @@ export const OfficialReceipt: React.FC<OfficialReceiptProps> = ({
 
         {/* Printable Official Slip Body */}
         <div className="p-5 overflow-y-auto bg-white print-content">
-          <div id="receipt-document-content" className="flex flex-col gap-4 bg-white">
+          <div
+            id="receipt-document-content"
+            className="flex flex-col gap-4 bg-white"
+            style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}
+          >
             <div className="p-5 rounded-md border border-[#9ca3af] bg-white flex flex-col gap-4 text-[#111827]">
               {/* Government Title Header */}
               <div className="text-center border-b border-[#e5e7eb] pb-4">
@@ -139,9 +145,9 @@ export const OfficialReceipt: React.FC<OfficialReceiptProps> = ({
         </div>
 
         {/* Footer Actions */}
-        <div className="flex flex-col sm:flex-row items-center justify-between p-4 border-t border-[#e5e7eb] bg-[#f9fafb] rounded-b-lg no-print gap-4">
-          <span className="text-[11px] text-[#6b7280] text-center sm:text-left">
-            Helpline: <strong className="text-[#111827]">1930</strong> (Toll-Free National)
+        <div className="flex flex-col sm:flex-row items-center justify-between p-4 border-t border-line bg-soft rounded-b-lg no-print gap-4">
+          <span className="text-[11px] text-muted text-center sm:text-left">
+            Helpline: <strong className="text-ink">1930</strong> (Toll-Free National)
           </span>
           <div className="btn-group sm:ml-auto">
             <button onClick={onClose} className="btn-secondary">
