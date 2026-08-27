@@ -48,7 +48,7 @@ export const TakedownDispatchCard: React.FC<TakedownDispatchCardProps> = ({
     <div className="page-wrap page-stack max-w-3xl">
       <p className="mb-6">
         <button type="button" className="btn-link" onClick={onBack}>
-          {hi ? '← वापस' : '← Back'}
+          ← {hi ? 'विवरण जाँच पर लौटें' : 'Back to check'}
         </button>
       </p>
       <h1 className="text-3xl md:text-4xl font-bold">
@@ -94,20 +94,25 @@ export const TakedownDispatchCard: React.FC<TakedownDispatchCardProps> = ({
         </p>
       </div>
 
-      <button
-        type="button"
-        onClick={handleExecuteDispatch}
-        disabled={isDispatching}
-        className="btn-emergency mt-8"
-      >
-        {isDispatching
-          ? hi
-            ? 'भेजा जा रहा है…'
-            : 'Sending…'
-          : hi
-          ? 'टेकडाउन नोटिस जारी करें'
-          : 'Issue takedown notice'}
-      </button>
+      <div className="btn-group mt-8">
+        <button
+          type="button"
+          onClick={handleExecuteDispatch}
+          disabled={isDispatching}
+          className="btn-emergency"
+        >
+          {isDispatching
+            ? hi
+              ? 'भेजा जा रहा है…'
+              : 'Sending…'
+            : hi
+            ? 'टेकडाउन नोटिस जारी करें'
+            : 'Issue takedown notice'}
+        </button>
+        <button type="button" onClick={onBack} className="btn-secondary">
+          {hi ? 'पीछे' : 'Back'}
+        </button>
+      </div>
 
       <p className="mt-6">
         <button type="button" className="btn-link" onClick={() => setShowJsonPayload(!showJsonPayload)}>

@@ -22,7 +22,7 @@ export const EscalationTracker: React.FC<EscalationTrackerProps> = ({
     <div className="page-wrap page-stack max-w-3xl">
       <p className="mb-6">
         <button type="button" className="btn-link" onClick={onBack}>
-          {hi ? '← वापस' : '← Back'}
+          ← {hi ? 'कार्रवाई पर लौटें' : 'Back to act'}
         </button>
       </p>
       <p className="text-success font-bold">

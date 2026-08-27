@@ -38,6 +38,12 @@ export const SocialVerificationCard: React.FC<SocialVerificationCardProps> = ({
 
   return (
     <div className="page-wrap page-stack max-w-3xl">
+      <div className="mb-6">
+        <button type="button" className="btn-link" onClick={onBackToIntake}>
+          ← {hi ? 'रिपोर्ट पर लौटें' : 'Back to report'}
+        </button>
+      </div>
+
       <h1 className="text-3xl md:text-4xl font-bold">
         {hi ? 'विवरण जाँचें' : 'Check these details'}
       </h1>
@@ -135,9 +141,6 @@ export const SocialVerificationCard: React.FC<SocialVerificationCardProps> = ({
             className="btn-secondary"
           >
             {isEditing ? (hi ? 'सहेजें' : 'Save') : (hi ? 'बदलें' : 'Change details')}
-          </button>
-          <button type="button" onClick={onBackToIntake} className="btn-link sm:ml-4">
-            {hi ? '← वापस' : '← Back'}
           </button>
         </div>
       </form>

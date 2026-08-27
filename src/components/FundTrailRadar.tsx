@@ -85,7 +85,7 @@ export const FundTrailRadar: React.FC<FundTrailRadarProps> = ({
     <div className="page-wrap page-stack max-w-3xl">
       <p className="mb-6">
         <button type="button" className="btn-link" onClick={onBack}>
-          {hi ? '← वापस' : '← Back'}
+          ← {hi ? 'फ्रीज पर लौटें' : 'Back to freeze'}
         </button>
       </p>
       <p className="text-success font-bold">

@@ -144,17 +144,17 @@ export const OfficialReceipt: React.FC<OfficialReceiptProps> = ({
         </div>
 
         {/* Footer Actions */}
-        <div className="flex flex-col sm:flex-row items-center justify-between p-4 border-t border-line bg-soft rounded-b-lg no-print gap-4">
-          <span className="text-[11px] text-muted text-center sm:text-left">
+        <div className="flex flex-col sm:flex-row items-center justify-between p-3.5 sm:p-4 border-t border-line bg-soft rounded-b-lg no-print gap-3">
+          <span className="hidden sm:inline text-[11px] text-muted text-left">
             Helpline: <strong className="text-ink">1930</strong> (Toll-Free National)
           </span>
-          <div className="btn-group sm:ml-auto">
+          <div className="btn-group w-full sm:w-auto sm:ml-auto">
             <button onClick={onClose} className="btn-secondary">
               {currentLang === 'hi' ? 'बंद करें' : 'Close'}
             </button>
             <button onClick={handlePrint} className="btn-primary">
-              <Printer size={18} />
-              <span>{currentLang === 'hi' ? 'रसीद डाउनलोड करें' : 'Download Slip'}</span>
+              <Printer size={16} />
+              <span>{currentLang === 'hi' ? 'रसीद डाउनलोड' : 'Download Receipt'}</span>
             </button>
           </div>
         </div>
