@@ -99,9 +99,9 @@ body {
   .page-wrap { padding-inline: 2rem; }
 }
 
-.page-stack { padding-block: 2.25rem 4.5rem; }
+.page-stack { padding-block: 1.5rem 2.5rem; }
 @media (min-width: 768px) {
-  .page-stack { padding-block: 3rem 5.5rem; }
+  .page-stack { padding-block: 2.75rem 4rem; }
 }
 
 h1, h2, h3, h4 {
@@ -129,7 +129,7 @@ h1, h2, h3, h4 {
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .page-enter, .panel-enter, .animate-fadeIn { animation: none; }
+  .page-enter, .panel-enter, .animate-fadeIn, .toast-bar { animation: none; }
 }
 
 .site-header {
@@ -144,9 +144,10 @@ h1, h2, h3, h4 {
 .topbar {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  min-height: 64px;
-  padding-block: 0.7rem;
+  gap: 0.65rem;
+  min-height: 56px;
+  padding-block: 0.55rem;
+  flex-wrap: nowrap;
 }
 .topbar-brand {
   background: none;
@@ -172,23 +173,61 @@ h1, h2, h3, h4 {
 @media (min-width: 860px) {
   .topbar-steps { display: flex; }
 }
-.topbar-steps span {
+.topbar-steps button {
+  background: none;
+  border: 0;
+  color: var(--subtle);
   padding: 5px 11px;
   border-radius: 999px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
 }
+.topbar-steps button:hover:not(:disabled) { color: var(--ink); }
+.topbar-steps button:disabled { opacity: 0.4; cursor: default; }
 .topbar-steps .is-done { color: var(--ink); }
 .topbar-steps .is-current {
   color: var(--accent-fg);
   background: var(--accent);
   font-weight: 600;
 }
+.topbar-steps .is-current:hover:not(:disabled) { color: var(--accent-fg); }
+.topbar-now {
+  display: inline;
+  font-size: 12px;
+  color: var(--muted);
+  margin-left: 4px;
+}
+@media (min-width: 860px) {
+  .topbar-now { display: none; }
+}
 .topbar-actions {
   display: flex;
   align-items: center;
-  gap: 0.7rem;
+  gap: 0.55rem;
   margin-left: auto;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: flex-end;
+}
+.meta-row {
+  font-size: 12px;
+  color: var(--subtle);
+  padding-bottom: 0.45rem;
+}
+.meta-row .page-wrap {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.meta-row button {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  color: var(--muted);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 .topbar-text {
   background: none;
@@ -239,20 +278,19 @@ h1, h2, h3, h4 {
 
 .helpline {
   display: inline-flex;
-  align-items: baseline;
-  gap: 8px;
+  align-items: center;
   background: #d4351c;
   color: #fff;
   font-weight: 600;
-  font-size: 14px;
-  padding: 8px 12px;
+  font-size: 13px;
+  padding: 6px 10px;
   text-decoration: none;
   border-radius: 999px;
-  line-height: 1.2;
-  transition: transform 0.2s var(--ease), background-color 0.2s var(--ease);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  transition: background-color 0.2s var(--ease);
 }
 .helpline:hover { background: #b91c1c; }
-.helpline small { font-weight: 500; font-size: 11px; opacity: 0.9; }
 
 .skip-link {
   position: absolute;
@@ -329,14 +367,40 @@ h1, h2, h3, h4 {
 }
 .notice-urgent { border-color: color-mix(in srgb, var(--danger) 35%, var(--line)); }
 
+.intake-home { max-width: 36rem; }
+.intake-home h1 { font-size: clamp(1.75rem, 5vw, 2.5rem); }
+.lede {
+  margin-top: 0.6rem;
+  color: var(--muted);
+  font-size: 1.05rem;
+}
+.alt-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.1rem;
+  color: var(--subtle);
+}
+.demo-label {
+  margin: 1.75rem 0 0.6rem;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--subtle);
+}
 .dropzone {
   border: 1px dashed var(--line-strong);
   border-radius: var(--radius);
-  padding: 2.5rem 1.25rem;
+  padding: 1.5rem 1rem;
   text-align: center;
   cursor: pointer;
   background: var(--card);
+  margin-top: 1.25rem;
   transition: border-color 0.2s var(--ease), background-color 0.2s var(--ease);
+}
+@media (min-width: 768px) {
+  .dropzone { padding: 2.25rem 1.25rem; }
 }
 .dropzone:hover, .dropzone.is-over {
   border-color: var(--ink);
@@ -381,9 +445,13 @@ h1, h2, h3, h4 {
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: 14px;
-  padding: 1rem 1.1rem;
+  padding: 0.85rem 1rem;
   cursor: pointer;
   color: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   transition: border-color 0.2s var(--ease), transform 0.2s var(--ease);
 }
 .sample-list button:hover {
@@ -397,7 +465,7 @@ h1, h2, h3, h4 {
 .sample-list .meta {
   color: var(--muted);
   font-size: 13px;
-  margin-top: 4px;
+  margin-top: 0;
 }
 
 .section-rule {
@@ -426,33 +494,38 @@ h1, h2, h3, h4 {
 .badge-emergency { color: var(--danger); }
 .badge-success { color: var(--success); }
 
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
 .toast-bar {
   position: fixed;
-  top: 1rem;
+  top: max(12px, env(safe-area-inset-top, 0px));
   left: 50%;
   transform: translateX(-50%);
-  z-index: 50;
+  z-index: 80;
   background: var(--accent);
   color: var(--accent-fg);
   font-size: 14px;
-  padding: 10px 16px;
+  padding: 10px 18px;
   border-radius: 999px;
-  max-width: calc(100% - 2rem);
+  max-width: min(36rem, calc(100% - 2rem));
+  text-align: center;
+  pointer-events: none;
+  animation: toast-in 0.35s var(--ease) both;
 }
 
 .site-footer {
   margin-top: auto;
   border-top: 1px solid var(--line);
   color: var(--muted);
-  font-size: 14px;
+  font-size: 13px;
 }
-.mobile-helpline {
-  position: sticky;
-  bottom: 0;
-  z-index: 20;
-  background: var(--header-bg);
-  backdrop-filter: blur(12px);
-  border-top: 1px solid var(--line);
+.footer-row {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding-block: 1rem;
 }
 
 .login-screen {

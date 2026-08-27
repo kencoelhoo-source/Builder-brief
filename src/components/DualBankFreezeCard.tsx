@@ -7,12 +7,14 @@ interface DualBankFreezeCardProps {
   transaction: ExtractedTransaction;
   currentLang: Language;
   onDispatchComplete: (payload: CFCFRMSPayload) => void;
+  onBack: () => void;
 }
 
 export const DualBankFreezeCard: React.FC<DualBankFreezeCardProps> = ({
   transaction,
   currentLang,
   onDispatchComplete,
+  onBack,
 }) => {
   const [secondsLeft, setSecondsLeft] = useState(1724);
   const [isDispatching, setIsDispatching] = useState(false);
@@ -49,6 +51,11 @@ export const DualBankFreezeCard: React.FC<DualBankFreezeCardProps> = ({
 
   return (
     <div className="page-wrap page-stack max-w-3xl">
+      <p className="mb-6">
+        <button type="button" className="btn-link" onClick={onBack}>
+          {hi ? '← वापस' : '← Back'}
+        </button>
+      </p>
       <h1 className="text-3xl md:text-4xl font-bold">
         {hi ? 'फ्रीज नोटिस भेजें' : 'Send the freeze notice'}
       </h1>

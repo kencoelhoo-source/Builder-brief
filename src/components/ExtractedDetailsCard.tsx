@@ -144,7 +144,7 @@ export const ExtractedDetailsCard: React.FC<ExtractedDetailsCardProps> = ({
             {isEditing ? (hi ? 'सहेजें' : 'Save') : (hi ? 'बदलें' : 'Change details')}
           </button>
           <button type="button" onClick={onBackToIntake} className="btn-link self-center">
-            {hi ? 'रद्द करें' : 'Cancel'}
+            {hi ? '← वापस' : '← Back'}
           </button>
         </div>
       </form>

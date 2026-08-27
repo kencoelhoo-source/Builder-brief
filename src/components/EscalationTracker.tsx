@@ -6,6 +6,7 @@ interface EscalationTrackerProps {
   payload: Sec79Payload;
   currentLang: Language;
   onGeneratePetition: () => void;
+  onBack: () => void;
 }
 
 export const EscalationTracker: React.FC<EscalationTrackerProps> = ({
@@ -13,11 +14,17 @@ export const EscalationTracker: React.FC<EscalationTrackerProps> = ({
   payload,
   currentLang,
   onGeneratePetition,
+  onBack,
 }) => {
   const hi = currentLang === 'hi';
 
   return (
     <div className="page-wrap page-stack max-w-3xl">
+      <p className="mb-6">
+        <button type="button" className="btn-link" onClick={onBack}>
+          {hi ? '← वापस' : '← Back'}
+        </button>
+      </p>
       <p className="text-success font-bold">
         {hi ? 'नोटिस भेज दिया गया' : 'The notice has been sent'}
       </p>

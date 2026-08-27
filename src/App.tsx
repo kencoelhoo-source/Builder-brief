@@ -194,7 +194,7 @@ export const App: React.FC = () => {
       const extracted = await parseVoiceTranscription(transcript);
       setTransaction(extracted);
       saveDraftToStorage(extracted, null);
-      setCurrentStep('review');
+      goToStep('review', 'flow');
       triggerToast(currentLang === 'hi' ? 'आवाज़ से विवरण दर्ज हुआ' : 'Voice input processed');
     } catch (e) {
       console.error(e);
@@ -293,7 +293,7 @@ export const App: React.FC = () => {
   return (
     <div className="app-shell">
       {toastMessage && (
-        <div className="toast-bar animate-fadeIn" role="status">
+        <div className="toast-bar" role="status">
           {toastMessage}
         </div>
       )}

@@ -15,6 +15,19 @@ interface EmergencyIntakeProps {
 
 type Panel = 'home' | 'voice' | 'manual';
 
+const demoLabel = (persona: FraudPersona, hi: boolean) => {
+  if (persona.id === 'gpay-phishing') {
+    return { title: hi ? 'गूगल पे' : 'Google Pay', meta: '₹48,500' };
+  }
+  if (persona.id === 'instagram-fake') {
+    return { title: hi ? 'फर्जी इंस्टाग्राम' : 'Fake Instagram', meta: persona.platform || '' };
+  }
+  if (persona.id === 'digital-arrest') {
+    return { title: hi ? 'डिजिटल अरेस्ट' : 'Digital arrest', meta: '₹1,50,000' };
+  }
+  return { title: hi ? persona.nameHi : persona.name, meta: '' };
+};
+
 export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
   currentLang,
   onSelectPreset,
@@ -72,7 +85,7 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
   };
 
   return (
-    <div className="page-wrap page-stack">
+    <div className="page-wrap page-stack intake">
       {panel !== 'home' && (
         <p className="mb-6">
           <button type="button" className="btn-link" onClick={() => setPanel('home')}>
@@ -82,15 +95,12 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
       )}
 
       {panel === 'home' && (
-        <div className="panel-enter">
-          <p className="eyebrow">{hi ? 'गोल्डन ऑवर' : 'Golden hour'}</p>
-          <h1 className="text-4xl md:text-[2.75rem] font-semibold max-w-2xl">
-            {hi ? 'साइबर अपराध की रिपोर्ट करें' : 'Report a cybercrime'}
-          </h1>
-          <p className="mt-5 text-lg text-muted max-w-2xl">
+        <div className="panel-enter intake-home">
+          <h1>{hi ? 'रिपोर्ट करें' : 'Report'}</h1>
+          <p className="lede">
             {hi
-              ? 'भुगतान या फर्जी प्रोफाइल का स्क्रीनशॉट अपलोड करें। यह सेवा विवरण निकालकर बैंक फ्रीज या टेकडाउन नोटिस तैयार करती है। इसमें लगभग 2 मिनट लगते हैं।'
-              : 'Upload a screenshot of the payment or fake profile. This service extracts the details and prepares a bank freeze or a takedown notice. It takes about 2 minutes.'}
+              ? 'पेमेंट या फर्जी प्रोफाइल का स्क्रीनशॉट डालें।'
+              : 'Drop a payment or fake-profile screenshot.'}
           </p>
 
           <input
@@ -117,85 +127,48 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
                 fileInputRef.current?.click();
               }
             }}
-            className={`dropzone mt-8 max-w-2xl ${isDragOver ? 'is-over' : ''}`}
+            className={`dropzone ${isDragOver ? 'is-over' : ''}`}
           >
             {isLoading ? (
-              <p className="font-bold text-lg">{hi ? 'स्कैन हो रहा है…' : 'Reading the screenshot…'}</p>
+              <p className="font-semibold">{hi ? 'पढ़ा जा रहा है…' : 'Reading…'}</p>
             ) : (
               <>
-                <Upload size={22} strokeWidth={1.75} className="mx-auto mb-3 text-muted" />
-                <p className="font-bold text-lg">
-                  {hi ? 'स्क्रीनशॉट अपलोड करें' : 'Upload a screenshot'}
-                </p>
-                <p className="text-muted mt-1">
-                  {hi ? 'GPay, Paytm, SMS, Instagram या Facebook' : 'GPay, Paytm, SMS, Instagram or Facebook'}
-                </p>
+                <Upload size={20} strokeWidth={1.75} className="mx-auto mb-2 text-muted" />
+                <p className="font-semibold">{hi ? 'स्क्रीनशॉट अपलोड' : 'Upload screenshot'}</p>
               </>
             )}
           </div>
 
-          <div className="mt-8 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8">
-            <button
-              type="button"
-              className="btn-primary"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isLoading}
-            >
-              {hi ? 'अभी शुरू करें' : 'Start now'}
+          <div className="alt-row">
+            <button type="button" className="btn-link" onClick={() => setPanel('voice')}>
+              {hi ? 'आवाज़' : 'Voice'}
             </button>
-            <a href="tel:1930" className="btn-link">
-              {hi ? 'अभी हो रहा है? 1930 पर कॉल करें' : 'Happening now? Call 1930'}
-            </a>
+            <span aria-hidden="true">·</span>
+            <button type="button" className="btn-link" onClick={() => setPanel('manual')}>
+              {hi ? 'UTR' : 'UTR'}
+            </button>
           </div>
 
-          <p className="mt-8 text-muted">
-            {hi ? 'अन्य तरीके: ' : 'Other ways to report: '}
-            <button type="button" className="btn-link" onClick={() => setPanel('voice')}>
-              {hi ? 'बोलकर' : 'by voice'}
-            </button>
-            {' · '}
-            <button type="button" className="btn-link" onClick={() => setPanel('manual')}>
-              {hi ? 'UTR नंबर से' : 'with a UTR number'}
-            </button>
-          </p>
-
-          <hr className="section-rule" />
-
-          <h2 className="text-xl font-bold">
-            {hi ? 'समीक्षकों के लिए नमूना मामले' : 'Sample cases for reviewers'}
-          </h2>
-          <p className="text-muted mt-2 mb-2">
-            {hi
-              ? 'पूरी यात्रा देखने के लिए एक मामला चुनें। डेटा सिंथेटिक है।'
-              : 'Pick a case to walk the full journey. The data is synthetic.'}
-          </p>
+          <p className="demo-label">{hi ? 'डेमो' : 'Demo'}</p>
           <ul className="sample-list">
-            {MOCK_PERSONAS.map((persona: FraudPersona) => (
-              <li key={persona.id}>
-                <button type="button" onClick={() => onSelectPreset(persona.id)} disabled={isLoading}>
-                  <span className="title">{hi ? persona.nameHi : persona.name}</span>
-                  <span className="meta block">
-                    {persona.incidentType === 'FINANCIAL'
-                      ? `${persona.utr ?? ''} · ₹${(persona.amount ?? 0).toLocaleString('en-IN')}`
-                      : persona.platform}
-                  </span>
-                </button>
-              </li>
-            ))}
+            {MOCK_PERSONAS.map((persona: FraudPersona) => {
+              const label = demoLabel(persona, hi);
+              return (
+                <li key={persona.id}>
+                  <button type="button" onClick={() => onSelectPreset(persona.id)} disabled={isLoading}>
+                    <span className="title">{label.title}</span>
+                    {label.meta ? <span className="meta">{label.meta}</span> : null}
+                  </button>
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}
 
       {panel === 'voice' && (
-        <div className="panel-enter max-w-2xl">
-          <h1 className="text-3xl font-bold">
-            {hi ? 'बोलकर रिपोर्ट करें' : 'Report by voice'}
-          </h1>
-          <p className="mt-4 text-muted text-lg">
-            {hi
-              ? 'उदाहरण: “गूगल पे पर पैसे कट गए” या “इंस्टाग्राम पर फर्जी प्रोफाइल है”।'
-              : 'For example: “I lost money on GPay” or “Someone made a fake Instagram profile”.'}
-          </p>
+        <div className="panel-enter max-w-xl">
+          <h1>{hi ? 'आवाज़ से रिपोर्ट' : 'Report by voice'}</h1>
           <button
             type="button"
             onClick={handleToggleVoice}
@@ -204,32 +177,21 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
             <Mic size={18} strokeWidth={1.75} />
             {isListening
               ? hi
-                ? 'रोकें और जमा करें'
-                : 'Stop and submit'
+                ? 'रोकें'
+                : 'Stop'
               : hi
-              ? 'रिकॉर्डिंग शुरू करें'
-              : 'Start recording'}
+              ? 'रिकॉर्ड करें'
+              : 'Record'}
           </button>
-          {spokenText && (
-            <p className="mt-6 text-lg">{spokenText}</p>
-          )}
+          {spokenText && <p className="mt-6">{spokenText}</p>}
         </div>
       )}
 
       {panel === 'manual' && (
         <form onSubmit={handleManualFormSubmit} className="panel-enter max-w-xl">
-          <h1 className="text-3xl font-bold">
-            {hi ? 'UTR नंबर दर्ज करें' : 'Enter a UTR number'}
-          </h1>
-          <p className="mt-4 text-muted text-lg">
-            {hi
-              ? 'यदि आपके पास 12-अंकीय लेनदेन संदर्भ है।'
-              : 'Use this if you already have the 12-digit transaction reference.'}
-          </p>
+          <h1>{hi ? 'UTR दर्ज करें' : 'Enter UTR'}</h1>
           <div className="mt-8">
-            <label className="field-label" htmlFor="utr">
-              {hi ? 'UTR' : 'UTR'}
-            </label>
+            <label className="field-label" htmlFor="utr">UTR</label>
             <input
               id="utr"
               type="text"
@@ -241,24 +203,17 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
               autoComplete="off"
             />
           </div>
-          <div className="mt-6">
-            <label className="field-label" htmlFor="amount">
-              {hi ? 'राशि (₹)' : 'Amount (₹)'}
-            </label>
+          <div className="mt-5">
+            <label className="field-label" htmlFor="amount">{hi ? 'राशि' : 'Amount'}</label>
             <input
               id="amount"
               type="number"
               value={manualAmount}
               onChange={(e) => setManualAmount(e.target.value)}
               className="input-field"
-              placeholder="25000"
             />
           </div>
-          <button
-            type="submit"
-            disabled={manualUtr.length < 10}
-            className="btn-primary mt-8"
-          >
+          <button type="submit" disabled={manualUtr.length < 10} className="btn-primary mt-8">
             {hi ? 'जारी रखें' : 'Continue'}
           </button>
         </form>

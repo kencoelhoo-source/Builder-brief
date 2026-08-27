@@ -30,9 +30,9 @@ export const OfficialReceipt: React.FC<OfficialReceiptProps> = ({
     const opt = {
       margin:       15,
       filename:     `Official_Receipt_${payload.ackNumber}.pdf`,
-      image:        { type: 'jpeg', quality: 0.98 },
+      image:        { type: 'jpeg' as const, quality: 0.98 },
       html2canvas:  { scale: 2 },
-      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      jsPDF:        { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
     };
     
     html2pdf().set(opt).from(element).save();
@@ -60,77 +60,79 @@ export const OfficialReceipt: React.FC<OfficialReceiptProps> = ({
         </div>
 
         {/* Printable Official Slip Body */}
-        <div id="receipt-document-content" className="p-5 overflow-y-auto flex flex-col gap-4 bg-white print-content">
-          <div className="p-5 rounded-md border border-[#9ca3af] bg-white flex flex-col gap-4 text-[#111827]">
-            {/* Government Title Header */}
-            <div className="text-center border-b border-[#e5e7eb] pb-4">
-              <span className="badge badge-info text-[10px] uppercase tracking-wider mb-2 border-[#bfdbfe]">
-                Citizen Financial Cyber Fraud Reporting Management System (CFCFRMS)
-              </span>
-              <h2 className="text-base font-black text-[#111827] tracking-tight uppercase mt-1">
-                Emergency Intercept & Lien Acknowledgment
-              </h2>
-              <p className="text-[11px] text-[#4b5563] mt-1 font-semibold">
-                Indian Cyber Crime Coordination Centre (I4C) · Ministry of Home Affairs (MHA)
-              </p>
-            </div>
-
-            {/* Acknowledgment Grid */}
-            <div className="grid grid-cols-2 gap-3 text-xs">
-              <div className="bg-[#f9fafb] p-3 rounded border border-[#e5e7eb]">
-                <span className="text-[10px] text-[#6b7280] block font-bold mb-1">ACKNOWLEDGMENT NO.</span>
-                <span className="text-sm font-mono font-black text-[#1e3a8a]">{payload.ackNumber}</span>
-              </div>
-              <div className="bg-[#f9fafb] p-3 rounded border border-[#e5e7eb]">
-                <span className="text-[10px] text-[#6b7280] block font-bold mb-1">CFCFRMS TOKEN</span>
-                <span className="text-sm font-mono font-bold text-[#4b5563]">{payload.cfcfrmsToken}</span>
-              </div>
-              <div className="bg-[#f9fafb] p-3 rounded border border-[#e5e7eb]">
-                <span className="text-[10px] text-[#6b7280] block font-bold mb-1">TRANSACTION UTR</span>
-                <span className="text-xs font-mono font-bold text-[#111827]">{transaction.utr}</span>
-              </div>
-              <div className="bg-[#f9fafb] p-3 rounded border border-[#e5e7eb]">
-                <span className="text-[10px] text-[#6b7280] block font-bold mb-1">FRAUD AMOUNT</span>
-                <span className="text-xs font-mono font-black text-[#b91c1c]">{formatINR(transaction.amount)}</span>
-              </div>
-            </div>
-
-            {/* Transaction Flow Details */}
-            <div className="flex flex-col gap-3 text-xs border-t border-[#e5e7eb] pt-4">
-              <div className="flex justify-between items-center border-b border-[#f3f4f6] pb-2">
-                <span className="text-[#4b5563] font-semibold">Victim Account / Bank:</span>
-                <span className="font-bold text-[#111827]">{transaction.victimName} · {transaction.remitterBank}</span>
-              </div>
-              <div className="flex justify-between items-center border-b border-[#f3f4f6] pb-2">
-                <span className="text-[#4b5563] font-semibold">Suspect Beneficiary VPA:</span>
-                <span className="font-mono text-[#b91c1c] font-bold">{transaction.beneficiaryVpa}</span>
-              </div>
-              <div className="flex justify-between items-center border-b border-[#f3f4f6] pb-2">
-                <span className="text-[#4b5563] font-semibold">Target Bank Desk:</span>
-                <span className="font-bold text-[#111827]">{transaction.beneficiaryBank}</span>
-              </div>
-              <div className="flex justify-between items-center border-b border-[#f3f4f6] pb-2">
-                <span className="text-[#4b5563] font-semibold">Dispatched At:</span>
-                <span className="font-mono text-[#111827]">{formatDateTimeIN(payload.dispatchedAt)}</span>
-              </div>
-              <div className="flex justify-between items-center pt-1">
-                <span className="text-[#4b5563] font-semibold">Statutory Authority:</span>
-                <span className="text-[#15803d] font-bold">Sec 91 Cr.P.C / Sec 94 BNSS 2023</span>
-              </div>
-            </div>
-
-            {/* Confirmed Lien Seal */}
-            <div className="bg-[#f0fdf4] border-2 border-[#15803d] p-3 rounded mt-2 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-[#15803d] text-white flex items-center justify-center font-bold shrink-0">
-                <Lock size={20} />
-              </div>
-              <div className="text-xs">
-                <span className="font-black text-[#15803d] block uppercase tracking-wide">
-                  STATUTORY LIEN CONFIRMED & REGISTERED
+        <div className="p-5 overflow-y-auto bg-white print-content">
+          <div id="receipt-document-content" className="flex flex-col gap-4 bg-white">
+            <div className="p-5 rounded-md border border-[#9ca3af] bg-white flex flex-col gap-4 text-[#111827]">
+              {/* Government Title Header */}
+              <div className="text-center border-b border-[#e5e7eb] pb-4">
+                <span className="badge badge-info text-[10px] uppercase tracking-wider mb-2 border-[#bfdbfe]">
+                  Citizen Financial Cyber Fraud Reporting Management System (CFCFRMS)
                 </span>
-                <span className="text-[11px] text-[#15803d] font-medium block mt-1">
-                  Target account debit operations restricted. Funds are preserved for court restoration.
-                </span>
+                <h2 className="text-base font-black text-[#111827] tracking-tight uppercase mt-1">
+                  Emergency Intercept & Lien Acknowledgment
+                </h2>
+                <p className="text-[11px] text-[#4b5563] mt-1 font-semibold">
+                  Indian Cyber Crime Coordination Centre (I4C) · Ministry of Home Affairs (MHA)
+                </p>
+              </div>
+
+              {/* Acknowledgment Grid */}
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div className="bg-[#f9fafb] p-3 rounded border border-[#e5e7eb]">
+                  <span className="text-[10px] text-[#6b7280] block font-bold mb-1">ACKNOWLEDGMENT NO.</span>
+                  <span className="text-sm font-mono font-black text-[#1e3a8a]">{payload.ackNumber}</span>
+                </div>
+                <div className="bg-[#f9fafb] p-3 rounded border border-[#e5e7eb]">
+                  <span className="text-[10px] text-[#6b7280] block font-bold mb-1">CFCFRMS TOKEN</span>
+                  <span className="text-sm font-mono font-bold text-[#4b5563]">{payload.cfcfrmsToken}</span>
+                </div>
+                <div className="bg-[#f9fafb] p-3 rounded border border-[#e5e7eb]">
+                  <span className="text-[10px] text-[#6b7280] block font-bold mb-1">TRANSACTION UTR</span>
+                  <span className="text-xs font-mono font-bold text-[#111827]">{transaction.utr}</span>
+                </div>
+                <div className="bg-[#f9fafb] p-3 rounded border border-[#e5e7eb]">
+                  <span className="text-[10px] text-[#6b7280] block font-bold mb-1">FRAUD AMOUNT</span>
+                  <span className="text-xs font-mono font-black text-[#b91c1c]">{formatINR(transaction.amount)}</span>
+                </div>
+              </div>
+
+              {/* Transaction Flow Details */}
+              <div className="flex flex-col gap-3 text-xs border-t border-[#e5e7eb] pt-4">
+                <div className="flex justify-between items-center border-b border-[#f3f4f6] pb-2">
+                  <span className="text-[#4b5563] font-semibold">Victim Account / Bank:</span>
+                  <span className="font-bold text-[#111827]">{transaction.victimName} · {transaction.remitterBank}</span>
+                </div>
+                <div className="flex justify-between items-center border-b border-[#f3f4f6] pb-2">
+                  <span className="text-[#4b5563] font-semibold">Suspect Beneficiary VPA:</span>
+                  <span className="font-mono text-[#b91c1c] font-bold">{transaction.beneficiaryVpa}</span>
+                </div>
+                <div className="flex justify-between items-center border-b border-[#f3f4f6] pb-2">
+                  <span className="text-[#4b5563] font-semibold">Target Bank Desk:</span>
+                  <span className="font-bold text-[#111827]">{transaction.beneficiaryBank}</span>
+                </div>
+                <div className="flex justify-between items-center border-b border-[#f3f4f6] pb-2">
+                  <span className="text-[#4b5563] font-semibold">Dispatched At:</span>
+                  <span className="font-mono text-[#111827]">{formatDateTimeIN(payload.dispatchedAt)}</span>
+                </div>
+                <div className="flex justify-between items-center pt-1">
+                  <span className="text-[#4b5563] font-semibold">Statutory Authority:</span>
+                  <span className="text-[#15803d] font-bold">Sec 91 Cr.P.C / Sec 94 BNSS 2023</span>
+                </div>
+              </div>
+
+              {/* Confirmed Lien Seal */}
+              <div className="bg-[#f0fdf4] border-2 border-[#15803d] p-3 rounded mt-2 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-[#15803d] text-white flex items-center justify-center font-bold shrink-0">
+                  <Lock size={20} />
+                </div>
+                <div className="text-xs">
+                  <span className="font-black text-[#15803d] block uppercase tracking-wide">
+                    STATUTORY LIEN CONFIRMED & REGISTERED
+                  </span>
+                  <span className="text-[11px] text-[#15803d] font-medium block mt-1">
+                    Target account debit operations restricted. Funds are preserved for court restoration.
+                  </span>
+                </div>
               </div>
             </div>
           </div>

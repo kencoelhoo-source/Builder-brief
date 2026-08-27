@@ -6,12 +6,14 @@ interface TakedownDispatchCardProps {
   transaction: SocialIncident;
   currentLang: Language;
   onDispatchComplete: (payload: Sec79Payload) => void;
+  onBack: () => void;
 }
 
 export const TakedownDispatchCard: React.FC<TakedownDispatchCardProps> = ({
   transaction,
   currentLang,
   onDispatchComplete,
+  onBack,
 }) => {
   const [secondsLeft, setSecondsLeft] = useState(7200);
   const [isDispatching, setIsDispatching] = useState(false);
@@ -44,6 +46,11 @@ export const TakedownDispatchCard: React.FC<TakedownDispatchCardProps> = ({
 
   return (
     <div className="page-wrap page-stack max-w-3xl">
+      <p className="mb-6">
+        <button type="button" className="btn-link" onClick={onBack}>
+          {hi ? '← वापस' : '← Back'}
+        </button>
+      </p>
       <h1 className="text-3xl md:text-4xl font-bold">
         {hi ? 'टेकडाउन नोटिस भेजें' : 'Send the takedown notice'}
       </h1>

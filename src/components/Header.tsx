@@ -5,6 +5,8 @@ import { ThemeToggle } from './ThemeToggle';
 interface HeaderProps {
   currentLang: Language;
   currentStep: AppStep;
+  furthestStep: number;
+  onGoToStep: (step: AppStep) => void;
   onToggleLang: (lang: Language) => void;
   onOpenMockedHub: () => void;
   onResetToHome: () => void;
@@ -16,6 +18,8 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({
   currentLang,
   currentStep,
+  furthestStep,
+  onGoToStep,
   onToggleLang,
   onOpenMockedHub,
   onResetToHome,
@@ -39,24 +43,32 @@ export const Header: React.FC<HeaderProps> = ({
     <header className="site-header">
       <a href="#main" className="skip-link">Skip to content</a>
       <div className="page-wrap topbar">
-        <button
-          type="button"
-          onClick={onResetToHome}
-          className="topbar-brand"
-        >
+        <button type="button" onClick={onResetToHome} className="topbar-brand">
           Kavach Omni
         </button>
 
         <nav className="topbar-steps" aria-label="Progress">
-          {steps.map((step, idx) => (
-            <span
-              key={step.id}
-              className={idx === currentIndex ? 'is-current' : idx < currentIndex ? 'is-done' : ''}
-            >
-              {hi ? step.hi : step.en}
-            </span>
-          ))}
+          {steps.map((step, idx) => {
+            const locked = idx > furthestStep;
+            const cls =
+              idx === currentIndex ? 'is-current' : idx < currentIndex ? 'is-done' : '';
+            return (
+              <button
+                key={step.id}
+                type="button"
+                className={cls}
+                disabled={locked}
+                onClick={() => onGoToStep(step.id)}
+              >
+                {hi ? step.hi : step.en}
+              </button>
+            );
+          })}
         </nav>
+
+        <span className="topbar-now">
+          {hi ? steps[currentIndex]?.hi : steps[currentIndex]?.en}
+        </span>
 
         <div className="topbar-actions">
           <a href="tel:1930" className="helpline">1930</a>
@@ -69,11 +81,16 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
           </div>
           <ThemeToggle theme={theme} onToggle={onToggleTheme} />
-          <button type="button" onClick={onOpenMockedHub} className="topbar-text">
-            {hi ? 'मॉक' : 'Mocked'}
-          </button>
           <button type="button" onClick={onLogout} className="topbar-text">
-            {hi ? 'बाहर' : 'Sign out'}
+            {hi ? 'बाहर' : 'Out'}
+          </button>
+        </div>
+      </div>
+      <div className="meta-row">
+        <div className="page-wrap">
+          <span>{hi ? 'प्रोटोटाइप' : 'Prototype'}</span>
+          <button type="button" onClick={onOpenMockedHub}>
+            {hi ? 'क्या मॉक है' : "What's mocked"}
           </button>
         </div>
       </div>

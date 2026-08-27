@@ -8,6 +8,7 @@ interface FundTrailRadarProps {
   currentLang: Language;
   onOpenCourtPetition: () => void;
   onViewReceipt: () => void;
+  onBack: () => void;
 }
 
 export const FundTrailRadar: React.FC<FundTrailRadarProps> = ({
@@ -16,6 +17,7 @@ export const FundTrailRadar: React.FC<FundTrailRadarProps> = ({
   currentLang,
   onOpenCourtPetition,
   onViewReceipt,
+  onBack,
 }) => {
   const hi = currentLang === 'hi';
   const [, setActiveStep] = useState<number>(1);
@@ -81,6 +83,11 @@ export const FundTrailRadar: React.FC<FundTrailRadarProps> = ({
 
   return (
     <div className="page-wrap page-stack max-w-3xl">
+      <p className="mb-6">
+        <button type="button" className="btn-link" onClick={onBack}>
+          {hi ? '← वापस' : '← Back'}
+        </button>
+      </p>
       <p className="text-success font-bold">
         {hi ? 'आदेश लागू हो गया' : 'The order has been applied'}
       </p>
