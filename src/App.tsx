@@ -52,6 +52,8 @@ export const App: React.FC = () => {
   const [sec79Payload, setSec79Payload] = useState<Sec79Payload | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isToastLeaving, setIsToastLeaving] = useState<boolean>(false);
+  const toastTimerRef = React.useRef<{ hide?: number; clear?: number }>({});
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
 
   const [showPetitionModal, setShowPetitionModal] = useState<boolean>(false);
@@ -131,8 +133,19 @@ export const App: React.FC = () => {
   }, []);
 
   const triggerToast = (msg: string) => {
+    if (toastTimerRef.current.hide) window.clearTimeout(toastTimerRef.current.hide);
+    if (toastTimerRef.current.clear) window.clearTimeout(toastTimerRef.current.clear);
+
+    setIsToastLeaving(false);
     setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3000);
+
+    toastTimerRef.current.hide = window.setTimeout(() => {
+      setIsToastLeaving(true);
+      toastTimerRef.current.clear = window.setTimeout(() => {
+        setToastMessage(null);
+        setIsToastLeaving(false);
+      }, 280);
+    }, 2500);
   };
 
   const handleToggleLang = (lang: Language) => {
@@ -293,7 +306,7 @@ export const App: React.FC = () => {
   return (
     <div className="app-shell">
       {toastMessage && (
-        <div className="toast-bar" role="status">
+        <div className={`toast-bar ${isToastLeaving ? 'is-leaving' : ''}`} role="status">
           {toastMessage}
         </div>
       )}

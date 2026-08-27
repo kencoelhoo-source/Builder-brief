@@ -154,9 +154,10 @@ h1, h2, h3, h4 {
 .topbar {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
-  min-height: 56px;
-  padding-block: 0.55rem;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 52px;
+  padding-block: 0.45rem;
   flex-wrap: nowrap;
 }
 .topbar-brand {
@@ -170,11 +171,12 @@ h1, h2, h3, h4 {
   letter-spacing: -0.03em;
   color: var(--ink);
   white-space: nowrap;
+  flex-shrink: 0;
 }
 .topbar-steps {
   display: none;
   align-items: center;
-  gap: 0.2rem;
+  gap: 0.25rem;
   font-size: 13px;
   color: var(--subtle);
   flex: 1;
@@ -187,7 +189,7 @@ h1, h2, h3, h4 {
   background: none;
   border: 0;
   color: var(--subtle);
-  padding: 5px 11px;
+  padding: 5px 12px;
   border-radius: 999px;
   cursor: pointer;
   font: inherit;
@@ -202,32 +204,26 @@ h1, h2, h3, h4 {
   font-weight: 600;
 }
 .topbar-steps .is-current:hover:not(:disabled) { color: var(--accent-fg); }
-.topbar-now {
-  display: inline;
-  font-size: 12px;
-  color: var(--muted);
-  margin-left: 4px;
-}
-@media (min-width: 860px) {
-  .topbar-now { display: none; }
-}
+
 .topbar-actions {
   display: flex;
   align-items: center;
   gap: 0.55rem;
   margin-left: auto;
   flex-wrap: nowrap;
+  flex-shrink: 0;
   justify-content: flex-end;
 }
 
 .topbar-text {
   background: none;
   border: 0;
-  padding: 0;
+  padding: 2px 4px;
   cursor: pointer;
   color: var(--muted);
   font-size: 13px;
   font-weight: 500;
+  white-space: nowrap;
 }
 .topbar-text:hover { color: var(--ink); }
 .wordmark {
@@ -239,49 +235,45 @@ h1, h2, h3, h4 {
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 0.85rem;
-  flex-wrap: wrap;
+  gap: 0.75rem;
+  flex-wrap: nowrap;
   justify-content: flex-end;
 }
 .lang-switch {
   display: flex;
-  gap: 0.65rem;
-  font-size: 13px;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 12.5px;
+  white-space: nowrap;
 }
 .lang-switch button {
   background: none;
   border: 0;
   color: var(--muted);
   cursor: pointer;
-  padding: 0;
+  padding: 2px 3px;
   font-weight: 500;
 }
 .lang-switch button.is-active { color: var(--ink); font-weight: 600; }
-.theme-toggle {
-  background: none;
-  border: 0;
-  color: var(--muted);
-  cursor: pointer;
-  padding: 4px;
-  display: inline-flex;
-}
-.theme-toggle:hover { color: var(--ink); }
 
 .helpline {
   display: inline-flex;
   align-items: center;
+  gap: 4px;
   background: #d4351c;
   color: #fff;
   font-weight: 600;
-  font-size: 13px;
-  padding: 6px 10px;
+  font-size: 12px;
+  padding: 5px 9px;
   text-decoration: none;
   border-radius: 999px;
   line-height: 1;
-  letter-spacing: 0.02em;
-  transition: background-color 0.2s var(--ease);
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background-color 0.2s var(--ease), transform 0.15s var(--ease);
 }
-.helpline:hover { background: #b91c1c; }
+.helpline:hover { background: #b91c1c; transform: translateY(-1px); }
 
 .skip-link {
   position: absolute;
@@ -542,24 +534,45 @@ h1, h2, h3, h4 {
 .badge-success { color: var(--success); }
 
 @keyframes toast-in {
-  from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
-  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -18px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+}
+@keyframes toast-out {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -16px) scale(0.96);
+  }
 }
 .toast-bar {
   position: fixed;
-  top: max(12px, env(safe-area-inset-top, 0px));
+  top: max(16px, env(safe-area-inset-top, 0px));
   left: 50%;
   transform: translateX(-50%);
-  z-index: 80;
+  z-index: 90;
   background: var(--accent);
   color: var(--accent-fg);
-  font-size: 14px;
-  padding: 10px 18px;
+  font-size: 13.5px;
+  font-weight: 500;
+  padding: 8px 18px;
   border-radius: 999px;
-  max-width: min(36rem, calc(100% - 2rem));
+  max-width: min(34rem, calc(100% - 2rem));
   text-align: center;
   pointer-events: none;
-  animation: toast-in 0.35s var(--ease) both;
+  box-shadow: 0 10px 28px -10px rgba(0, 0, 0, 0.35);
+  animation: toast-in 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.toast-bar.is-leaving {
+  animation: toast-out 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .site-footer {

@@ -66,10 +66,6 @@ export const Header: React.FC<HeaderProps> = ({
           })}
         </nav>
 
-        <span className="topbar-now">
-          {hi ? steps[currentIndex]?.hi : steps[currentIndex]?.en}
-        </span>
-
         <div className="topbar-actions">
           <a
             href="tel:1930"
@@ -78,7 +74,8 @@ export const Header: React.FC<HeaderProps> = ({
             aria-label={hi ? "1930 राष्ट्रीय हेल्पलाइन" : "1930 National Helpline"}
           >
             <PhoneCall size={12} strokeWidth={2.25} />
-            <span>{hi ? 'हेल्पलाइन 1930' : '1930 Helpline'}</span>
+            <span>1930</span>
+            <span className="hidden sm:inline">{hi ? 'हेल्पलाइन' : 'Helpline'}</span>
           </a>
           <div className="lang-switch">
             <button type="button" className={currentLang === 'en' ? 'is-active' : ''} onClick={() => onToggleLang('en')}>

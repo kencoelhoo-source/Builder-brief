@@ -99,8 +99,8 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
           <h1>{hi ? 'रिपोर्ट करें' : 'Report'}</h1>
           <p className="lede">
             {hi
-              ? 'पेमेंट या फर्जी प्रोफाइल का स्क्रीनशॉट डालें। पहले 60 मिनट (गोल्डन ऑवर) में रिपोर्ट करने से बैंक खाता तुरंत फ्रीज किया जा सकता है।'
-              : 'Drop a payment or fake-profile screenshot. Reporting during the first 60 minutes (Golden Hour) enables instant account freeze before cash is withdrawn.'}
+              ? 'पेमेंट या फर्जी प्रोफाइल का स्क्रीनशॉट डालें।'
+              : 'Drop a payment or fake-profile screenshot.'}
           </p>
 
           <input
@@ -134,7 +134,7 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
             ) : (
               <>
                 <Upload size={20} strokeWidth={1.75} className="mx-auto mb-2 text-muted" />
-                <p className="font-semibold">{hi ? 'स्क्रीनशॉट अपलोड' : 'Upload screenshot'}</p>
+                <p className="font-semibold">{hi ? 'स्क्रीनशॉट अपलोड करें' : 'Upload screenshot'}</p>
                 <p className="text-xs text-muted mt-1">{hi ? 'UPI रसीद, बैंक SMS, या संदिग्ध चैट' : 'UPI receipt, bank SMS, or suspect chat'}</p>
               </>
             )}
@@ -142,11 +142,11 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
 
           <div className="alt-row">
             <button type="button" className="btn-link" onClick={() => setPanel('voice')}>
-              {hi ? 'आवाज़ से बोलें' : 'Report by voice'}
+              {hi ? 'आवाज़' : 'Voice'}
             </button>
             <span aria-hidden="true">·</span>
             <button type="button" className="btn-link" onClick={() => setPanel('manual')}>
-              {hi ? 'UTR नंबर लिखें' : 'Enter UTR manually'}
+              {hi ? 'UTR' : 'UTR'}
             </button>
           </div>
 

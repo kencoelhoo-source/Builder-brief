@@ -16,11 +16,11 @@ export const SiteFooter: React.FC<SiteFooterProps> = ({
 
   return (
     <footer className="site-footer no-print border-t border-line mt-12 bg-canvas">
-      <div className="page-wrap py-6 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted">
-        <div className="text-center md:text-left">
-           <strong className="text-ink">{hi ? 'प्रोटोटाइप' : 'Prototype'}</strong> — {hi ? 'सिमुलेटेड · आधिकारिक सरकारी वेबसाइट नहीं' : 'Simulated · Not an official government website'}
+      <div className="page-wrap py-6 flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-3.5 text-xs text-muted">
+        <div className="text-left leading-relaxed">
+          <strong className="text-ink">{hi ? 'प्रोटोटाइप' : 'Prototype'}</strong> — {hi ? 'सिमुलेटेड · आधिकारिक सरकारी वेबसाइट नहीं' : 'Simulated · Not an official government website'}
         </div>
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-5 mt-1 sm:mt-0">
           <button type="button" onClick={onResetToHome} className="btn-link">
             {hi ? 'नई रिपोर्ट' : 'New report'}
           </button>
