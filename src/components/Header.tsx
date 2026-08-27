@@ -8,7 +8,6 @@ interface HeaderProps {
   furthestStep: number;
   onGoToStep: (step: AppStep) => void;
   onToggleLang: (lang: Language) => void;
-  onOpenMockedHub: () => void;
   onResetToHome: () => void;
   theme: 'light' | 'dark';
   onToggleTheme: () => void;
@@ -21,7 +20,6 @@ export const Header: React.FC<HeaderProps> = ({
   furthestStep,
   onGoToStep,
   onToggleLang,
-  onOpenMockedHub,
   onResetToHome,
   theme,
   onToggleTheme,
@@ -83,14 +81,6 @@ export const Header: React.FC<HeaderProps> = ({
           <ThemeToggle theme={theme} onToggle={onToggleTheme} />
           <button type="button" onClick={onLogout} className="topbar-text">
             {hi ? 'बाहर' : 'Out'}
-          </button>
-        </div>
-      </div>
-      <div className="meta-row">
-        <div className="page-wrap">
-          <span>{hi ? 'प्रोटोटाइप' : 'Prototype'}</span>
-          <button type="button" onClick={onOpenMockedHub}>
-            {hi ? 'क्या मॉक है' : "What's mocked"}
           </button>
         </div>
       </div>

@@ -302,7 +302,6 @@ export const App: React.FC = () => {
         currentLang={currentLang}
         currentStep={currentStep}
         onToggleLang={handleToggleLang}
-        onOpenMockedHub={() => setShowMockedHub(true)}
         onResetToHome={handleResetToHome}
         theme={theme}
         onToggleTheme={() => setTheme((t) => (t === 'light' ? 'dark' : 'light'))}
