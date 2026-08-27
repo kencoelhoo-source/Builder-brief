@@ -123,14 +123,15 @@ export const MyApplicationsTab: React.FC<MyApplicationsTabProps> = ({
             : 'If response is unverified within statutory SLA windows, the system automatically routes the dossier upwards:'}
         </p>
 
-        <div className="mt-6 relative space-y-4">
-          {/* Continuous Ultra-Thin Animated Connecting Line */}
-          <div className="absolute left-[13px] sm:left-[15px] top-8 bottom-8 anim-beam-thin z-0" />
-
+        <div className="mt-6 space-y-4">
           {/* Level 1: Immediate Nodal Dispatch */}
-          <div className="relative flex items-center gap-3.5 sm:gap-4 z-10">
-            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#15803d] text-white flex items-center justify-center text-xs font-bold font-mono leading-none ring-4 ring-card select-none shadow-sm flex-shrink-0">
-              1
+          <div className="relative flex items-center gap-3.5 sm:gap-4">
+            <div className="relative flex items-center justify-center flex-shrink-0 w-7 sm:w-8 self-stretch">
+              {/* Bottom connector to Step 2 */}
+              <div className="absolute top-1/2 bottom-0 left-1/2 -translate-x-1/2 w-[1.5px] anim-beam-thin" />
+              <div className="relative z-10 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#15803d] text-white flex items-center justify-center text-xs font-bold font-mono leading-none ring-4 ring-card select-none shadow-sm">
+                1
+              </div>
             </div>
             <div className="flex-1 p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/5 min-w-0">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
@@ -153,9 +154,15 @@ export const MyApplicationsTab: React.FC<MyApplicationsTabProps> = ({
           </div>
 
           {/* Level 2: CISO & Senior Risk Desk */}
-          <div className="relative flex items-center gap-3.5 sm:gap-4 z-10">
-            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#b45309] text-white flex items-center justify-center text-xs font-bold font-mono leading-none ring-4 ring-card select-none shadow-sm flex-shrink-0">
-              2
+          <div className="relative flex items-center gap-3.5 sm:gap-4">
+            <div className="relative flex items-center justify-center flex-shrink-0 w-7 sm:w-8 self-stretch">
+              {/* Top connector from Step 1 */}
+              <div className="absolute top-0 bottom-1/2 left-1/2 -translate-x-1/2 w-[1.5px] anim-beam-thin" />
+              {/* Bottom connector to Step 3 */}
+              <div className="absolute top-1/2 bottom-0 left-1/2 -translate-x-1/2 w-[1.5px] anim-beam-thin" />
+              <div className="relative z-10 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#b45309] text-white flex items-center justify-center text-xs font-bold font-mono leading-none ring-4 ring-card select-none shadow-sm">
+                2
+              </div>
             </div>
             <div className="flex-1 p-4 rounded-xl border border-line bg-soft/50 min-w-0 hover:border-amber-500/40 transition-colors">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
@@ -178,9 +185,15 @@ export const MyApplicationsTab: React.FC<MyApplicationsTabProps> = ({
           </div>
 
           {/* Level 3: RBI Ombudsman & Cyber SP */}
-          <div className="relative flex items-center gap-3.5 sm:gap-4 z-10">
-            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#334155] text-white flex items-center justify-center text-xs font-bold font-mono leading-none ring-4 ring-card select-none shadow-sm flex-shrink-0">
-              3
+          <div className="relative flex items-center gap-3.5 sm:gap-4">
+            <div className="relative flex items-center justify-center flex-shrink-0 w-7 sm:w-8 self-stretch">
+              {/* Top connector from Step 2 */}
+              <div className="absolute top-0 bottom-1/2 left-1/2 -translate-x-1/2 w-[1.5px] anim-beam-thin" />
+              {/* Bottom connector to Step 4 */}
+              <div className="absolute top-1/2 bottom-0 left-1/2 -translate-x-1/2 w-[1.5px] anim-beam-thin" />
+              <div className="relative z-10 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#334155] text-white flex items-center justify-center text-xs font-bold font-mono leading-none ring-4 ring-card select-none shadow-sm">
+                3
+              </div>
             </div>
             <div className="flex-1 p-4 rounded-xl border border-line bg-soft/50 min-w-0 hover:border-slate-500/40 transition-colors">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
@@ -203,9 +216,13 @@ export const MyApplicationsTab: React.FC<MyApplicationsTabProps> = ({
           </div>
 
           {/* Level 4: Magistrate Court */}
-          <div className="relative flex items-center gap-3.5 sm:gap-4 z-10">
-            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#0f172a] dark:bg-white dark:text-ink text-white flex items-center justify-center text-xs font-bold font-mono leading-none ring-4 ring-card select-none shadow-sm flex-shrink-0">
-              4
+          <div className="relative flex items-center gap-3.5 sm:gap-4">
+            <div className="relative flex items-center justify-center flex-shrink-0 w-7 sm:w-8 self-stretch">
+              {/* Top connector from Step 3 */}
+              <div className="absolute top-0 bottom-1/2 left-1/2 -translate-x-1/2 w-[1.5px] anim-beam-thin" />
+              <div className="relative z-10 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#0f172a] dark:bg-white dark:text-ink text-white flex items-center justify-center text-xs font-bold font-mono leading-none ring-4 ring-card select-none shadow-sm">
+                4
+              </div>
             </div>
             <div className="flex-1 p-4 rounded-xl border border-line bg-soft/50 min-w-0">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
