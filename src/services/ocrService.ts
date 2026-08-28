@@ -1,4 +1,3 @@
-import Tesseract from 'tesseract.js';
 import type { CyberIncident, SocialIncident, FraudCategory } from '../types';
 import { MOCK_PERSONAS } from '../data/mockPersonas';
 
@@ -22,7 +21,7 @@ const BANK_HINTS: { match: RegExp; name: string }[] = [
 
 const VPA_RE = /\b[a-zA-Z0-9._-]{3,}@(?:oksbi|okhdfcbank|okaxis|okicici|ybl|ibl|axl|paytm|upi|apl|okbizaxis|waaxis|okkotak)\b/i;
 const GENERIC_VPA_RE = /\b[a-zA-Z0-9._-]{3,}@[a-zA-Z]{2,18}\b/;
-const UTR_LABELED_RE = /(?:utr|rrn|ref(?:erence)?(?:\s*(?:no|id|number))?|txn(?:\s*id)?|transaction(?:\s*id)?)\s*[:#.\-]*\s*([0-9]{12})/i;
+const UTR_LABELED_RE = /(?:utr|rrn|ref(?:erence)?(?:\s*(?:no|id|number))?|txn(?:\s*id)?|transaction(?:\s*id)?)\s*[:#.-]*\s*([0-9]{12})/i;
 const UTR_ANY_RE = /\b([0-9]{12})\b/;
 const AMOUNT_RE = /(?:₹|rs\.?|inr)\s*([0-9]{1,3}(?:,[0-9]{2,3})+|[0-9]+)(?:\.[0-9]{1,2})?/i;
 const AMOUNT_BARE_RE = /\b([0-9]{1,3}(?:,[0-9]{3})+)(?:\.[0-9]{1,2})?\b/;
@@ -63,11 +62,13 @@ const personaToIncident = (id: string): CyberIncident | null => {
       fraudCategory: persona.category,
       fraudCategoryLabel: persona.categoryLabel,
       incidentSummary: persona.description,
-      victimName: 'Citizen (Demo User)',
-      victimMobile: '+91-98765-43210',
+      victimName: persona.profile.fullName,
+      victimMobile: persona.profile.mobile,
       confidenceScore: 92.5,
       extractedVia: 'VISION_OCR',
       timestamp: persona.timestamp,
+      personProfile: persona.profile,
+      casePerspective: persona.casePerspective,
     };
   }
   return {
@@ -82,21 +83,136 @@ const personaToIncident = (id: string): CyberIncident | null => {
     fraudCategory: persona.category,
     fraudCategoryLabel: persona.categoryLabel,
     incidentSummary: persona.description,
-    victimName: 'Citizen (Demo User)',
-    victimMobile: '+91-98765-43210',
+    victimName: persona.profile.fullName,
+    victimMobile: persona.profile.mobile,
     confidenceScore: 98.4,
     extractedVia: 'VISION_OCR',
+    personProfile: persona.profile,
+    casePerspective: persona.casePerspective,
   };
 };
 
-const readImageText = async (file: File): Promise<{ text: string; confidence: number }> => {
-  const { data } = await Tesseract.recognize(file, 'eng', {
-    logger: () => undefined,
+const ocrCache = new Map<string, { text: string; confidence: number }>();
+const MAX_OCR_EDGE = 1600;
+const OCR_TIMEOUT_MS = 28000;
+
+export class OcrReadError extends Error {
+  code: 'HEIC_UNSUPPORTED' | 'DECODE_FAILED' | 'OCR_TIMEOUT' | 'OCR_FAILED';
+  constructor(code: OcrReadError['code'], message: string) {
+    super(message);
+    this.name = 'OcrReadError';
+    this.code = code;
+  }
+}
+
+const isHeicLike = (file: File) => {
+  const type = (file.type || '').toLowerCase();
+  const name = file.name.toLowerCase();
+  return type.includes('heic') || type.includes('heif') || name.endsWith('.heic') || name.endsWith('.heif');
+};
+
+const withTimeout = <T,>(promise: Promise<T>, ms: number, code: OcrReadError['code']): Promise<T> =>
+  new Promise((resolve, reject) => {
+    const timer = window.setTimeout(() => reject(new OcrReadError(code, 'OCR timed out')), ms);
+    promise.then(
+      (value) => {
+        window.clearTimeout(timer);
+        resolve(value);
+      },
+      (err) => {
+        window.clearTimeout(timer);
+        reject(err);
+      }
+    );
   });
-  return {
-    text: (data.text || '').replace(/\u0000/g, '').trim(),
-    confidence: typeof data.confidence === 'number' ? data.confidence : 0,
-  };
+
+const loadImageElement = (src: string): Promise<HTMLImageElement> =>
+  new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error('decode'));
+    img.src = src;
+  });
+
+const rasterizeForOcr = async (file: File): Promise<Blob> => {
+  const objectUrl = URL.createObjectURL(file);
+  try {
+    let img: HTMLImageElement;
+    try {
+      img = await loadImageElement(objectUrl);
+    } catch {
+      throw new OcrReadError(
+        isHeicLike(file) ? 'HEIC_UNSUPPORTED' : 'DECODE_FAILED',
+        isHeicLike(file)
+          ? 'This device could not read a HEIC photo. Save or export as JPG or PNG.'
+          : 'Could not decode that image.'
+      );
+    }
+
+    const width = img.naturalWidth || img.width;
+    const height = img.naturalHeight || img.height;
+    if (!width || !height) {
+      throw new OcrReadError('DECODE_FAILED', 'Could not decode that image.');
+    }
+
+    const scale = Math.min(1, MAX_OCR_EDGE / Math.max(width, height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(width * scale));
+    canvas.height = Math.max(1, Math.round(height * scale));
+    const ctx = canvas.getContext('2d', { alpha: false });
+    if (!ctx) throw new OcrReadError('DECODE_FAILED', 'Could not prepare that image.');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    const blob = await new Promise<Blob | null>((resolve) => {
+      canvas.toBlob(resolve, 'image/jpeg', 0.85);
+    });
+    if (!blob) throw new OcrReadError('DECODE_FAILED', 'Could not prepare that image.');
+    return blob;
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+};
+
+const readImageText = async (file: File): Promise<{ text: string; confidence: number }> => {
+  const cacheKey = `${file.name}:${file.size}:${file.lastModified}`;
+  const cached = ocrCache.get(cacheKey);
+  if (cached) return cached;
+
+  const raster = await rasterizeForOcr(file);
+  const [{ createWorker }, workerAsset] = await Promise.all([
+    import('tesseract.js'),
+    import('tesseract.js/dist/worker.min.js?url'),
+  ]);
+  const worker = await withTimeout(
+    createWorker('eng', 1, {
+      logger: () => undefined,
+      workerPath: workerAsset.default,
+      workerBlobURL: false,
+    }),
+    OCR_TIMEOUT_MS,
+    'OCR_TIMEOUT'
+  );
+  try {
+    const { data } = await withTimeout(worker.recognize(raster), OCR_TIMEOUT_MS, 'OCR_TIMEOUT');
+    const result = {
+      text: (data.text || '').replace(/\u0000/g, '').trim(),
+      confidence: typeof data.confidence === 'number' ? data.confidence : 0,
+    };
+    if (ocrCache.size >= 20) ocrCache.delete(ocrCache.keys().next().value as string);
+    ocrCache.set(cacheKey, result);
+    return result;
+  } catch (err) {
+    if (err instanceof OcrReadError) throw err;
+    throw new OcrReadError('OCR_FAILED', 'Could not read that screenshot.');
+  } finally {
+    try {
+      await worker.terminate();
+    } catch {
+      /* ignore */
+    }
+  }
 };
 
 const classifyAndBuild = (text: string, confidence: number): CyberIncident => {

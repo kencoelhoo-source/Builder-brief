@@ -1,12 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Scale,
   X,
   Download,
 } from 'lucide-react';
 import type { SocialIncident, Sec79Payload, Language } from '../types';
-
-import html2pdf from 'html2pdf.js';
+import { downloadElementPdf } from '../utils/pdfExport';
 
 interface FIRDraftModalProps {
   transaction: SocialIncident;
@@ -21,39 +20,45 @@ export const FIRDraftModal: React.FC<FIRDraftModalProps> = ({
   currentLang,
   onClose,
 }) => {
-  const handlePrint = () => {
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handlePrint = async () => {
     const element = document.getElementById('fir-document-content');
-    if (!element) return;
-    
-    const opt = {
-      margin:       [10, 12, 10, 12] as [number, number, number, number],
-      filename:     `FIR_Draft_CyberCrime_${transaction.victimName.replace(/\s+/g, '_')}.pdf`,
-      image:        { type: 'jpeg' as const, quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true, logging: false, windowWidth: 794 },
-      jsPDF:        { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
-    };
-    
-    html2pdf().set(opt).from(element).save();
+    if (!element || isExporting) return;
+    setIsExporting(true);
+    try {
+      const safeName = (transaction.victimName || 'Citizen').replace(/\s+/g, '_');
+      await downloadElementPdf(element, `FIR_Draft_CyberCrime_${safeName}.pdf`);
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const currentDate = new Date().toLocaleDateString('en-IN', {
+    timeZone: 'Asia/Kolkata',
     day: '2-digit',
     month: 'long',
     year: 'numeric',
   });
+  const profile = transaction.personProfile;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto animate-fadeIn">
-      <div className="bg-card border border-line rounded-xl w-full max-w-3xl max-h-[94vh] flex flex-col p-0 shadow-2xl relative">
+    <div className="fir-modal fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto animate-fadeIn">
+      <div className="fir-modal-shell bg-card border border-line rounded-xl w-full max-w-3xl max-h-[94vh] flex flex-col p-0 shadow-2xl relative min-w-0">
         {/* Header Bar */}
-        <div className="flex items-center justify-between p-3.5 sm:p-4 border-b border-line bg-soft rounded-t-xl no-print">
-          <div className="flex items-center gap-2">
-            <Scale size={18} className="text-ink" />
-            <h3 className="text-sm font-bold text-ink">
-              {currentLang === 'hi'
-                ? 'प्रथम सूचना रिपोर्ट (FIR) ड्राफ्ट (Sec 154 CrPC / 173 BNSS)'
-                : 'Police FIR Complaint Draft (Sec 154 CrPC / 173 BNSS)'}
-            </h3>
+        <div className="flex items-start justify-between gap-3 p-3.5 sm:p-4 border-b border-line bg-soft rounded-t-xl no-print">
+          <div className="flex items-start gap-2 min-w-0">
+            <Scale size={18} className="text-ink shrink-0 mt-0.5" />
+            <div className="min-w-0">
+              <h3 className="text-sm font-bold text-ink leading-snug">
+                {currentLang === 'hi' ? 'FIR शिकायत ड्राफ्ट' : 'FIR complaint draft'}
+              </h3>
+              <p className="text-[11px] text-muted mt-0.5 leading-snug">
+                {currentLang === 'hi'
+                  ? 'Sec 154 CrPC / 173 BNSS · डेमो · दाखिल नहीं'
+                  : 'Sec 154 CrPC / 173 BNSS · demo · not filed'}
+              </p>
+            </div>
           </div>
           <button
             onClick={onClose}
@@ -65,13 +70,14 @@ export const FIRDraftModal: React.FC<FIRDraftModalProps> = ({
         </div>
 
         {/* Printable Legal Document Body */}
-        <div className="p-3 sm:p-6 overflow-y-auto bg-[#f8fafc] dark:bg-[#0f172a] print-content flex justify-center">
+        <div className="fir-modal-body p-3 sm:p-6 overflow-y-auto bg-[#f8fafc] dark:bg-[#0f172a] print-content flex justify-center">
           <div
             id="fir-document-content"
-            className="w-full max-w-[720px] bg-white text-[#111827] p-6 sm:p-8 rounded-lg shadow-sm border border-[#e2e8f0] text-[12.5px] leading-relaxed text-justify space-y-3"
+            className="fir-document w-full max-w-[720px] bg-white text-[#111827] p-5 sm:p-8 rounded-lg shadow-sm border border-[#e2e8f0] text-[12.5px] leading-relaxed text-left space-y-3"
             style={{ fontFamily: '"Times New Roman", Times, serif', boxSizing: 'border-box' }}
           >
             <div className="text-center pb-2 border-b border-[#cbd5e1]">
+              <p className="text-[10px] font-black text-[#b91c1c] uppercase mb-1">PROTOTYPE TEMPLATE — NOT A FILED FIR</p>
               <h1 className="text-[14px] font-bold uppercase tracking-wide">
                 FORMAL POLICE COMPLAINT / FIRST INFORMATION REPORT (FIR) - CYBER CRIME
               </h1>
@@ -89,7 +95,8 @@ export const FIRDraftModal: React.FC<FIRDraftModalProps> = ({
 
               <div className="bg-[#f8fafc] p-2.5 rounded border border-[#cbd5e1] space-y-1">
                 <p><strong>Complainant:</strong> {transaction.victimName} | <strong>Mobile:</strong> {transaction.victimMobile}</p>
-                <p><strong>Address:</strong> [Permanent / Residential Address of Complainant]</p>
+                <p><strong>Address:</strong> {profile ? `${profile.address}, ${profile.city}, ${profile.state} - ${profile.postalCode}` : '[Permanent / Residential Address of Complainant]'}</p>
+                <p><strong>Age / Gender:</strong> {profile ? `${profile.age} / ${profile.gender}` : '[Age / Gender]'} | <strong>Occupation:</strong> {profile?.occupation || '[Occupation]'}</p>
                 <p><strong>Subject:</strong> Formal criminal complaint regarding cyber impersonation, privacy violation, and defamation on <strong>{transaction.platform}</strong> (Sec 66C, 66D, 67 IT Act, 2000 &amp; BNS 2023).</p>
               </div>
             </div>
@@ -101,13 +108,13 @@ export const FIRDraftModal: React.FC<FIRDraftModalProps> = ({
 
             <ol className="list-decimal pl-5 space-y-1.5 text-xs text-[#1e293b]">
               <li>
-                That on <strong>{transaction.timestamp}</strong>, it came to my knowledge that an unknown accused created/circulated unauthorized and malicious material ({transaction.contentType.replace(/_/g, ' ')}) on <strong>{transaction.platform}</strong> targeting my personal identity.
+                That on <strong>{transaction.timestamp}</strong>, it came to my knowledge that an unknown accused created/circulated unauthorized and malicious material ({(transaction.contentType || 'CONTENT').replace(/_/g, ' ')}) on <strong>{transaction.platform || 'the platform'}</strong> targeting my personal identity.
               </li>
               <li>
                 That the offending URL / Profile handle is: <strong className="break-all">{transaction.suspectUrl}</strong>.
               </li>
               <li>
-                That an emergency statutory Notice under Section 79(3)(b) of the Information Technology Act, 2000 was transmitted to the Grievance Officer under Token: <strong>{payload.takedownToken}</strong> on {new Date(payload.dispatchedAt).toLocaleString('en-IN')}.
+                That this prototype generated a sample Section 79(3)(b) notice reference under Token: <strong>{payload.takedownToken}</strong> on {new Date(payload.dispatchedAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}. No notice was transmitted by this build.
               </li>
               <li>
                 That the acts committed attract cognizable offenses under Section 66C (Identity Theft), Section 66D (Cheating by Personation), Section 67 of the IT Act, 2000, and corresponding provisions of the Bharatiya Nyaya Sanhita, 2023.
@@ -143,15 +150,19 @@ export const FIRDraftModal: React.FC<FIRDraftModalProps> = ({
         {/* Footer Actions */}
         <div className="flex flex-col sm:flex-row items-center justify-between p-3.5 sm:p-4 border-t border-line bg-soft rounded-b-xl no-print gap-3">
           <span className="hidden sm:inline text-[11px] text-muted text-left">
-            Standard Format compliant with Section 154 Cr.P.C. &amp; Section 173 BNSS 2023
+            Prototype template for review; obtain legal advice before filing
           </span>
           <div className="btn-group w-full sm:w-auto sm:ml-auto">
             <button onClick={onClose} className="btn-secondary">
               {currentLang === 'hi' ? 'बंद करें' : 'Close'}
             </button>
-            <button onClick={handlePrint} className="btn-primary">
+            <button onClick={handlePrint} className="btn-primary" disabled={isExporting}>
               <Download size={15} />
-              <span>{currentLang === 'hi' ? 'FIR डाउनलोड' : 'Download FIR Draft (PDF)'}</span>
+              <span>
+                {isExporting
+                  ? currentLang === 'hi' ? 'तैयार हो रहा है…' : 'Preparing…'
+                  : currentLang === 'hi' ? 'FIR डाउनलोड' : 'Download FIR Draft (PDF)'}
+              </span>
             </button>
           </div>
         </div>

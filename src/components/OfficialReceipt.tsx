@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   ShieldCheck,
   Lock,
@@ -8,8 +8,7 @@ import {
 } from 'lucide-react';
 import type { ExtractedTransaction, CFCFRMSPayload, Language } from '../types';
 import { formatINR, formatDateTimeIN } from '../utils/formatters';
-
-import html2pdf from 'html2pdf.js';
+import { downloadElementPdf } from '../utils/pdfExport';
 
 interface OfficialReceiptProps {
   transaction: ExtractedTransaction;
@@ -24,19 +23,17 @@ export const OfficialReceipt: React.FC<OfficialReceiptProps> = ({
   currentLang,
   onClose,
 }) => {
-  const handlePrint = () => {
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handlePrint = async () => {
     const element = document.getElementById('receipt-document-content');
-    if (!element) return;
-    
-    const opt = {
-      margin:       [10, 10, 10, 10] as [number, number, number, number],
-      filename:     `NCRP_Acknowledgment_Slip_${payload.ackNumber}.pdf`,
-      image:        { type: 'jpeg' as const, quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true, logging: false, windowWidth: 794 },
-      jsPDF:        { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
-    };
-    
-    html2pdf().set(opt).from(element).save();
+    if (!element || isExporting) return;
+    setIsExporting(true);
+    try {
+      await downloadElementPdf(element, `Kavach_Demo_Receipt_${payload.ackNumber || 'DEMO'}.pdf`);
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   return (
@@ -48,8 +45,8 @@ export const OfficialReceipt: React.FC<OfficialReceiptProps> = ({
             <ShieldCheck size={18} className="text-[#15803d]" />
             <h3 className="text-sm font-bold text-ink">
               {currentLang === 'hi'
-                ? 'राष्ट्रीय साइबर अपराध पावती रसीद (NCRP Slip)'
-                : 'National Cyber Crime Reporting Portal (NCRP) Acknowledgment'}
+                ? 'कवच प्रोटोटाइप डेमो रसीद'
+                : 'Kavach Prototype Demo Receipt'}
             </h3>
           </div>
           <button
@@ -61,40 +58,40 @@ export const OfficialReceipt: React.FC<OfficialReceiptProps> = ({
           </button>
         </div>
 
-        {/* Printable Official Slip Body */}
+            {/* Printable prototype summary */}
         <div className="p-3 sm:p-6 overflow-y-auto bg-[#f8fafc] dark:bg-[#0f172a] print-content flex justify-center">
           <div
             id="receipt-document-content"
             className="w-full max-w-[680px] bg-white text-[#111827] p-5 sm:p-7 rounded-lg border-2 border-[#1e3a8a] shadow-sm flex flex-col gap-3.5"
             style={{ boxSizing: 'border-box' }}
           >
-            {/* Government Official Header */}
+            {/* Prototype header */}
             <div className="text-center border-b-2 border-[#1e3a8a] pb-3 relative">
               <div className="flex items-center justify-between">
                 <div className="text-left">
                   <p className="text-[10px] font-bold text-[#1e3a8a] uppercase tracking-wider">
-                    GOVERNMENT OF INDIA
+                    KAVACH PROTOTYPE
                   </p>
                   <p className="text-[9px] text-[#475569] font-semibold">
-                    MINISTRY OF HOME AFFAIRS (MHA)
+                    NOT AN OFFICIAL GOVERNMENT SERVICE
                   </p>
                 </div>
                 <div className="text-center px-2">
                   <p className="text-[12px] font-black text-[#1e3a8a] uppercase tracking-wide">
-                    INDIAN CYBER CRIME COORDINATION CENTRE (I4C)
+                    DEMONSTRATION DOCUMENT
                   </p>
                   <p className="text-[10px] font-bold text-[#0f172a] uppercase">
-                    CITIZEN FINANCIAL CYBER FRAUD REPORTING MANAGEMENT SYSTEM (CFCFRMS)
+                    NO LIVE BANK OR POLICE SYSTEM CONNECTION
                   </p>
                 </div>
                 <div className="text-right">
                   <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-[#f1f5f9] border border-[#cbd5e1] text-[#334155] font-bold">
-                    PORTAL: 1930
+                    DEMO ONLY
                   </span>
                 </div>
               </div>
               <p className="text-[13px] font-black text-[#111827] uppercase tracking-tight mt-2 bg-[#f8fafc] py-1 border-y border-[#e2e8f0]">
-                FORMAL EMERGENCY INTERCEPT &amp; STATUTORY LIEN ACKNOWLEDGMENT SLIP
+                PROTOTYPE EMERGENCY REPORT SUMMARY
               </p>
             </div>
 
@@ -158,26 +155,26 @@ export const OfficialReceipt: React.FC<OfficialReceiptProps> = ({
                 </div>
                 <div className="text-xs">
                   <span className="font-black text-[#15803d] block uppercase tracking-wide text-[11px]">
-                    STATUTORY LIEN REGISTERED &amp; DEBIT BLOCKED
+                    SIMULATED RESPONSE · NO LIVE LIEN
                   </span>
                   <span className="text-[10.5px] text-[#166534] font-medium block mt-0.5">
-                    Target account debit restricted. Funds preserved in banking layer pending Section 457 Cr.P.C. court restoration.
+                    This visual is a prototype response only. No account was frozen and no funds were preserved by this build.
                   </span>
                 </div>
               </div>
               <div className="hidden sm:flex flex-col items-center justify-center p-1.5 bg-white border border-[#bbf7d0] rounded shrink-0">
                 <QrCode size={28} className="text-[#15803d]" />
-                <span className="text-[8px] font-mono text-[#15803d] font-bold mt-0.5">I4C VERIFIED</span>
+                    <span className="text-[8px] font-mono text-[#15803d] font-bold mt-0.5">DEMO PREVIEW</span>
               </div>
             </div>
 
-            {/* Statutory Compliance Footer */}
+            {/* Prototype footer */}
             <div className="border-t border-[#cbd5e1] pt-2 flex flex-col sm:flex-row justify-between items-center text-[10px] text-[#64748b] gap-2">
               <p>
                 National Cyber Crime Helpline: <strong>1930</strong> (24x7 Citizen Assistance) | <strong>cybercrime.gov.in</strong>
               </p>
               <p className="font-mono text-[9px] text-right">
-                Digitally Authenticated NCRP Record · Sec 65B BSA 2023
+                Prototype-generated record · not digitally authenticated
               </p>
             </div>
           </div>
@@ -186,15 +183,19 @@ export const OfficialReceipt: React.FC<OfficialReceiptProps> = ({
         {/* Footer Actions */}
         <div className="flex flex-col sm:flex-row items-center justify-between p-3.5 sm:p-4 border-t border-line bg-soft rounded-b-xl no-print gap-3">
           <span className="hidden sm:inline text-[11px] text-muted text-left">
-            Official NCRP / I4C Registered Acknowledgment Copy
+            Prototype-generated demo copy; not an official acknowledgment
           </span>
           <div className="btn-group w-full sm:w-auto sm:ml-auto">
             <button onClick={onClose} className="btn-secondary">
               {currentLang === 'hi' ? 'बंद करें' : 'Close'}
             </button>
-            <button onClick={handlePrint} className="btn-primary">
+            <button onClick={handlePrint} className="btn-primary" disabled={isExporting}>
               <Download size={15} />
-              <span>{currentLang === 'hi' ? 'रसीद डाउनलोड' : 'Download Receipt (PDF)'}</span>
+              <span>
+                {isExporting
+                  ? currentLang === 'hi' ? 'तैयार हो रहा है…' : 'Preparing…'
+                  : currentLang === 'hi' ? 'रसीद डाउनलोड' : 'Download Receipt (PDF)'}
+              </span>
             </button>
           </div>
         </div>

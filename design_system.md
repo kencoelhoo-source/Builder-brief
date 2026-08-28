@@ -1,8 +1,8 @@
-# Kavach Omni - Design System & UI Guidelines
+# Kavach - Design System & UI Guidelines
 
 ## 1. Design Philosophy
 **"Minimalist Government"**
-The Kavach Omni interface is designed to emulate modern, trustworthy government digital infrastructure (like GOV.UK, USWDS, or the new India.gov.in standards). It intentionally avoids "startup aesthetics" like neon glows, heavy glassmorphism, or rounded bubbles.
+The Kavach interface is designed to emulate modern, trustworthy government digital infrastructure (like GOV.UK, USWDS, or the new India.gov.in standards). It intentionally avoids "startup aesthetics" like neon glows, heavy glassmorphism, or rounded bubbles.
 
 The primary goals are:
 - **High Contrast & Readability:** Especially for mobile users in sunlight.

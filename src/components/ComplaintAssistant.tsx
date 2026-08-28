@@ -12,13 +12,14 @@ const generateId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 7)
 
 export const ComplaintAssistant: React.FC<ComplaintAssistantProps> = ({ currentLang }) => {
   const isHindi = currentLang === 'hi';
+  const [welcomeId] = useState(generateId);
   const [isOpen, setIsOpen] = useState(false);
   const [inputText, setInputText] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>(() => [
     {
-      id: generateId(),
+      id: welcomeId,
       role: 'assistant',
       content: isHindi
         ? 'नमस्ते! मैं कवच साइबर सहायक हूँ। मुझे बताइए कि क्या हुआ (जैसे UPI फ्रॉड या फेक प्रोफाइल), मैं तुरंत कानूनी व शिकायत प्रक्रिया में आपकी मदद करूँगा।'
@@ -31,6 +32,12 @@ export const ComplaintAssistant: React.FC<ComplaintAssistantProps> = ({ currentL
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isSending]);
+
+  useEffect(() => () => speechService.stopListening(), []);
+
+  const welcomeMessage = isHindi
+    ? 'नमस्ते! मैं आपका कवच साइबर सहायक हूँ। मुझे बताइए कि क्या हुआ (जैसे UPI फ्रॉड, फर्जी प्रोफाइल या फ़िशिंग), और मैं आपको आपातकालीन कदम तथा कानूनी ड्राफ्ट के बारे में मार्गदर्शन दूँगा।'
+    : 'Hello! I am your Kavach Cyber Assistant. Tell me what happened (e.g. UPI fraud, impersonation, phishing), and I will guide you with emergency steps and legal drafts.';
 
   const quickPrompts = useMemo(
     () =>
@@ -65,20 +72,36 @@ export const ComplaintAssistant: React.FC<ComplaintAssistantProps> = ({ currentL
     setInputText('');
     setIsSending(true);
 
-    const botReply = await askChatAssistant(updated, currentLang);
-
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: generateId(),
-        role: 'assistant',
-        content: botReply,
-      },
-    ]);
-    setIsSending(false);
+    try {
+      const botReply = await askChatAssistant(updated, currentLang);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: generateId(),
+          role: 'assistant',
+          content: botReply,
+        },
+      ]);
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: generateId(),
+          role: 'assistant',
+          content: isHindi
+            ? 'कृपया आधिकारिक सहायता के लिए 1930 या cybercrime.gov.in का उपयोग करें।'
+            : 'Please use official help at 1930 or cybercrime.gov.in.',
+        },
+      ]);
+    } finally {
+      setIsSending(false);
+    }
   };
 
+  const voiceSupported = speechService.isSupported();
+
   const handleToggleVoice = () => {
+    if (!voiceSupported) return;
     if (isListening) {
       speechService.stopListening();
       setIsListening(false);
@@ -109,39 +132,57 @@ export const ComplaintAssistant: React.FC<ComplaintAssistantProps> = ({ currentL
   return (
     <div className={`complaint-assistant ${isOpen ? 'is-open' : ''}`}>
       {isOpen && (
-        <section className="assistant-panel" aria-label={isHindi ? 'शिकायत सहायक' : 'Complaint Assistant'}>
+        <section className="assistant-panel" role="dialog" aria-modal="true" aria-labelledby="assistant-title">
           <header className="assistant-header">
             <div className="assistant-title">
               <div className="assistant-avatar">
                 <Bot size={18} />
               </div>
               <div>
-                <h2>{isHindi ? 'कवच साइबर सहायक' : 'Kavach AI Assistant'}</h2>
+                <h2 id="assistant-title">{isHindi ? 'कवच साइबर सहायक' : 'Kavach AI Assistant'}</h2>
                 <p>{isHindi ? '24/7 आपातकालीन साइबर मार्गदर्शन' : '24/7 Citizen Cyber Guidance'}</p>
               </div>
             </div>
             <button
               type="button"
               className="assistant-close-btn"
-              onClick={() => setIsOpen(false)}
+              onClick={() => { speechService.stopListening(); setIsListening(false); setIsOpen(false); }}
               aria-label={isHindi ? 'सहायक बंद करें' : 'Close assistant'}
             >
               <X size={18} />
             </button>
           </header>
 
-          <div className="assistant-messages">
-            {messages.map((m) => (
-              <div key={m.id} className={`assistant-msg ${m.role}`}>
-                <div className="assistant-msg-icon">
-                  {m.role === 'assistant' ? <Bot size={14} /> : <User size={14} />}
+          <div className="assistant-messages" role="log" aria-live="polite" aria-relevant="additions">
+            {messages.map((m, index) => (
+              <React.Fragment key={m.id}>
+                <div className={`assistant-msg ${m.role}`}>
+                  <div className="assistant-msg-icon">
+                    {m.role === 'assistant' ? <Bot size={14} /> : <User size={14} />}
+                  </div>
+                  <div className="assistant-msg-bubble">
+                    {(m.id === welcomeId ? welcomeMessage : m.content).split('\n').map((line, i) => (
+                      <p key={i}>{line.replaceAll('**', '')}</p>
+                    ))}
+                  </div>
                 </div>
-                <div className="assistant-msg-bubble">
-                  {m.content.split('\n').map((line, i) => (
-                    <p key={i}>{line}</p>
-                  ))}
-                </div>
-              </div>
+                {index === 0 && m.role === 'assistant' && (
+                  <div className="assistant-quick-prompts" aria-label={isHindi ? 'त्वरित सवाल' : 'Quick questions'}>
+                    {quickPrompts.map((prompt) => (
+                      <button
+                        key={prompt}
+                        type="button"
+                        className="assistant-prompt-pill"
+                        onClick={() => void handleSendMessage(prompt)}
+                        disabled={isSending}
+                      >
+                        <Sparkles size={11} className="shrink-0" />
+                        <span>{prompt}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </React.Fragment>
             ))}
 
             {isSending && (
@@ -158,21 +199,6 @@ export const ComplaintAssistant: React.FC<ComplaintAssistantProps> = ({ currentL
             <div ref={messagesEndRef} />
           </div>
 
-          <div className="assistant-quick-prompts">
-            {quickPrompts.map((prompt) => (
-              <button
-                key={prompt}
-                type="button"
-                className="assistant-prompt-pill"
-                onClick={() => void handleSendMessage(prompt)}
-                disabled={isSending}
-              >
-                <Sparkles size={11} className="shrink-0" />
-                <span>{prompt}</span>
-              </button>
-            ))}
-          </div>
-
           <form
             className="assistant-input-form"
             onSubmit={(e) => {
@@ -184,6 +210,7 @@ export const ComplaintAssistant: React.FC<ComplaintAssistantProps> = ({ currentL
               type="text"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
+              maxLength={1000}
               placeholder={isHindi ? 'अपनी शिकायत या सवाल लिखें...' : 'Ask a question or describe the incident...'}
               aria-label={isHindi ? 'शिकायत संदेश' : 'Complaint message'}
             />
@@ -192,7 +219,12 @@ export const ComplaintAssistant: React.FC<ComplaintAssistantProps> = ({ currentL
                 type="button"
                 className={`assistant-action-btn ${isListening ? 'is-recording' : ''}`}
                 onClick={handleToggleVoice}
-                title={isHindi ? 'आवाज़ से बोलें' : 'Voice input'}
+                disabled={!voiceSupported}
+                title={
+                  voiceSupported
+                    ? isHindi ? 'आवाज़ से बोलें' : 'Voice input'
+                    : isHindi ? 'इस ब्राउज़र में आवाज़ उपलब्ध नहीं' : 'Voice not available in this browser'
+                }
                 aria-label={isHindi ? 'आवाज़ से बोलें' : 'Voice input'}
               >
                 {isListening ? <MicOff size={16} /> : <Mic size={16} />}

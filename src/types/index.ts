@@ -14,6 +14,20 @@ export type FraudCategory =
   | 'HACKING_COMPROMISE'
   | 'OTHER';
 
+export type CasePerspective = 'REPORTING_VICTIM' | 'WRONGLY_ACCUSED';
+
+export interface MockPersonProfile {
+  fullName: string;
+  mobile: string;
+  age: number;
+  gender: string;
+  address: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  occupation: string;
+}
+
 export interface RadarNode {
   id: string;
   label: string;
@@ -52,6 +66,8 @@ export interface FraudPersona {
   description: string;
   descriptionHi: string;
   screenshotTag: string;
+  profile: MockPersonProfile;
+  casePerspective: CasePerspective;
 }
 
 export interface BaseIncident {
@@ -64,6 +80,8 @@ export interface BaseIncident {
   victimMobile: string;
   confidenceScore: number;
   extractedVia: 'VISION_OCR' | 'VOICE_TRANSCRIBE' | 'MANUAL';
+  personProfile?: MockPersonProfile;
+  casePerspective?: CasePerspective;
 }
 
 export interface FinancialIncident extends BaseIncident {

@@ -1,6 +1,6 @@
-# Kavach Omni - Technical Integration & API Guide
+# Kavach - Technical Integration & API Guide
 
-This document outlines how the Kavach Omni frontend currently fakes its backend operations, and how it should be wired up to actual government/banking APIs in a production environment.
+This document outlines how the Kavach frontend currently simulates its backend operations, and how it should be wired up to actual government/banking APIs in a production environment.
 
 ## 1. The Simulated AI Parser (`src/services/ocrService.ts`)
 

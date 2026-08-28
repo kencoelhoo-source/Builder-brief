@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { Language } from '../types';
 import { ThemeToggle } from './ThemeToggle';
+import loginHero from '../assets/login-hero-v2.png';
 
 interface LoginScreenProps {
   currentLang: Language;
@@ -8,6 +9,7 @@ interface LoginScreenProps {
   theme: 'light' | 'dark';
   onToggleTheme: () => void;
   onLogin: (phone: string) => void;
+  onOpenQuiz: () => void;
 }
 
 const DEMO_PHONE = '9876543210';
@@ -19,6 +21,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   theme,
   onToggleTheme,
   onLogin,
+  onOpenQuiz,
 }) => {
   const hi = currentLang === 'hi';
   const [phone, setPhone] = useState(DEMO_PHONE);
@@ -48,10 +51,13 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
 
   return (
     <div className="login-screen page-enter">
-      <div className="login-card">
-        <div className="flex items-center justify-between mb-8">
-          <span className="wordmark">Kavach Omni</span>
-          <div className="header-actions">
+      <div className="login-shell">
+        <figure className="login-visual">
+          <img
+            src={loginHero}
+          alt={hi ? 'सुबह की रोशनी से भरा शांत घर का प्रवेश द्वार' : 'A calm home entryway filled with morning light'}
+          />
+          <div className="login-utility-controls" role="group" aria-label={hi ? 'भाषा और थीम' : 'Language and theme'}>
             <div className="lang-switch">
               <button
                 type="button"
@@ -70,16 +76,25 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
             </div>
             <ThemeToggle theme={theme} onToggle={onToggleTheme} />
           </div>
-        </div>
-
+          <figcaption className="login-visual-copy">
+            <p className="wordmark">Kavach</p>
+            <h2>{hi ? 'हम आपके साथ हैं।' : 'We’ve got you.'}</h2>
+            <p>
+              {hi
+                ? 'यहीं से शुरुआत करें। पैसे जाने पर पहले 1930 पर कॉल करें।'
+                : 'Start here. If money just left your account, call 1930 first.'}
+            </p>
+          </figcaption>
+        </figure>
+      <div className="login-card">
         <p className="eyebrow">{hi ? 'सिमुलेटेड लॉगिन' : 'Simulated sign-in'}</p>
         <h1 className="text-3xl font-semibold">
           {hi ? 'साइबर अपराध रिपोर्ट करें' : 'Report a cybercrime'}
         </h1>
         <p className="mt-3 text-muted">
           {hi
-            ? 'गोल्डन ऑवर में बैंक फ्रीज या टेकडाउन नोटिस तैयार करें। कोई वास्तविक OTP नहीं भेजा जाता।'
-            : 'Prepare a freeze or takedown in the golden hour. No real OTP is sent.'}
+            ? 'फ्रीज या टेकडाउन नोटिस का डेमो देखें। कोई असली OTP नहीं जाता।'
+            : 'Preview a freeze or takedown notice. No real OTP is sent.'}
         </p>
 
         {stage === 'phone' ? (
@@ -139,11 +154,16 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
           {hi ? 'समीक्षक के रूप में जारी रखें' : 'Continue as reviewer'}
         </button>
 
+        <button type="button" className="btn-secondary w-full mt-3" onClick={onOpenQuiz}>
+          {hi ? 'साइबर सुरक्षा क्विज़' : 'Learn with the cyber-safety quiz'}
+        </button>
+
         <p className="mt-6 text-xs text-subtle leading-relaxed">
           {hi
             ? 'यह भारत सरकार की आधिकारिक सेवा नहीं है। Build What Moves India हेतु नागरिक प्रोटोटाइप।'
             : 'Not an official government service. A citizen prototype for Build What Moves India.'}
         </p>
+      </div>
       </div>
     </div>
   );

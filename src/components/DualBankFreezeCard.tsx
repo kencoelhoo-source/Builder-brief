@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import type { ExtractedTransaction, Language, CFCFRMSPayload } from '../types';
 import { getBankNodalOfficer } from '../data/bankNodalDirectory';
 import { formatINR, formatTimeRemaining } from '../utils/formatters';
+import { getOrCreateSessionDeadline } from '../services/storageService';
 
 interface DualBankFreezeCardProps {
   transaction: ExtractedTransaction;
@@ -16,88 +17,108 @@ export const DualBankFreezeCard: React.FC<DualBankFreezeCardProps> = ({
   onDispatchComplete,
   onBack,
 }) => {
-  const [secondsLeft, setSecondsLeft] = useState(1724);
+  const [deadlineAt] = useState(() => getOrCreateSessionDeadline('freeze', 30 * 60));
+  const [now, setNow] = useState(() => Date.now());
   const [isDispatching, setIsDispatching] = useState(false);
   const [showJsonPayload, setShowJsonPayload] = useState(false);
+  const mountedRef = useRef(true);
   const hi = currentLang === 'hi';
   const remitterOfficer = getBankNodalOfficer(transaction.remitterBank);
   const beneficiaryOfficer = getBankNodalOfficer(transaction.beneficiaryBank);
+  const canDispatch = Boolean(remitterOfficer && beneficiaryOfficer && transaction.utr && transaction.amount > 0);
+  const secondsLeft = Math.max(0, Math.ceil((deadlineAt - now) / 1000));
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setSecondsLeft((prev) => (prev > 0 ? prev - 1 : 0));
+      setNow(Date.now());
     }, 1000);
     return () => clearInterval(timer);
   }, []);
 
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
   const handleExecuteDispatch = async () => {
+    if (!canDispatch) return;
     setIsDispatching(true);
-    await new Promise((resolve) => setTimeout(resolve, 1800));
-    onDispatchComplete({
-      ackNumber: `NCRP-2026-${Math.floor(1000000 + Math.random() * 9000000)}`,
-      cfcfrmsToken: `CFCFRMS-P0-${Date.now().toString().slice(-8)}`,
-      incidentTimestamp: transaction.timestamp,
-      dispatchedAt: new Date().toISOString(),
-      remitterBank: transaction.remitterBank,
-      beneficiaryBank: transaction.beneficiaryBank,
-      utr: transaction.utr,
-      amount: transaction.amount,
-      beneficiaryVpa: transaction.beneficiaryVpa,
-      legalSection: 'Section 91 Cr.P.C / Section 94 BNSS, 2023',
-      priorityScore: 'P0_CRITICAL_GOLDEN_HOUR',
-      status: 'LIEN_CONFIRMED',
-    });
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 1800));
+      if (!mountedRef.current) return;
+      onDispatchComplete({
+        ackNumber: `DEMO-2026-${Math.floor(1000000 + Math.random() * 9000000)}`,
+        cfcfrmsToken: `DEMO-CFCFRMS-${Date.now().toString().slice(-8)}`,
+        incidentTimestamp: transaction.timestamp,
+        dispatchedAt: new Date().toISOString(),
+        remitterBank: transaction.remitterBank,
+        beneficiaryBank: transaction.beneficiaryBank,
+        utr: transaction.utr,
+        amount: transaction.amount,
+        beneficiaryVpa: transaction.beneficiaryVpa,
+        legalSection: 'Section 91 Cr.P.C / Section 94 BNSS, 2023',
+        priorityScore: 'P0_CRITICAL_GOLDEN_HOUR',
+        status: 'LIEN_CONFIRMED',
+      });
+    } finally {
+      if (mountedRef.current) setIsDispatching(false);
+    }
   };
 
   return (
-    <div className="page-wrap page-stack max-w-3xl">
-      <p className="mb-6">
-        <button type="button" className="btn-link" onClick={onBack}>
-          ← {hi ? 'विवरण जाँच पर लौटें' : 'Back to check'}
-        </button>
+    <div className="page-wrap page-stack flow-page">
+      <p className="crumb">
+        <button type="button" onClick={onBack}>{hi ? 'जाँच' : 'Check'}</button>
+        <span className="crumb-sep" aria-hidden="true">/</span>
+        <span>{hi ? 'डेमो नोटिस' : 'Demo notice'}</span>
       </p>
-      <h1 className="text-3xl md:text-4xl font-bold">
-        {hi ? 'फ्रीज नोटिस भेजें' : 'Send the freeze notice'}
-      </h1>
-      <p className="mt-4 text-lg text-muted">
-        {hi
-          ? `${formatTimeRemaining(secondsLeft)} गोल्डन ऑवर समय शेष · ${formatINR(transaction.amount)} · धारा 91 CrPC`
-          : `${formatTimeRemaining(secondsLeft)} golden hour window remaining · ${formatINR(transaction.amount)} · Section 91 CrPC`}
-      </p>
-
-      <div className="mt-8 py-5 border-t border-line">
-        <p className="field-label">{hi ? '1. आपका बैंक' : '1. Your bank'}</p>
-        <p className="text-lg font-bold">{remitterOfficer.bankName}</p>
-        <p className="text-muted mt-1">{transaction.remitterAccount}</p>
-        <p className="mt-2">{remitterOfficer.nodalEmail}</p>
-        <p className="text-muted mt-1">
-          {hi
-            ? 'विवादित UTR दर्ज करें और चार्जबैक शुरू करें।'
-            : 'Register the disputed UTR and start a chargeback.'}
-        </p>
+      <div className="dossier-head">
+        <header>
+          <h1>{hi ? 'डेमो फ्रीज नोटिस।' : 'Demo freeze notice.'}</h1>
+          <p className="lede">
+            {hi
+              ? `${formatTimeRemaining(secondsLeft)} · ${formatINR(transaction.amount)} · यह बैंक को नहीं भेजा जाता।`
+              : `${formatTimeRemaining(secondsLeft)} · ${formatINR(transaction.amount)} · This is not sent to a bank.`}
+          </p>
+        </header>
       </div>
 
-      <div className="py-5 border-t border-line">
-        <p className="field-label">{hi ? '2. संदिग्ध का बैंक' : '2. Suspect bank'}</p>
-        <p className="text-lg font-bold">{beneficiaryOfficer.bankName}</p>
-        <p className="text-muted mt-1 break-all">{transaction.beneficiaryVpa}</p>
-        <p className="mt-2">{beneficiaryOfficer.nodalEmail}</p>
-        <p className="text-muted mt-1">
-          {hi
-            ? `${formatINR(transaction.amount)} पर तत्काल डेबिट फ्रीज और लियन।`
-            : `Place an immediate debit freeze and lien for ${formatINR(transaction.amount)}.`}
-        </p>
+      <div className="action-split">
+        <article className="action-panel">
+          <p className="field-label">{hi ? '1. आपका बैंक' : '1. Your bank'}</p>
+          <p className="detail-value">{remitterOfficer?.bankName || 'Verified bank contact unavailable'}</p>
+          <p className="detail-meta">{transaction.remitterAccount}</p>
+          <p className="detail-meta">{remitterOfficer?.nodalEmail || 'Select a verified bank before dispatch'}</p>
+          <p className="detail-meta">
+            {hi
+              ? 'बैंक से बात करते समय यह UTR बताएं। यह डेमो चार्जबैक शुरू नहीं करता।'
+              : 'Quote this UTR to your bank. This demo does not start a chargeback.'}
+          </p>
+        </article>
+        <article className="action-panel">
+          <p className="field-label">{hi ? '2. संदिग्ध का बैंक' : '2. Suspect bank'}</p>
+          <p className="detail-value">{beneficiaryOfficer?.bankName || 'Verified bank contact unavailable'}</p>
+          <p className="detail-meta">{transaction.beneficiaryVpa}</p>
+          <p className="detail-meta">{beneficiaryOfficer?.nodalEmail || 'Select a verified bank before dispatch'}</p>
+          <p className="detail-meta">
+            {hi
+              ? `${formatINR(transaction.amount)} के लिए बैंक अनुरोध कैसा दिख सकता है।`
+              : `What a bank request for ${formatINR(transaction.amount)} could contain.`}
+          </p>
+        </article>
       </div>
 
       <div className="p-5 sm:p-6 rounded-2xl border border-line bg-card mt-8 space-y-5">
         <div>
           <p className="font-semibold text-sm text-ink">
-            {hi ? 'कार्रवाई कैसे काम करती है?' : 'How this freeze action works:'}
+            {hi ? 'डेमो कार्रवाई कैसे काम करती है?' : 'How this demo action works:'}
           </p>
           <p className="mt-1.5 text-xs sm:text-sm text-muted leading-relaxed">
             {hi
-              ? 'धारा 91 CrPC / 94 BNSS के तहत दोनों बैंकों के नोडल अधिकारियों को आधिकारिक निर्देश भेजा जाता है ताकि संदिग्ध खाते से किसी भी प्रकार की निकासी (ATM / ट्रांसफर) तत्काल रोकी जा सके।'
-              : 'An official statutory directive under Section 91 Cr.P.C / Section 94 BNSS is transmitted simultaneously to the designated Nodal Officers of both banks to enforce an immediate debit freeze & lien before funds are cashed out.'}
+              ? 'यह प्रोटोटाइप दिखाता है कि धारा 91 CrPC / 94 BNSS आधारित अनुरोध दोनों बैंकों तक कैसे पहुँच सकता है। इस बिल्ड में कोई वास्तविक बैंक कॉल नहीं होती।'
+              : 'This prototype shows how a Section 91 Cr.P.C / Section 94 BNSS request could be routed to both banks. This build does not contact a live bank system.'}
           </p>
           <p className="mt-2 text-xs text-subtle">
             {hi ? 'प्रोटोटाइप नोट: बैंकिंग गेटवे प्रेषण सिमुलेटेड है।' : 'Prototype note: Banking gateway dispatch is simulated for demonstration.'}
@@ -108,7 +129,7 @@ export const DualBankFreezeCard: React.FC<DualBankFreezeCardProps> = ({
           <button
             type="button"
             onClick={handleExecuteDispatch}
-            disabled={isDispatching}
+            disabled={isDispatching || !canDispatch}
             className="btn-emergency"
           >
             {isDispatching
@@ -116,10 +137,10 @@ export const DualBankFreezeCard: React.FC<DualBankFreezeCardProps> = ({
                 ? 'भेजा जा रहा है…'
                 : 'Sending…'
               : hi
-              ? 'फ्रीज आदेश जारी करें'
-              : 'Issue freeze directive'}
+              ? 'डेमो फ्रीज नोटिस तैयार करें'
+              : 'Prepare demo freeze notice'}
           </button>
-          <button type="button" onClick={onBack} className="btn-secondary">
+          <button type="button" onClick={onBack} className="btn-secondary" disabled={isDispatching}>
             {hi ? 'पीछे' : 'Back'}
           </button>
         </div>
@@ -141,7 +162,7 @@ export const DualBankFreezeCard: React.FC<DualBankFreezeCardProps> = ({
           {JSON.stringify(
             {
               protocol: 'CFCFRMS_V2_INTERCEPT',
-              priority: 'P0_GOLDEN_HOUR',
+              priority: 'P0_DEMO',
               transaction: {
                 utr: transaction.utr,
                 amount_inr: transaction.amount,
@@ -150,7 +171,7 @@ export const DualBankFreezeCard: React.FC<DualBankFreezeCardProps> = ({
                 beneficiary_bank: transaction.beneficiaryBank,
               },
               statutory_act: 'Sec 91 CrPC / 94 BNSS 2023',
-              nodal_recipients: [remitterOfficer.nodalEmail, beneficiaryOfficer.nodalEmail],
+              nodal_recipients: [remitterOfficer?.nodalEmail, beneficiaryOfficer?.nodalEmail].filter(Boolean),
             },
             null,
             2

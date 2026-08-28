@@ -22,7 +22,7 @@ export const EscalationTracker: React.FC<EscalationTrackerProps> = ({
   const [viewTab, setViewTab] = useState<'status' | 'application'>('status');
 
   return (
-    <div className="page-wrap page-stack max-w-3xl">
+    <div className="page-wrap page-stack flow-page">
       <p className="mb-6">
         <button type="button" className="btn-link" onClick={onBack}>
           ← {hi ? 'कार्रवाई पर लौटें' : 'Back to act'}
@@ -67,45 +67,43 @@ export const EscalationTracker: React.FC<EscalationTrackerProps> = ({
 
       {viewTab === 'status' ? (
         <div className="anim-slide-left">
-          <p className="text-success font-bold text-sm">
-            {hi ? 'नोटिस भेज दिया गया' : 'The notice has been sent'}
-          </p>
-          <h1 className="text-3xl md:text-4xl font-bold mt-2">
-            {hi ? 'टेकडाउन की स्थिति' : 'Takedown status'}
-          </h1>
-          <p className="mt-3 text-base sm:text-lg text-muted">
-            {payload.takedownToken} · {transaction.platform}
-          </p>
+          <header className="page-head">
+            <p className="eyebrow">{hi ? 'डेमो नोटिस तैयार है' : 'Demo notice is ready'}</p>
+            <h1>{hi ? 'टेकडाउन की स्थिति' : 'Takedown status'}</h1>
+            <p className="lede">
+              {payload.takedownToken} · {transaction.platform}
+            </p>
+          </header>
 
-          <ol className="mt-8 border-t border-line">
-            <li className="py-4 sm:py-5 border-b border-line">
-              <p className="text-muted text-xs sm:text-sm">1. {hi ? 'पूर्ण' : 'Done'}</p>
-              <p className="font-bold text-base sm:text-lg mt-0.5 text-ink">
-                {hi ? 'Sec 79 नोटिस भेजा गया' : 'Section 79 notice dispatched'}
-              </p>
-              <p className="text-muted text-xs sm:text-sm mt-1">
-                {new Date(payload.dispatchedAt).toLocaleString('en-IN')}
-              </p>
+          <ol className="trail-list">
+            <li>
+              <div>
+                <p className="field-label">1. {hi ? 'पूर्ण' : 'Done'}</p>
+                <p className="detail-value">{hi ? 'Sec 79 नोटिस का डेमो' : 'Section 79 notice demo'}</p>
+                <p className="detail-meta">
+                  {new Date(payload.dispatchedAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+                </p>
+              </div>
             </li>
-            <li className="py-4 sm:py-5 border-b border-line">
-              <p className="text-muted text-xs sm:text-sm">2. {hi ? 'चल रहा है' : 'In progress'}</p>
-              <p className="font-bold text-base sm:text-lg mt-0.5 text-ink">
-                {hi ? 'प्लेटफ़ॉर्म समीक्षा' : 'Platform review'}
-              </p>
-              <p className="text-muted text-xs sm:text-sm mt-1">
-                {payload.grievanceOfficerEmail} · {hi ? '36 घंटे की अवधि सक्रिय' : '36-hour window is running'}
-              </p>
+            <li>
+              <div>
+                <p className="field-label">2. {hi ? 'चल रहा है' : 'In progress'}</p>
+                <p className="detail-value">{hi ? 'प्लेटफ़ॉर्म समीक्षा (डेमो)' : 'Platform review (demo)'}</p>
+                <p className="detail-meta">
+                  {payload.grievanceOfficerEmail} · {hi ? '36 घंटे की डेमो अवधि' : '36-hour demo window'}
+                </p>
+              </div>
             </li>
-            <li className="py-4 sm:py-5 border-b border-line">
-              <p className="text-muted text-xs sm:text-sm">3. {hi ? 'यदि आवश्यक हो' : 'If needed'}</p>
-              <p className="font-bold text-base sm:text-lg mt-0.5 text-ink">
-                {hi ? 'FIR और पुलिस जाँच' : 'FIR and police investigation'}
-              </p>
-              <p className="text-muted text-xs sm:text-sm mt-1">
-                {hi
-                  ? 'यदि प्लेटफ़ॉर्म कार्रवाई न करे तो स्थानीय साइबर सेल को भेजा जाएगा।'
-                  : 'If the platform does not comply, this goes to the local cyber cell.'}
-              </p>
+            <li>
+              <div>
+                <p className="field-label">3. {hi ? 'यदि आवश्यक हो' : 'If needed'}</p>
+                <p className="detail-value">{hi ? 'FIR और पुलिस जाँच' : 'FIR and police investigation'}</p>
+                <p className="detail-meta">
+                  {hi
+                    ? 'प्रोडक्शन में, अनुपालन न होने पर स्थानीय साइबर सेल को भेजा जा सकता है।'
+                    : 'In production, non-compliance could be routed to the local cyber cell.'}
+                </p>
+              </div>
             </li>
           </ol>
 
@@ -115,8 +113,8 @@ export const EscalationTracker: React.FC<EscalationTrackerProps> = ({
             </p>
             <p className="mt-1">
               {hi
-                ? 'यदि 36 घंटे के भीतर सामग्री नहीं हटाई जाती, तो धारा 154 CrPC / 173 BNSS के तहत तैयार FIR ड्राफ्ट डाउनलोड करके अपने स्थानीय साइबर सेल में शिकायत दर्ज कराएं।'
-                : 'If the platform fails to take down the content within 36 hours, download the pre-formatted FIR draft (compliant with Sec 154 CrPC / 173 BNSS) to submit at your nearest Cyber Police Station.'}
+                ? 'यदि यह वास्तविक घटना है, तो आधिकारिक प्लेटफॉर्म रिपोर्टिंग और स्थानीय साइबर सेल की प्रक्रिया अपनाएँ। यह ड्राफ्ट केवल प्रोटोटाइप है।'
+                : 'For a real incident, use the platform’s official reporting channel and your local cyber cell. This draft is only a prototype.'}
             </p>
           </div>
 
@@ -131,7 +129,7 @@ export const EscalationTracker: React.FC<EscalationTrackerProps> = ({
             payload={payload}
             currentLang={currentLang}
             onOpenCourtPetition={onGeneratePetition}
-            onViewReceipt={() => {}}
+            onViewReceipt={() => undefined}
           />
         </div>
       )}

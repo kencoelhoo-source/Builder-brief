@@ -1,7 +1,7 @@
-# Kavach Omni (Formerly Kavach 60) - Project Brain
+# Kavach (Formerly Kavach 60) - Project Brain
 
 ## 1. Project Overview
-**Kavach Omni** is a prototype web application designed as a next-generation "Emergency Cybercrime Intercept Portal" for Indian citizens. It acts as an intelligent frontend for the National Cybercrime Reporting Portal (NCRP). 
+**Kavach** is a prototype web application designed as a next-generation "Emergency Cybercrime Support Portal" for Indian citizens. It acts as an intelligent frontend for the National Cybercrime Reporting Portal (NCRP).
 
 Its primary goal is to minimize the friction of reporting cybercrimes during the critical "Golden Hour". It achieves this by using AI (simulated via OCR and Voice Transcription) to instantly parse evidence (screenshots, voice reports) and automatically generate statutory actions (Bank Freezes for financial crimes, and IT Act Sec 79 Takedowns for social media crimes).
 
@@ -13,7 +13,7 @@ The UI is built with a strictly formal, high-contrast **Government Light Theme**
 
 The application is built on React + Vite + Tailwind CSS. The state machine is housed entirely in `src/App.tsx`, which routes the user through a linear sequence of "Steps" based on the type of crime detected.
 
-### The Omni-Crime Split
+### The Financial and Social Crime Split
 When a user submits evidence (via file drop, voice, or a mock persona), the `ocrService.ts` classifies the incident into one of two branches:
 
 #### Branch A: Financial Incident (Money Loss)
@@ -41,7 +41,7 @@ When a user submits evidence (via file drop, voice, or a mock persona), the `ocr
 *   **`types/index.ts`**: The central TypeScript definitions. Crucial for understanding the data models (`CyberIncident`, `FinancialIncident`, `SocialIncident`, `CFCFRMSPayload`, `Sec79Payload`).
 
 ### `/src/components` (UI Elements)
-*   **`Header.tsx`**: The top navigation bar with the "NCRP Omni-Crime Portal" branding, 1930 hotline, and language toggle.
+*   **`Header.tsx`**: The top navigation bar with the "Kavach" branding, 1930 hotline, and language toggle.
 *   **`StepTracker.tsx`**: A simple breadcrumb/progress bar showing where the user is in the flow.
 *   **`EmergencyIntake.tsx`**: The landing page. Contains the drag-and-drop zone, voice recording button, manual UTR entry, and the list of mock simulation personas.
 *   **`MockedTransparencyHub.tsx`**: An informational modal explaining the architecture to stakeholders.

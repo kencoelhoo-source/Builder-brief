@@ -1,9 +1,25 @@
+export const formatUTR = (utr: string): string => {
+  const digits = (utr || '').replace(/\s+/g, '');
+  return digits.replace(/(\d{4})(?=\d)/g, '$1 ');
+};
+
+/** Bank name for a court caption — no doubled "Ltd." */
+export const courtBankTitle = (name: string): string => {
+  const raw = (name || 'the concerned bank').trim().replace(/\.+$/, '');
+  return raw.toUpperCase().replace(/\s+LTD\.?\s+LTD\.?/g, ' LTD.');
+};
+
 export const formatINR = (amount: number): string => {
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    maximumFractionDigits: 0,
-  }).format(amount);
+  const value = Number.isFinite(amount) ? amount : 0;
+  try {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0,
+    }).format(value);
+  } catch {
+    return `₹${value}`;
+  }
 };
 
 export const formatTimeRemaining = (seconds: number): string => {
@@ -15,12 +31,18 @@ export const formatTimeRemaining = (seconds: number): string => {
 
 export const formatDateTimeIN = (dateStr?: string): string => {
   const date = dateStr ? new Date(dateStr) : new Date();
-  return date.toLocaleString('en-IN', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true,
-  });
+  if (Number.isNaN(date.getTime())) return dateStr || '';
+  try {
+    return date.toLocaleString('en-IN', {
+      timeZone: 'Asia/Kolkata',
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    });
+  } catch {
+    return date.toISOString();
+  }
 };

@@ -11,17 +11,17 @@ const fallbackReply = (message: string, language: string) => {
       return [
         '🛡️ **सोशल मीडिया उत्पीड़न / फेक प्रोफाइल सहायता:**',
         '1. संदिग्ध प्रोफाइल लिंक (URL) व चैट का स्क्रीनशॉट बिना एडिट किए रखें।',
-        '2. Kavach Omni में suspect URL डालें और Sec 79 Takedown Notice तैयार करें।',
-        '3. 154 CrPC / BNSS के तहत औपचारिक पुलिस FIR ड्राफ्ट डाउनलोड करें।',
+        '2. Kavach में suspect URL डालकर एक प्रोटोटाइप ड्राफ्ट देखें।',
+        '3. वास्तविक शिकायत के लिए आधिकारिक साइबर सेल या cybercrime.gov.in का उपयोग करें।',
         '📞 राष्ट्रीय साइबर हेल्पलाइन: 1930',
       ].join('\n');
     }
     return [
-      '⚡ **वित्तीय धोखाधड़ी (Golden Hour) सहायता:**',
+      '⚡ **वित्तीय धोखाधड़ी सहायता:**',
       '1. Google Pay/PhonePe/Paytm से 12 अंकों का UTR नंबर निकालें।',
-      '2. Kavach Omni में UTR दर्ज करें — दोनों बैंकों को इंटर-बैंक फ्रीज अलर्ट जाएगा।',
+        '2. Kavach में UTR दर्ज करके डेमो फ्रीज ड्राफ्ट देखें; यह लाइव बैंक अलर्ट नहीं भेजता।',
       '3. तुरंत 1930 पर कॉल करके वित्तीय शिकायत दर्ज कराएं।',
-      '4. फंड फ्रीज होने के बाद Sec 457 CrPC कोर्ट याचिका जनरेट करें।',
+        '4. वास्तविक कार्रवाई के बाद ही कानूनी सलाह लेकर कोई कोर्ट ड्राफ्ट इस्तेमाल करें।',
       '📞 राष्ट्रीय साइबर हेल्पलाइन: 1930',
     ].join('\n');
   }
@@ -30,18 +30,18 @@ const fallbackReply = (message: string, language: string) => {
     return [
       '🛡️ **Social Media Incident / Harassment Guidance:**',
       '1. Take screenshots of abusive posts/messages and copy the exact profile URL.',
-      '2. Use Kavach Omni to dispatch a 36-hour Sec 79 Takedown Notice to the platform.',
-      '3. Generate a formal police FIR draft (Sec 154 CrPC / BNSS) from this portal.',
+      '2. Use Kavach to preview a Sec 79 takedown draft; this build does not contact the platform.',
+      '3. For a real complaint, use the platform’s official channel and your local cyber cell.',
       '📞 National Helpline: 1930',
     ].join('\n');
   }
 
   return [
-    '⚡ **Financial Cyber Fraud (Golden Hour) Guidance:**',
+    '⚡ **Financial cyber fraud guidance:**',
     '1. Locate the 12-digit UTR/Ref number from your payment receipt.',
-    '2. Enter the UTR in Kavach Omni to trigger statutory dual-bank freeze notices.',
+    '2. Enter the UTR in Kavach to preview a simulated dual-bank freeze notice.',
     '3. Dial 1930 immediately to register the official NCRP incident.',
-    '4. Generate the Sec 457 CrPC court refund petition once funds are secured.',
+    '4. Use any legal petition only after real bank confirmation and professional legal review.',
     '📞 National Helpline: 1930',
   ].join('\n');
 };
@@ -60,24 +60,40 @@ const chatAssistantApi = (): Plugin => ({
       try {
         let rawBody = '';
         for await (const chunk of req) {
-          rawBody += chunk;
+          rawBody += chunk.toString();
+          if (rawBody.length > 32_000) {
+            res.statusCode = 413;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ error: 'Request too large' }));
+            return;
+          }
         }
 
         const body = JSON.parse(rawBody || '{}') as {
-          language?: string;
-          messages?: { role: 'user' | 'assistant'; content: string }[];
+          language?: unknown;
+          messages?: unknown;
         };
 
-        const messages = Array.isArray(body.messages) ? body.messages.slice(-8) : [];
+        const messages = (Array.isArray(body.messages) ? body.messages : [])
+          .filter((message): message is { role: 'user' | 'assistant'; content: string } => {
+            if (!message || typeof message !== 'object') return false;
+            const candidate = message as { role?: unknown; content?: unknown };
+            return (candidate.role === 'user' || candidate.role === 'assistant') && typeof candidate.content === 'string';
+          })
+          .slice(-8)
+          .map((message) => ({ ...message, content: message.content.trim().slice(0, 1000) }));
         const latest = messages[messages.length - 1]?.content || '';
+        const language = body.language === 'hi' ? 'hi' : 'en';
         const apiKey = process.env.OPENAI_API_KEY;
 
         if (!apiKey) {
           res.setHeader('Content-Type', 'application/json');
-          res.end(JSON.stringify({ reply: fallbackReply(latest, body.language || 'en') }));
+          res.end(JSON.stringify({ reply: fallbackReply(latest, language) }));
           return;
         }
 
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 8000);
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
           headers: {
@@ -90,7 +106,7 @@ const chatAssistantApi = (): Plugin => ({
               {
                 role: 'system',
                 content:
-                  'You are Kavach Omni AI Cyber Crime Assistant. Provide concise, actionable, and legally sound advice for Indian citizens facing cybercrimes (UPI fraud, extortion, fake profile harassment). Reference National Cyber Helpline 1930, Bank Freezes (CFCFRMS), IT Act Sec 79 takedowns, and CrPC Sec 457 refund petitions. Reply in the user language (English or Hindi).',
+                  'You are Kavach’s prototype cyber-safety assistant. Provide concise general safety guidance in English or Hindi. Never claim that a report, bank freeze, takedown, FIR, or court filing was submitted. Clearly say when the user must use official channels such as 1930 or cybercrime.gov.in, and recommend legal or police verification for legal questions.',
               },
               ...messages.map((m) => ({
                 role: m.role,
@@ -100,7 +116,8 @@ const chatAssistantApi = (): Plugin => ({
             temperature: 0.3,
             max_tokens: 400,
           }),
-        });
+          signal: controller.signal,
+        }).finally(() => clearTimeout(timeout));
 
         if (response.ok) {
           const data = (await response.json()) as {
@@ -115,7 +132,7 @@ const chatAssistantApi = (): Plugin => ({
         }
 
         res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify({ reply: fallbackReply(latest, body.language || 'en') }));
+        res.end(JSON.stringify({ reply: fallbackReply(latest, language) }));
       } catch (err) {
         console.error('Chat assistant proxy error:', err);
         res.setHeader('Content-Type', 'application/json');

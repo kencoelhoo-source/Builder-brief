@@ -75,12 +75,12 @@ export const BANK_NODAL_DIRECTORY: Record<string, BankNodalOfficer> = {
   },
 };
 
-export const getBankNodalOfficer = (bankIdentifier: string): BankNodalOfficer => {
+export const getBankNodalOfficer = (bankIdentifier: string): BankNodalOfficer | null => {
   const upper = bankIdentifier.toUpperCase();
   for (const [key, officer] of Object.entries(BANK_NODAL_DIRECTORY)) {
     if (upper.includes(key) || officer.bankName.toUpperCase().includes(upper)) {
       return officer;
     }
   }
-  return BANK_NODAL_DIRECTORY.HDFC; // Fallback default
+  return null;
 };

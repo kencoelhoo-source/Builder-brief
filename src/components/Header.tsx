@@ -9,10 +9,13 @@ interface HeaderProps {
   furthestStep: number;
   onGoToStep: (step: AppStep) => void;
   onToggleLang: (lang: Language) => void;
-  onResetToHome: () => void;
+  onGoHome: () => void;
   theme: 'light' | 'dark';
   onToggleTheme: () => void;
   onLogout: () => void;
+  onTrack: () => void;
+  canTrack: boolean;
+  onHub: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -21,20 +24,24 @@ export const Header: React.FC<HeaderProps> = ({
   furthestStep,
   onGoToStep,
   onToggleLang,
-  onResetToHome,
+  onGoHome,
   theme,
   onToggleTheme,
   onLogout,
+  onTrack,
+  canTrack,
+  onHub,
 }) => {
   const hi = currentLang === 'hi';
   const steps: { id: AppStep; en: string; hi: string; hintEn: string; hintHi: string }[] = [
-    { id: 'intake', en: 'Report', hi: 'शिकायत', hintEn: '1. Report: Submit screenshot, voice or UTR', hintHi: '1. शिकायत: स्क्रीनशॉट, आवाज़ या UTR दर्ज करें' },
-    { id: 'review', en: 'Check', hi: 'जाँच', hintEn: '2. Check: Verify extracted incident data', hintHi: '2. जाँच: निकाले गए विवरण की पुष्टि करें' },
-    { id: 'freeze', en: 'Act', hi: 'कार्रवाई', hintEn: '3. Act: Send statutory freeze directive to banks', hintHi: '3. कार्रवाई: बैंकों को कानूनी फ्रीज नोटिस भेजें' },
-    { id: 'radar', en: 'Track', hi: 'स्थिति', hintEn: '4. Track: Monitor intercepted funds & court petition', hintHi: '4. स्थिति: रोकी गई राशि देखें व न्यायालय याचिका डाउनलोड करें' },
+    { id: 'intake', en: 'Report', hi: 'शिकायत', hintEn: '1. Report', hintHi: '1. शिकायत' },
+    { id: 'review', en: 'Check', hi: 'जाँच', hintEn: '2. Check', hintHi: '2. जाँच' },
+    { id: 'freeze', en: 'Preview', hi: 'डेमो', hintEn: '3. Preview', hintHi: '3. डेमो' },
+    { id: 'radar', en: 'Track', hi: 'ट्रैक', hintEn: '4. Track this complaint', hintHi: '4. यह शिकायत ट्रैक करें' },
   ];
-  const currentIndex =
-    currentStep === 'petition'
+  const currentIndex = onHub
+    ? -1
+    : currentStep === 'petition'
       ? steps.length - 1
       : steps.findIndex((s) => s.id === currentStep);
 
@@ -42,13 +49,13 @@ export const Header: React.FC<HeaderProps> = ({
     <header className="site-header">
       <a href="#main" className="skip-link">Skip to content</a>
       <div className="page-wrap topbar">
-        <button type="button" onClick={onResetToHome} className="topbar-brand">
-          Kavach Omni
+        <button type="button" onClick={onGoHome} className="topbar-brand">
+          Kavach
         </button>
 
         <nav className="topbar-steps" aria-label="Progress">
           {steps.map((step, idx) => {
-            const locked = idx > furthestStep;
+            const locked = step.id === 'radar' ? !canTrack && idx > furthestStep : idx > furthestStep;
             const cls =
               idx === currentIndex ? 'is-current' : idx < currentIndex ? 'is-done' : '';
             return (
@@ -56,9 +63,12 @@ export const Header: React.FC<HeaderProps> = ({
                 key={step.id}
                 type="button"
                 className={cls}
-                disabled={locked}
+                disabled={step.id === 'radar' ? !canTrack : locked}
                 title={hi ? step.hintHi : step.hintEn}
-                onClick={() => onGoToStep(step.id)}
+                onClick={() => {
+                  if (step.id === 'radar') onTrack();
+                  else onGoToStep(step.id);
+                }}
               >
                 {hi ? step.hi : step.en}
               </button>
@@ -70,8 +80,8 @@ export const Header: React.FC<HeaderProps> = ({
           <a
             href="tel:1930"
             className="helpline"
-            title={hi ? "1930 राष्ट्रीय साइबर वित्तीय धोखाधड़ी हेल्पलाइन (कॉल करने के लिए टैप करें)" : "1930 National Cyber Financial Fraud Emergency Helpline (Tap to call)"}
-            aria-label={hi ? "1930 राष्ट्रीय हेल्पलाइन" : "1930 National Helpline"}
+            title={hi ? '1930 पर कॉल करें' : 'Call 1930'}
+            aria-label={hi ? '1930 हेल्पलाइन' : '1930 Helpline'}
           >
             <PhoneCall size={12} strokeWidth={2.25} />
             <span>1930</span>
@@ -86,8 +96,8 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
           </div>
           <ThemeToggle theme={theme} onToggle={onToggleTheme} />
-          <button type="button" onClick={onLogout} className="topbar-text">
-            {hi ? 'बाहर' : 'Out'}
+          <button type="button" onClick={onLogout} className="topbar-logout">
+            {hi ? 'साइन आउट' : 'Sign out'}
           </button>
         </div>
       </div>

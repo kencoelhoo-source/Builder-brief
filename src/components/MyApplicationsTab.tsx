@@ -3,6 +3,7 @@ import { ShieldCheck, Copy, Check, Clock, FileText, Scale } from 'lucide-react';
 import type { CyberIncident, CFCFRMSPayload, Sec79Payload, Language } from '../types';
 import { formatINR } from '../utils/formatters';
 import { getBankNodalOfficer } from '../data/bankNodalDirectory';
+import { copyText } from '../utils/browser';
 
 interface MyApplicationsTabProps {
   transaction: CyberIncident;
@@ -21,15 +22,21 @@ export const MyApplicationsTab: React.FC<MyApplicationsTabProps> = ({
 }) => {
   const hi = currentLang === 'hi';
   const [copied, setCopied] = useState(false);
-  const [secondsRemaining, setSecondsRemaining] = useState<number>(23 * 3600 + 58 * 60 + 32);
+  const [now, setNow] = useState(() => Date.now());
 
   // Live countdown timer for Tier 2 Auto-Escalation SLA
   useEffect(() => {
     const timer = setInterval(() => {
-      setSecondsRemaining((prev) => (prev > 0 ? prev - 1 : 0));
+      setNow(Date.now());
     }, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  const dispatchedAt = Date.parse(payload.dispatchedAt);
+  const escalationDeadline = Number.isFinite(dispatchedAt)
+    ? dispatchedAt + 24 * 60 * 60 * 1000
+    : now;
+  const secondsRemaining = Math.max(0, Math.ceil((escalationDeadline - now) / 1000));
 
   const formatCountdown = (secs: number) => {
     const h = Math.floor(secs / 3600);
@@ -42,21 +49,23 @@ export const MyApplicationsTab: React.FC<MyApplicationsTabProps> = ({
   const cfcfrms = isFinancial ? (payload as CFCFRMSPayload) : null;
   const sec79 = !isFinancial ? (payload as Sec79Payload) : null;
 
-  const ackNumber = cfcfrms?.ackNumber || sec79?.takedownToken || 'NCRP-2026-LIVE';
+  const ackNumber = cfcfrms?.ackNumber || sec79?.ackNumber || 'DEMO-CASE';
   const officer = isFinancial
     ? getBankNodalOfficer(transaction.beneficiaryBank)
     : {
         bankName: transaction.platform,
-        nodalEmail: (sec79?.grievanceOfficerEmail) || 'grievance.officer@meta.com',
-        escalationEmail: 'legal.compliance@meta.com',
+        nodalEmail: (sec79?.grievanceOfficerEmail) || 'Verified platform contact unavailable',
+        escalationEmail: 'Production integration required',
         cyberCellHead: 'Designated Appellate Officer',
         jurisdiction: 'National Cyber Crime Command',
       };
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(ackNumber);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    void copyText(ackNumber).then((ok) => {
+      if (!ok) return;
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    });
   };
 
   return (
@@ -71,7 +80,7 @@ export const MyApplicationsTab: React.FC<MyApplicationsTabProps> = ({
                 <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-600" />
               </span>
               <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
-                {hi ? 'सक्रिय कानूनी मामला (Active Intercept)' : 'Active Case Intercept'}
+                {hi ? 'प्रोटोटाइप केस (सिमुलेशन)' : 'Prototype Case (Simulation)'}
               </span>
             </div>
 
@@ -95,14 +104,14 @@ export const MyApplicationsTab: React.FC<MyApplicationsTabProps> = ({
             </p>
           </div>
 
-          {/* Auto-Escalation Countdown Capsule */}
+          {/* Demo countdown derived from the dispatch timestamp */}
           <div className="p-3.5 sm:p-4 rounded-xl bg-soft border border-line flex items-center gap-3">
             <div className="w-9 h-9 rounded-full bg-amber-500/10 flex items-center justify-center flex-shrink-0 text-amber-600 dark:text-amber-400 anim-live-glow">
               <Clock size={18} />
             </div>
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-wider text-muted">
-                {hi ? 'स्तर 2 स्वतः एस्केलेशन टाइमर' : 'Level 2 Auto-Escalate In'}
+                 {hi ? 'डेमो स्तर 2 टाइमर' : 'Demo Level 2 Timer'}
               </p>
               <p className="text-base font-mono font-bold text-ink mt-0.5">
                 {formatCountdown(secondsRemaining)}
@@ -115,119 +124,116 @@ export const MyApplicationsTab: React.FC<MyApplicationsTabProps> = ({
       {/* Vertical Animated Escalation Timeline */}
       <div className="p-5 sm:p-6 rounded-2xl border border-line bg-card shadow-sm">
         <h3 className="text-base font-bold text-ink">
-          {hi ? 'स्वचालित कानूनी एस्केलेशन सीढ़ी' : 'Automated Statutory Escalation Ladder'}
+          {hi ? 'सिमुलेटेड एस्केलेशन सीढ़ी' : 'Simulated Escalation Ladder'}
         </h3>
         <p className="text-xs text-muted mt-1">
-          {hi
-            ? 'यदि बैंक/मध्यस्थ समय पर जवाब नहीं देते, तो शिकायत स्वचालित रूप से वरिष्ठ अधिकारियों को प्रेषित होगी:'
-            : 'If response is unverified within statutory SLA windows, the system automatically routes the dossier upwards:'}
+            {hi
+              ? 'यह प्रोटोटाइप दिखाता है कि समयबद्ध एस्केलेशन कैसे व्यवस्थित की जा सकती है:'
+              : 'This prototype shows how a time-bound escalation plan could be organized:'}
         </p>
 
-        <div className="mt-6">
+        <div className="mt-6 escalation-timeline">
           {/* Level 1: Immediate Nodal Dispatch */}
-          <div className="flex items-start gap-3.5 sm:gap-4 pb-4">
+          <div className="escalation-step flex items-start gap-3.5 sm:gap-4 pb-4">
             <div className="flex flex-col items-center self-stretch flex-shrink-0 w-7 sm:w-8">
-              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#15803d] text-white flex items-center justify-center text-xs font-bold font-mono leading-none ring-4 ring-card select-none shadow-sm z-10 mt-2">
+              <div className="escalation-node escalation-node-1 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-bold font-mono leading-none ring-4 ring-card select-none shadow-sm z-10 mt-2">
                 1
               </div>
-              <div className="flex-1 w-[1.5px] anim-beam-thin" />
             </div>
-            <div className="flex-1 p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/5 min-w-0">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+            <div className="escalation-card escalation-card-1 flex-1 p-4 rounded-xl min-w-0">
+              <div className="escalation-card-header flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
                 <p className="text-sm font-bold text-ink">
-                  {hi ? 'स्तर 1: बैंक / प्लेटफ़ॉर्म नोडल अधिकारी (तत्काल)' : 'Level 1: Designated Nodal Officer (Immediate)'}
+                  {hi ? 'स्तर 1: नोडल अधिकारी (डेमो)' : 'Level 1: Nodal Officer (Demo)'}
                 </p>
-                <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full self-start sm:self-auto">
-                  {hi ? '✓ प्रेषित / सक्रिय' : '✓ Dispatched / Active'}
+                <span className="escalation-status escalation-status-1 text-[11px] font-semibold px-2 py-0.5 rounded-full self-start sm:self-auto">
+                  {hi ? '✓ डेमो तैयार' : '✓ Demo ready'}
                 </span>
               </div>
               <p className="text-xs text-muted mt-1.5 break-all">
-                {officer.bankName} · <strong className="text-ink">{officer.nodalEmail}</strong>
+                {officer?.bankName || 'Verified contact unavailable'} · <strong className="text-ink">{officer?.nodalEmail || 'Production integration required'}</strong>
               </p>
               <p className="text-xs text-muted mt-1">
                 {hi
-                  ? 'धारा 91 CrPC / IT Act 79 के तहत डेबिट फ्रीज आदेश जारी किया गया।'
-                  : 'Statutory directive issued for immediate lien lock / 36-hour content removal.'}
+                  ? 'डेमो निर्देश दिखाया गया है; कोई लाइव लियन या टेकडाउन जारी नहीं हुआ।'
+                  : 'A prototype directive is shown for review; no live lien or takedown was issued.'}
               </p>
             </div>
           </div>
 
           {/* Level 2: CISO & Senior Risk Desk */}
-          <div className="flex items-start gap-3.5 sm:gap-4 pb-4">
+          <div className="escalation-step flex items-start gap-3.5 sm:gap-4 pb-4">
             <div className="flex flex-col items-center self-stretch flex-shrink-0 w-7 sm:w-8">
-              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#b45309] text-white flex items-center justify-center text-xs font-bold font-mono leading-none ring-4 ring-card select-none shadow-sm z-10 mt-2">
+              <div className="escalation-node escalation-node-2 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-bold font-mono leading-none ring-4 ring-card select-none shadow-sm z-10 mt-2">
                 2
               </div>
-              <div className="flex-1 w-[1.5px] anim-beam-thin" />
             </div>
-            <div className="flex-1 p-4 rounded-xl border border-line bg-soft/50 min-w-0 hover:border-amber-500/40 transition-colors">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+            <div className="escalation-card escalation-card-2 flex-1 p-4 rounded-xl min-w-0">
+              <div className="escalation-card-header flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
                 <p className="text-sm font-bold text-ink">
-                  {hi ? 'स्तर 2: CISO एवं धोखाधड़ी नियंत्रण प्रमुख (24 घंटे)' : 'Level 2: CISO & Fraud Risk VP Desk (24 Hours)'}
+                  {hi ? 'स्तर 2: वरिष्ठ जोखिम डेस्क (24 घंटे)' : 'Level 2: Senior Risk Desk (24 Hours)'}
                 </p>
-                <span className="text-[11px] font-semibold text-amber-700 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full self-start sm:self-auto">
-                  {hi ? 'समयबद्ध ऑटो-ट्रिगर' : 'Auto-Escalation Armed'}
+                <span className="escalation-status escalation-status-2 text-[11px] font-semibold px-2 py-0.5 rounded-full self-start sm:self-auto">
+                  {hi ? 'डेमो टाइमर' : 'Demo timer'}
                 </span>
               </div>
               <p className="text-xs text-muted mt-1.5 break-all">
-                {officer.cyberCellHead} · <span className="font-mono text-ink">{officer.escalationEmail}</span>
+                {officer?.cyberCellHead || 'Verified escalation contact unavailable'} · <span className="font-mono text-ink">{officer?.escalationEmail || 'Production integration required'}</span>
               </p>
               <p className="text-xs text-muted mt-1">
                 {hi
                   ? 'यदि नोडल अधिकारी 24 घंटे में पुष्टि नहीं करते, तो गैर-अनुपालन नोटिस सीधे CISO को भेजा जाएगा।'
-                  : 'Automated non-compliance alert transmits directly to the bank CISO if unacknowledged in 24h.'}
+                  : 'A production system could notify the appropriate escalation desk if unacknowledged in 24h.'}
               </p>
             </div>
           </div>
 
           {/* Level 3: RBI Ombudsman & Cyber SP */}
-          <div className="flex items-start gap-3.5 sm:gap-4 pb-4">
+          <div className="escalation-step flex items-start gap-3.5 sm:gap-4 pb-4">
             <div className="flex flex-col items-center self-stretch flex-shrink-0 w-7 sm:w-8">
-              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#334155] text-white flex items-center justify-center text-xs font-bold font-mono leading-none ring-4 ring-card select-none shadow-sm z-10 mt-2">
+              <div className="escalation-node escalation-node-3 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-bold font-mono leading-none ring-4 ring-card select-none shadow-sm z-10 mt-2">
                 3
               </div>
-              <div className="flex-1 w-[1.5px] anim-beam-thin" />
             </div>
-            <div className="flex-1 p-4 rounded-xl border border-line bg-soft/50 min-w-0 hover:border-slate-500/40 transition-colors">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+            <div className="escalation-card escalation-card-3 flex-1 p-4 rounded-xl min-w-0">
+              <div className="escalation-card-header flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
                 <p className="text-sm font-bold text-ink">
-                  {hi ? 'स्तर 3: RBI बैंकिंग लोकपाल एवं पुलिस अधीक्षक (साइबर क्राइम)' : 'Level 3: RBI Banking Ombudsman & Cyber Crime SP (72 Hours)'}
+                  {hi ? 'स्तर 3: नियामक एवं साइबर पुलिस (72 घंटे)' : 'Level 3: Regulator & Cyber Police (72 Hours)'}
                 </p>
-                <span className="text-[11px] font-semibold text-muted bg-soft px-2 py-0.5 rounded-full self-start sm:self-auto">
-                  {hi ? 'वैधानिक ओवरसाइट' : 'Statutory Oversight'}
+                <span className="escalation-status escalation-status-3 text-[11px] font-semibold px-2 py-0.5 rounded-full self-start sm:self-auto">
+                {hi ? 'संभावित अगला मार्ग' : 'Possible next route'}
                 </span>
               </div>
               <p className="text-xs text-muted mt-1.5">
-                {officer.jurisdiction}
+                {officer?.jurisdiction || (hi ? 'क्षेत्रीय संपर्क उपलब्ध नहीं' : 'Regional contact unavailable')}
               </p>
               <p className="text-xs text-muted mt-1">
                 {hi
-                  ? 'संपूर्ण डिजिटल केस डोजियर नियामक एवं पुलिस अधीक्षक को औपचारिक शिकायत के रूप में प्रेषित होगा।'
-                  : 'Full cryptographically signed dossier automatically filed with RBI Banking Ombudsman.'}
+                  ? 'वास्तविक मामले में सत्यापित डोजियर संबंधित नियामक या साइबर पुलिस तक भेजा जा सकता है।'
+                  : 'In a production system, a verified dossier could be routed to the appropriate regulator or police authority.'}
               </p>
             </div>
           </div>
 
           {/* Level 4: Magistrate Court */}
-          <div className="flex items-start gap-3.5 sm:gap-4">
+          <div className="escalation-step flex items-start gap-3.5 sm:gap-4">
             <div className="flex flex-col items-center self-stretch flex-shrink-0 w-7 sm:w-8">
-              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#0f172a] dark:bg-white dark:text-ink text-white flex items-center justify-center text-xs font-bold font-mono leading-none ring-4 ring-card select-none shadow-sm z-10 mt-2">
+              <div className="escalation-node escalation-node-4 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-bold font-mono leading-none ring-4 ring-card select-none shadow-sm z-10 mt-2">
                 4
               </div>
             </div>
-            <div className="flex-1 p-4 rounded-xl border border-line bg-soft/50 min-w-0">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+            <div className="escalation-card escalation-card-4 flex-1 p-4 rounded-xl min-w-0">
+              <div className="escalation-card-header flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
                 <p className="text-sm font-bold text-ink">
                   {hi ? 'स्तर 4: मुख्य न्यायिक मजिस्ट्रेट न्यायालय (धन वापसी आदेश)' : 'Level 4: Judicial Magistrate Court (Sec 457 CrPC / 503 BNSS)'}
                 </p>
-                <span className="text-[11px] font-semibold text-ink bg-card border border-line px-2 py-0.5 rounded-full self-start sm:self-auto">
+                <span className="escalation-status escalation-status-4 text-[11px] font-semibold px-2 py-0.5 rounded-full self-start sm:self-auto">
                   {hi ? 'अंतिम आदेश' : 'Final Order'}
                 </span>
               </div>
               <p className="text-xs text-muted mt-1.5">
                 {hi
-                  ? 'फ्रीज की गई राशि को सीधे आपके खाते में रिलीज कराने हेतु न्यायालय याचिका।'
-                  : 'Formal court petition for the unconditional de-freeze and restoration of funds.'}
+                  ? 'वास्तविक बैंक कार्रवाई की पुष्टि के बाद समीक्षा के लिए कोर्ट याचिका का टेम्पलेट।'
+                  : 'A court petition template to review after confirmed bank action and legal advice.'}
               </p>
             </div>
           </div>
@@ -238,10 +244,10 @@ export const MyApplicationsTab: React.FC<MyApplicationsTabProps> = ({
       <div className="p-5 rounded-2xl border border-line bg-card flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h4 className="text-sm font-bold text-ink">
-            {hi ? 'दस्तावेज़ एवं पावती' : 'Documents & Formal Slips'}
+            {hi ? 'डेमो दस्तावेज़' : 'Demo documents'}
           </h4>
           <p className="text-xs text-muted mt-0.5">
-            {hi ? 'अपने रिकॉर्ड और न्यायालय हेतु आधिकारिक प्रतियों को डाउनलोड करें।' : 'Download official copies for your legal and bank records.'}
+            {hi ? 'प्रोटोटाइप से तैयार किए गए रिकॉर्ड डाउनलोड करें।' : 'Download prototype-generated copies for review.'}
           </p>
         </div>
         <div className="btn-group sm:ml-auto">
@@ -256,10 +262,12 @@ export const MyApplicationsTab: React.FC<MyApplicationsTabProps> = ({
               <span>{hi ? 'FIR ड्राफ्ट' : 'FIR Draft'}</span>
             </button>
           )}
-          <button onClick={onViewReceipt} className="btn-secondary">
-            <ShieldCheck size={15} />
-            <span>{hi ? 'पावती रसीद' : 'NCRP Receipt'}</span>
-          </button>
+          {isFinancial && (
+            <button onClick={onViewReceipt} className="btn-secondary">
+              <ShieldCheck size={15} />
+              <span>{hi ? 'डेमो रसीद' : 'Demo receipt'}</span>
+            </button>
+          )}
         </div>
       </div>
     </div>

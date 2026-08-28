@@ -15,17 +15,23 @@ import { EscalationTracker } from './components/EscalationTracker';
 import { FIRDraftModal } from './components/FIRDraftModal';
 import { ComplaintAssistant } from './components/ComplaintAssistant';
 import { SiteFooter } from './components/SiteFooter';
+
 import { LoginScreen } from './components/LoginScreen';
 import type { AppStep, Language, CyberIncident, FinancialIncident, SocialIncident, CFCFRMSPayload, Sec79Payload } from './types';
-import { parseScreenshotOCR, parseVoiceTranscription } from './services/ocrService';
+import { parseScreenshotOCR, parseVoiceTranscription, OcrReadError } from './services/ocrService';
 import {
   saveDraftToStorage,
   getDraftFromStorage,
   saveLanguagePreference,
   getLanguagePreference,
   clearDraftFromStorage,
+  clearSessionFlowState,
+  saveLastAcknowledgment,
   type SavedDraft,
 } from './services/storageService';
+import { CyberSafetyQuiz } from './components/CyberSafetyQuiz';
+import { WronglyAccusedCaseCard } from './components/WronglyAccusedCaseCard';
+import { HomeHub } from './components/HomeHub';
 
 
 type Theme = 'light' | 'dark';
@@ -34,6 +40,12 @@ const STEP_ORDER: AppStep[] = ['intake', 'review', 'freeze', 'radar'];
 const stepIndex = (step: AppStep) => {
   if (step === 'petition') return 3;
   return Math.max(0, STEP_ORDER.indexOf(step));
+};
+
+type NavigationOptions = {
+  persist?: boolean;
+  transaction?: CyberIncident | null;
+  payload?: CFCFRMSPayload | Sec79Payload | null;
 };
 
 const getInitialTheme = (): Theme => {
@@ -63,7 +75,11 @@ export const App: React.FC = () => {
   const [showReceiptModal, setShowReceiptModal] = useState<boolean>(false);
   const [showFIRModal, setShowFIRModal] = useState<boolean>(false);
   const [showMockedHub, setShowMockedHub] = useState<boolean>(false);
+
+  const [showQuiz, setShowQuiz] = useState<boolean>(false);
+  const [intakeResetKey, setIntakeResetKey] = useState(0);
   const [furthestStep, setFurthestStep] = useState<number>(0);
+  const [showHub, setShowHub] = useState(true);
   const [sessionPhone, setSessionPhone] = useState<string | null>(() => {
     try {
       return sessionStorage.getItem('kavach_session');
@@ -82,7 +98,11 @@ export const App: React.FC = () => {
   }, [theme]);
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    try {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch {
+      window.scrollTo(0, 0);
+    }
   }, [currentStep]);
 
   useEffect(() => {
@@ -90,19 +110,25 @@ export const App: React.FC = () => {
     window.history.replaceState({ step: 'intake' }, '');
   }, []);
 
-  const goToStep = (step: AppStep, source: 'nav' | 'flow' | 'pop' = 'nav') => {
+  const goToStep = (
+    step: AppStep,
+    source: 'nav' | 'flow' | 'pop' = 'nav',
+    options: NavigationOptions = {}
+  ) => {
+    const nextTransaction = options.transaction !== undefined ? options.transaction : transaction;
+    const nextPayload = options.payload !== undefined ? options.payload : payload || sec79Payload;
     const idx = stepIndex(step);
     if (source === 'nav' && idx > furthestStep) return;
     if (source !== 'flow') {
-      if ((step === 'review' || step === 'freeze') && !transaction) return;
-      if (step === 'radar' && !payload && !sec79Payload) return;
+      if ((step === 'review' || step === 'freeze') && !nextTransaction) return;
+      if (step === 'radar' && !nextPayload) return;
     }
     if (source === 'flow') {
       setFurthestStep((n) => Math.max(n, idx));
     }
     setCurrentStep(step);
-    if (transaction) {
-      saveDraftToStorage(transaction, payload || sec79Payload, step);
+    if (options.persist !== false && nextTransaction) {
+      saveDraftToStorage(nextTransaction, nextPayload, step);
       setSavedDraft(getDraftFromStorage());
     }
     if (source !== 'pop') {
@@ -147,26 +173,35 @@ export const App: React.FC = () => {
     setIsLoading(true);
     try {
       const extracted = await parseScreenshotOCR(personaId);
+      setPayload(null);
+      setSec79Payload(null);
       setTransaction(extracted);
-      saveDraftToStorage(extracted, null, 'review');
-      setSavedDraft(getDraftFromStorage());
-      goToStep('review', 'flow');
+      goToStep('review', 'flow', { transaction: extracted, payload: null });
       triggerToast(currentLang === 'hi' ? 'AI ने ट्रांसक्शन विवरण निकाल लिया है' : 'Vision AI parsed screenshot details');
     } catch (e) {
       console.error(e);
+      triggerToast(currentLang === 'hi' ? 'डेमो रिपोर्ट लोड नहीं हो सकी' : 'Could not load that demo report');
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleUploadFile = async (file: File) => {
+    if ((file.type && !file.type.startsWith('image/')) || file.size > 10 * 1024 * 1024) {
+      triggerToast(
+        currentLang === 'hi'
+          ? 'कृपया 10 MB से छोटी इमेज अपलोड करें'
+          : 'Please upload an image smaller than 10 MB'
+      );
+      return;
+    }
     setIsLoading(true);
     try {
       const extracted = await parseScreenshotOCR(file);
+      setPayload(null);
+      setSec79Payload(null);
       setTransaction(extracted);
-      saveDraftToStorage(extracted, null, 'review');
-      setSavedDraft(getDraftFromStorage());
-      goToStep('review', 'flow');
+      goToStep('review', 'flow', { transaction: extracted, payload: null });
       const thin =
         extracted.incidentType === 'FINANCIAL'
           ? !extracted.utr && !extracted.amount && !extracted.beneficiaryVpa
@@ -182,11 +217,20 @@ export const App: React.FC = () => {
       );
     } catch (e) {
       console.error(e);
-      triggerToast(
-        currentLang === 'hi'
-          ? 'स्क्रीनशॉट पढ़ा नहीं जा सका। फिर कोशिश करें या मैन्युअल भरें।'
-          : 'Could not read that screenshot. Try again or enter details manually.'
-      );
+      const code = e instanceof OcrReadError ? e.code : '';
+      const hiMsg =
+        code === 'HEIC_UNSUPPORTED'
+          ? 'यह HEIC फोटो नहीं पढ़ सकी। JPG या PNG में सेव करके अपलोड करें।'
+          : code === 'OCR_TIMEOUT'
+            ? 'पढ़ने में समय लग गया। छोटी इमेज आज़माएं या UTR खुद लिखें।'
+            : 'स्क्रीनशॉट पढ़ा नहीं जा सका। फिर कोशिश करें या मैन्युअल भरें।';
+      const enMsg =
+        code === 'HEIC_UNSUPPORTED'
+          ? 'This device could not read a HEIC photo. Save as JPG or PNG and upload again.'
+          : code === 'OCR_TIMEOUT'
+            ? 'Reading timed out. Try a smaller image or enter the UTR yourself.'
+            : 'Could not read that screenshot. Try again or enter details manually.';
+      triggerToast(currentLang === 'hi' ? hiMsg : enMsg);
     } finally {
       setIsLoading(false);
     }
@@ -196,19 +240,20 @@ export const App: React.FC = () => {
     setIsLoading(true);
     try {
       const extracted = await parseVoiceTranscription(transcript);
+      setPayload(null);
+      setSec79Payload(null);
       setTransaction(extracted);
-      saveDraftToStorage(extracted, null, 'review');
-      setSavedDraft(getDraftFromStorage());
-      goToStep('review', 'flow');
+      goToStep('review', 'flow', { transaction: extracted, payload: null });
       triggerToast(currentLang === 'hi' ? 'आवाज़ से विवरण दर्ज हुआ' : 'Voice input processed');
     } catch (e) {
       console.error(e);
+      triggerToast(currentLang === 'hi' ? 'आवाज़ को समझा नहीं जा सका' : 'Could not process that voice report');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleManualSubmit = (utr: string, amount: number) => {
+  const handleManualSubmit = (utr: string, amount: number, beneficiaryVpa: string) => {
     const manualTxn: FinancialIncident = {
       incidentType: 'FINANCIAL',
       utr,
@@ -216,8 +261,8 @@ export const App: React.FC = () => {
       timestamp: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
       remitterBank: 'HDFC Bank Ltd.',
       remitterAccount: 'XXXX-XXXX-4012',
-      beneficiaryVpa: 'fraudster.target@okaxis',
-      beneficiaryBank: 'Axis Bank Ltd.',
+      beneficiaryVpa,
+      beneficiaryBank: 'Unknown bank — please verify',
       fraudCategory: 'UPI_PHISHING',
       fraudCategoryLabel: 'Manually Entered UTR Report',
       incidentSummary: `Unauthorized transaction reported with UTR ${utr}.`,
@@ -227,71 +272,131 @@ export const App: React.FC = () => {
       extractedVia: 'MANUAL',
     };
     setTransaction(manualTxn);
-    saveDraftToStorage(manualTxn, null, 'review');
-    setSavedDraft(getDraftFromStorage());
-    goToStep('review', 'flow');
+    setPayload(null);
+    setSec79Payload(null);
+    goToStep('review', 'flow', { transaction: manualTxn, payload: null });
   };
 
   const handleProceedToAction = (updatedTxn: CyberIncident) => {
     setTransaction(updatedTxn);
-    saveDraftToStorage(updatedTxn, null, 'freeze');
-    setSavedDraft(getDraftFromStorage());
-    goToStep('freeze', 'flow');
+    goToStep('freeze', 'flow', { transaction: updatedTxn, payload: null });
     triggerToast(currentLang === 'hi' ? 'कार्रवाई योजना तैयार' : 'Action Plan Ready');
   };
 
   const handleDispatchComplete = (generatedPayload: CFCFRMSPayload | Sec79Payload) => {
     if ('cfcfrmsToken' in generatedPayload) {
       setPayload(generatedPayload as CFCFRMSPayload);
-      triggerToast(currentLang === 'hi' ? 'बैंकों को फ्रीज आदेश भेजा गया!' : 'Statutory Freeze Notice Dispatched to Banks!');
+      triggerToast(currentLang === 'hi' ? 'डेमो फ्रीज नोटिस तैयार हुआ' : 'Demo freeze notice prepared');
     } else {
       setSec79Payload(generatedPayload as Sec79Payload);
-      triggerToast(currentLang === 'hi' ? 'टेकडाउन नोटिस भेजा गया!' : 'Takedown Notice Dispatched to Platform!');
+      triggerToast(currentLang === 'hi' ? 'डेमो टेकडाउन नोटिस तैयार हुआ' : 'Demo takedown notice prepared');
     }
 
+    saveLastAcknowledgment(generatedPayload.ackNumber);
     if (transaction) {
-      saveDraftToStorage(transaction, generatedPayload, 'radar');
-      setSavedDraft(getDraftFromStorage());
+      goToStep('radar', 'flow', { transaction, payload: generatedPayload });
     }
-    goToStep('radar', 'flow');
+  };
+
+  const handleManualSocialSubmit = (platform: string, suspectUrl: string, summary: string) => {
+    const socialTxn: SocialIncident = {
+      incidentType: 'SOCIAL',
+      platform,
+      suspectUrl,
+      contentType: 'FAKE_PROFILE',
+      timestamp: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+      fraudCategory: 'SOCIAL_MEDIA_IMPERSONATION',
+      fraudCategoryLabel: 'Manually entered profile report',
+      incidentSummary: summary,
+      victimName: 'Citizen (Demo User)',
+      victimMobile: '+91-98765-43210',
+      confidenceScore: 100,
+      extractedVia: 'MANUAL',
+    };
+    setTransaction(socialTxn);
+    setPayload(null);
+    setSec79Payload(null);
+    goToStep('review', 'flow', { transaction: socialTxn, payload: null });
+  };
+
+  const handleGoHub = () => {
+    setShowHub(true);
+    setCurrentStep('intake');
+    window.history.replaceState({ step: 'intake' }, '');
+  };
+
+  const handleTrack = () => {
+    const livePayload = payload || sec79Payload;
+    if (transaction && livePayload) {
+      setShowHub(false);
+      goToStep('radar', 'nav', { transaction, payload: livePayload });
+      return;
+    }
+    const draft = getDraftFromStorage();
+    if (draft?.transaction && draft.payload) {
+      handleResumeDraft();
+      setShowHub(false);
+      return;
+    }
+    triggerToast(
+      currentLang === 'hi'
+        ? 'अभी कोई शिकायत ट्रैक करने को नहीं है। पहले रिपोर्ट करें।'
+        : 'No complaint to track yet. Report one first.'
+    );
   };
 
   const handleResumeDraft = () => {
     const draft = getDraftFromStorage();
-    if (!draft?.transaction) return;
-    setTransaction(draft.transaction);
-    if (draft.payload) {
-      if (draft.transaction.incidentType === 'FINANCIAL') {
-        setPayload(draft.payload as CFCFRMSPayload);
-      } else {
-        setSec79Payload(draft.payload as Sec79Payload);
-      }
+    if (!draft?.transaction) {
+      triggerToast(currentLang === 'hi' ? 'सहेजा हुआ ड्राफ्ट उपलब्ध नहीं है' : 'Saved draft is no longer available');
+      return;
     }
-    const targetStep = draft.step || (draft.payload ? 'radar' : 'review');
-    setFurthestStep((n) => Math.max(n, stepIndex(targetStep)));
-    setCurrentStep(targetStep);
+
+    const isFinancial = draft.transaction.incidentType === 'FINANCIAL';
+    const hasCompatiblePayload = Boolean(
+      draft.payload && (isFinancial ? 'cfcfrmsToken' in draft.payload : 'takedownToken' in draft.payload)
+    );
+
+    setTransaction(draft.transaction);
+    setPayload(isFinancial && hasCompatiblePayload ? draft.payload as CFCFRMSPayload : null);
+    setSec79Payload(!isFinancial && hasCompatiblePayload ? draft.payload as Sec79Payload : null);
+
+    // A draft saved at intake/review/freeze should always reopen at review unless
+    // it contains a matching completed payload. This avoids blank screens from
+    // stale step metadata or a payload from the other incident type.
+    const targetStep: AppStep = hasCompatiblePayload ? 'radar' : 'review';
+    goToStep(targetStep, 'flow', {
+      transaction: draft.transaction,
+      payload: hasCompatiblePayload ? draft.payload : null,
+    });
     triggerToast(currentLang === 'hi' ? 'सुरक्षित ड्राफ्ट लोड हो गया' : 'Draft restored successfully');
   };
 
   const handleClearDraft = () => {
     clearDraftFromStorage();
+    clearSessionFlowState();
     setSavedDraft(null);
     setTransaction(null);
     setPayload(null);
     setSec79Payload(null);
     setFurthestStep(0);
+    setIntakeResetKey((key) => key + 1);
     triggerToast(currentLang === 'hi' ? 'ड्राफ्ट हटा दिया गया' : 'Draft cleared');
   };
 
   const handleResetToHome = () => {
     clearDraftFromStorage();
+    clearSessionFlowState();
     setSavedDraft(null);
     setTransaction(null);
     setPayload(null);
     setSec79Payload(null);
     setFurthestStep(0);
-    goToStep('intake', 'flow');
-    triggerToast(currentLang === 'hi' ? 'नया केस शुरू किया गया' : 'Reset to new emergency intake');
+    setIntakeResetKey((key) => key + 1);
+    setCurrentStep('intake');
+    setShowHub(true);
+    window.history.replaceState({ step: 'intake' }, '');
+    triggerToast(currentLang === 'hi' ? 'नया केस शुरू किया गया' : 'Ready for a new report');
   };
 
   const handleLogin = (phone: string) => {
@@ -316,13 +421,19 @@ export const App: React.FC = () => {
 
   if (!sessionPhone) {
     return (
-      <LoginScreen
-        currentLang={currentLang}
-        onToggleLang={handleToggleLang}
-        theme={theme}
-        onToggleTheme={() => setTheme((t) => (t === 'light' ? 'dark' : 'light'))}
-        onLogin={handleLogin}
-      />
+      <>
+        <LoginScreen
+          currentLang={currentLang}
+          onToggleLang={handleToggleLang}
+          theme={theme}
+          onToggleTheme={() => setTheme((t) => (t === 'light' ? 'dark' : 'light'))}
+          onLogin={handleLogin}
+          onOpenQuiz={() => setShowQuiz(true)}
+        />
+        {showQuiz && (
+          <CyberSafetyQuiz currentLang={currentLang} onClose={() => setShowQuiz(false)} />
+        )}
+      </>
     );
   }
 
@@ -338,31 +449,61 @@ export const App: React.FC = () => {
         currentLang={currentLang}
         currentStep={currentStep}
         onToggleLang={handleToggleLang}
-        onResetToHome={handleResetToHome}
+        onGoHome={handleGoHub}
         theme={theme}
         onToggleTheme={() => setTheme((t) => (t === 'light' ? 'dark' : 'light'))}
         onLogout={handleLogout}
         furthestStep={furthestStep}
-        onGoToStep={(step) => goToStep(step, 'nav')}
+        onGoToStep={(step) => {
+          setShowHub(false);
+          goToStep(step, 'nav');
+        }}
+        onTrack={handleTrack}
+        canTrack={Boolean((payload || sec79Payload) && transaction)}
+        onHub={showHub}
       />
 
-      <main id="main" className="flex-1 page-enter" key={currentStep}>
-        {currentStep === 'intake' && (
+      <main id="main" className="flex-1 page-enter" key={showHub ? 'hub' : currentStep}>
+        {showHub ? (
+          <HomeHub
+            currentLang={currentLang}
+            onReport={() => setShowHub(false)}
+            onTrack={handleTrack}
+            canTrack={Boolean((payload || sec79Payload) && transaction) || Boolean(savedDraft?.payload)}
+            ackNumber={
+              payload?.ackNumber
+              || sec79Payload?.ackNumber
+              || (savedDraft?.payload && 'ackNumber' in savedDraft.payload ? savedDraft.payload.ackNumber : null)
+              || null
+            }
+          />
+        ) : currentStep === 'intake' && (
           <EmergencyIntake
+            key={intakeResetKey}
             currentLang={currentLang}
             onSelectPreset={handleSelectPreset}
             onUploadFile={handleUploadFile}
             onVoiceTranscribe={handleVoiceTranscribe}
             onManualSubmit={handleManualSubmit}
+            onManualSocialSubmit={handleManualSocialSubmit}
             isLoading={isLoading}
             savedDraft={savedDraft}
-            onResumeDraft={handleResumeDraft}
+            onResumeDraft={() => {
+              handleResumeDraft();
+              setShowHub(false);
+            }}
             onClearDraft={handleClearDraft}
           />
         )}
 
-        {currentStep === 'review' && transaction && (
-          transaction.incidentType === 'FINANCIAL' ? (
+        {!showHub && currentStep === 'review' && transaction && (
+          transaction.casePerspective === 'WRONGLY_ACCUSED' && transaction.incidentType === 'FINANCIAL' ? (
+            <WronglyAccusedCaseCard
+              transaction={transaction as FinancialIncident}
+              currentLang={currentLang}
+              onBackToIntake={() => goToStep('intake', 'nav')}
+            />
+          ) : transaction.incidentType === 'FINANCIAL' ? (
             <ExtractedDetailsCard
               transaction={transaction as FinancialIncident}
               currentLang={currentLang}
@@ -379,7 +520,7 @@ export const App: React.FC = () => {
           )
         )}
 
-        {currentStep === 'freeze' && transaction && (
+        {!showHub && currentStep === 'freeze' && transaction && (
           transaction.incidentType === 'FINANCIAL' ? (
             <DualBankFreezeCard
               transaction={transaction as FinancialIncident}
@@ -397,7 +538,7 @@ export const App: React.FC = () => {
           )
         )}
 
-        {currentStep === 'radar' && transaction && (
+        {!showHub && currentStep === 'radar' && transaction && (
           transaction.incidentType === 'FINANCIAL' && payload ? (
             <FundTrailRadar
               transaction={transaction as FinancialIncident}
@@ -423,6 +564,7 @@ export const App: React.FC = () => {
         currentLang={currentLang}
         onResetToHome={handleResetToHome}
         onOpenMockedHub={() => setShowMockedHub(true)}
+        onOpenQuiz={() => setShowQuiz(true)}
       />
 
       {showPetitionModal && transaction && payload && (
@@ -457,6 +599,10 @@ export const App: React.FC = () => {
           currentLang={currentLang}
           onClose={() => setShowMockedHub(false)}
         />
+      )}
+
+      {showQuiz && (
+        <CyberSafetyQuiz currentLang={currentLang} onClose={() => setShowQuiz(false)} />
       )}
 
       <ComplaintAssistant currentLang={currentLang} />

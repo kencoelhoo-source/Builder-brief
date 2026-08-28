@@ -1,4 +1,5 @@
 import type { Language } from '../types';
+import { isAppleTouchDevice } from '../utils/browser';
 
 export interface SpeechRecognitionResultCallback {
   (transcript: string, isFinal: boolean): void;
@@ -7,15 +8,22 @@ export interface SpeechRecognitionResultCallback {
 export class SpeechService {
   private recognition: any = null;
   private isListening = false;
+  private finalTranscript = '';
 
   constructor() {
-    const SpeechRecognition =
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    try {
+      const SpeechRecognition =
+        (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (!SpeechRecognition) return;
 
-    if (SpeechRecognition) {
       this.recognition = new SpeechRecognition();
-      this.recognition.continuous = true;
-      this.recognition.interimResults = true;
+      const appleTouch = isAppleTouchDevice();
+      // iOS Safari often throws or immediately ends with continuous + interimResults.
+      this.recognition.continuous = !appleTouch;
+      this.recognition.interimResults = !appleTouch;
+      this.recognition.maxAlternatives = 1;
+    } catch {
+      this.recognition = null;
     }
   }
 
@@ -26,7 +34,7 @@ export class SpeechService {
   public startListening(
     lang: Language,
     onResult: SpeechRecognitionResultCallback,
-    onError?: (err: any) => void
+    onError?: (err: unknown) => void
   ): boolean {
     if (!this.recognition) {
       if (onError) onError('Web Speech API is not supported in this browser.');
@@ -34,6 +42,8 @@ export class SpeechService {
     }
 
     try {
+      if (this.isListening) this.stopListening();
+      this.finalTranscript = '';
       this.recognition.lang = lang === 'hi' ? 'hi-IN' : 'en-IN';
       this.recognition.onresult = (event: any) => {
         let interimTranscript = '';
@@ -47,7 +57,8 @@ export class SpeechService {
           }
         }
 
-        const combined = finalTranscript || interimTranscript;
+        if (finalTranscript) this.finalTranscript = `${this.finalTranscript} ${finalTranscript}`.trim();
+        const combined = `${this.finalTranscript} ${interimTranscript}`.trim();
         onResult(combined, !!finalTranscript);
       };
 
@@ -64,6 +75,7 @@ export class SpeechService {
       this.isListening = true;
       return true;
     } catch (e) {
+      this.isListening = false;
       if (onError) onError(e);
       return false;
     }
@@ -71,7 +83,11 @@ export class SpeechService {
 
   public stopListening(): void {
     if (this.recognition && this.isListening) {
-      this.recognition.stop();
+      try {
+        this.recognition.stop();
+      } catch {
+        /* recognition may already have ended */
+      }
       this.isListening = false;
     }
   }
@@ -81,4 +97,21 @@ export class SpeechService {
   }
 }
 
-export const speechService = new SpeechService();
+let speechServiceInstance: SpeechService | null = null;
+
+export const getSpeechService = (): SpeechService => {
+  if (!speechServiceInstance) speechServiceInstance = new SpeechService();
+  return speechServiceInstance;
+};
+
+/** Lazy so a constructor throw cannot white-screen the app at import. */
+export const speechService = {
+  isSupported: () => getSpeechService().isSupported(),
+  startListening: (
+    lang: Language,
+    onResult: SpeechRecognitionResultCallback,
+    onError?: (err: unknown) => void
+  ) => getSpeechService().startListening(lang, onResult, onError),
+  stopListening: () => getSpeechService().stopListening(),
+  getIsListening: () => getSpeechService().getIsListening(),
+};

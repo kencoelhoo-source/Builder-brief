@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Radio, ShieldCheck } from 'lucide-react';
 import type { ExtractedTransaction, Language, CFCFRMSPayload, RadarNode } from '../types';
 import { formatINR } from '../utils/formatters';
@@ -22,15 +22,7 @@ export const FundTrailRadar: React.FC<FundTrailRadarProps> = ({
   onBack,
 }) => {
   const hi = currentLang === 'hi';
-  const [, setActiveStep] = useState<number>(1);
   const [viewTab, setViewTab] = useState<'radar' | 'application'>('radar');
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveStep((prev) => (prev < 4 ? prev + 1 : prev));
-    }, 1200);
-    return () => clearInterval(interval);
-  }, []);
 
   const nodes: RadarNode[] = [
     {
@@ -40,8 +32,8 @@ export const FundTrailRadar: React.FC<FundTrailRadarProps> = ({
       tier: 0,
       amount: transaction.amount,
       status: 'DISPATCHED',
-      statusLabel: 'Debit confirmed',
-      statusLabelHi: 'डेबिट पुष्टि',
+      statusLabel: 'Illustrative demo path',
+      statusLabelHi: 'डेमो मार्ग',
       bankName: transaction.remitterBank,
       accountMasked: transaction.remitterAccount,
     },
@@ -52,8 +44,8 @@ export const FundTrailRadar: React.FC<FundTrailRadarProps> = ({
       tier: 1,
       amount: transaction.amount,
       status: 'LIEN_LOCKED',
-      statusLabel: 'Lien marked — frozen',
-      statusLabelHi: 'लियन — फ्रीज',
+      statusLabel: 'Illustrative demo path',
+      statusLabelHi: 'डेमो मार्ग',
       bankName: transaction.beneficiaryBank,
       accountMasked: 'XXXX-8921',
       frozenAt: 'Intercepted',
@@ -65,8 +57,8 @@ export const FundTrailRadar: React.FC<FundTrailRadarProps> = ({
       tier: 2,
       amount: Math.round(transaction.amount * 0.45),
       status: 'INTERCEPTED',
-      statusLabel: 'Transfer intercepted',
-      statusLabelHi: 'अंतरण रोका गया',
+      statusLabel: 'Illustrative route',
+      statusLabelHi: 'उदाहरण मार्ग',
       bankName: 'IndusInd Bank',
       accountMasked: 'XXXX-5512',
     },
@@ -77,15 +69,15 @@ export const FundTrailRadar: React.FC<FundTrailRadarProps> = ({
       tier: 3,
       amount: Math.round(transaction.amount * 0.55),
       status: 'BLOCKED',
-      statusLabel: 'Withdrawal blocked',
-      statusLabelHi: 'निकासी ब्लॉक',
+      statusLabel: 'Illustrative route',
+      statusLabelHi: 'उदाहरण मार्ग',
       bankName: 'ATM Switch Terminal',
       accountMasked: 'Card #4912',
     },
   ];
 
   return (
-    <div className="page-wrap page-stack max-w-3xl">
+    <div className="page-wrap page-stack flow-page">
       <p className="mb-6">
         <button type="button" className="btn-link" onClick={onBack}>
           ← {hi ? 'फ्रीज पर लौटें' : 'Back to freeze'}
@@ -130,31 +122,30 @@ export const FundTrailRadar: React.FC<FundTrailRadarProps> = ({
 
       {viewTab === 'radar' ? (
         <div className="anim-slide-left">
-          <p className="text-success font-bold text-sm">
-            {hi ? 'आदेश लागू हो गया' : 'The order has been applied'}
-          </p>
-          <h1 className="text-3xl md:text-4xl font-bold mt-2">
-            {hi
-              ? `${formatINR(transaction.amount)} फ्रीज कर दी गई है`
-              : `${formatINR(transaction.amount)} has been frozen`}
-          </h1>
-          <p className="mt-3 text-base sm:text-lg text-muted">
-            {hi
-              ? `पावती ${payload.ackNumber}। राशि मजिस्ट्रेट आदेश तक सुरक्षित है।`
-              : `Acknowledgment ${payload.ackNumber}. The funds stay held until a magistrate restoration order.`}
-          </p>
+          <header className="page-head">
+            <p className="eyebrow">{hi ? 'डेमो प्रतिक्रिया तैयार है' : 'Demo response is ready'}</p>
+            <h1>
+              {hi
+                ? `${formatINR(transaction.amount)} की डेमो स्थिति`
+                : `Demo status for ${formatINR(transaction.amount)}`}
+            </h1>
+            <p className="lede">
+              {hi
+                ? `डेमो संदर्भ ${payload.ackNumber}। इस बिल्ड में कोई वास्तविक बैंक कार्रवाई नहीं हुई।`
+                : `Demo reference ${payload.ackNumber}. This build has not taken a real banking action.`}
+            </p>
+          </header>
 
-          {/* Intercept Trail Nodes */}
-          <ol className="mt-8 border-t border-line">
+          <ol className="trail-list">
             {nodes.map((node) => (
-              <li key={node.id} className="py-4 sm:py-5 border-b border-line flex flex-col sm:flex-row sm:justify-between gap-2">
+              <li key={node.id}>
                 <div>
-                  <p className="font-bold text-base sm:text-lg text-ink">{node.label}</p>
-                  <p className="text-muted text-xs sm:text-sm mt-0.5">{node.subLabel}</p>
+                  <p className="detail-value">{node.label}</p>
+                  <p className="detail-meta">{node.subLabel}</p>
                 </div>
                 <div className="sm:text-right">
-                  <p className="font-mono font-bold text-ink">₹{node.amount.toLocaleString('en-IN')}</p>
-                  <p className="text-muted text-xs sm:text-sm mt-0.5">{hi ? node.statusLabelHi : node.statusLabel}</p>
+                  <p className="detail-value font-mono">₹{node.amount.toLocaleString('en-IN')}</p>
+                  <p className="detail-meta">{hi ? node.statusLabelHi : node.statusLabel}</p>
                 </div>
               </li>
             ))}
@@ -163,19 +154,19 @@ export const FundTrailRadar: React.FC<FundTrailRadarProps> = ({
           {/* Next Step / Court Petition */}
           <div className="mt-10 p-5 rounded-2xl border border-line bg-card">
             <h2 className="text-lg font-bold text-ink">
-              {hi ? 'धन वापसी (अगला कानूनी कदम)' : 'Get the money back (Next Legal Step)'}
+              {hi ? 'धन वापसी का अगला संभावित कदम' : 'Possible next step for fund recovery'}
             </h2>
             <p className="mt-2 text-muted text-xs sm:text-sm leading-relaxed">
               {hi
-                ? 'राशि बैंकिंग लेयर में सुरक्षित फ्रीज हो चुकी है। अब धारा 457 CrPC / 503 BNSS के तहत मजिस्ट्रेट याचिका द्वारा यह रकम आपके खाते में लौटाई जाएगी।'
-                : 'Funds are securely locked in the banking layer. A Magistrate Restoration Petition (under Section 457 CrPC / 503 BNSS) is now required to legally release and restore the frozen money directly to your account.'}
+                ? 'यह डेमो दिखाता है कि वास्तविक बैंक कार्रवाई के बाद कौन से दस्तावेज़ उपयोगी हो सकते हैं। इस प्रोटोटाइप से कोई फ्रीज या वापसी नहीं होती।'
+                : 'This demo shows which documents could be useful after a real bank action. No freeze or recovery happens from this prototype.'}
             </p>
             <div className="btn-group mt-6">
               <button type="button" onClick={onOpenCourtPetition} className="btn-primary">
-                {hi ? 'न्यायालय याचिका' : 'Generate court petition'}
+                {hi ? 'डेमो याचिका देखें' : 'View demo petition'}
               </button>
               <button type="button" onClick={onViewReceipt} className="btn-secondary">
-                {hi ? 'पावती रसीद' : 'Download receipt'}
+                {hi ? 'डेमो रसीद देखें' : 'View demo receipt'}
               </button>
             </div>
           </div>
