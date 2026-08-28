@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, FilePlus, Search } from 'lucide-react';
+import { ArrowRight, BarChart3, FilePlus, Link2, Search, ShieldAlert } from 'lucide-react';
 import type { Language } from '../types';
 import hubHero from '../assets/hub-hero.jpg';
 
@@ -9,6 +9,9 @@ interface HomeHubProps {
   onTrack: () => void;
   canTrack: boolean;
   ackNumber?: string | null;
+  onOpenScamAnalyzer: () => void;
+  onOpenLinkChecker: () => void;
+  onOpenDashboard: () => void;
 }
 
 export const HomeHub: React.FC<HomeHubProps> = ({
@@ -17,6 +20,9 @@ export const HomeHub: React.FC<HomeHubProps> = ({
   onTrack,
   canTrack,
   ackNumber,
+  onOpenScamAnalyzer,
+  onOpenLinkChecker,
+  onOpenDashboard,
 }) => {
   const hi = currentLang === 'hi';
 
@@ -67,6 +73,48 @@ export const HomeHub: React.FC<HomeHubProps> = ({
           </span>
           <span className="hub-card-foot">
             {canTrack ? (hi ? 'स्थिति देखें' : 'See status') : (hi ? 'अभी कोई शिकायत नहीं' : 'No complaint yet')}
+            <ArrowRight size={16} />
+          </span>
+        </button>
+
+        <button type="button" className="hub-card" onClick={onOpenScamAnalyzer}>
+          <span className="hub-card-icon"><ShieldAlert size={22} /></span>
+          <span className="hub-card-title">{hi ? 'AI स्कैम विश्लेषक' : 'AI scam analyzer'}</span>
+          <span className="hub-card-meta">
+            {hi
+              ? 'SMS, ईमेल, WhatsApp या कॉल विवरण में ठगी के संकेत देखें।'
+              : 'Check SMS, email, WhatsApp, or call descriptions for common scam signals.'}
+          </span>
+          <span className="hub-card-foot">
+            {hi ? 'विश्लेषण करें' : 'Analyze'}
+            <ArrowRight size={16} />
+          </span>
+        </button>
+
+        <button type="button" className="hub-card" onClick={onOpenLinkChecker}>
+          <span className="hub-card-icon"><Link2 size={22} /></span>
+          <span className="hub-card-title">{hi ? 'संदिग्ध लिंक चेकर' : 'Suspicious link checker'}</span>
+          <span className="hub-card-meta">
+            {hi
+              ? 'URL खोले बिना domain, HTTPS और impersonation संकेत जांचें।'
+              : 'Assess domain, HTTPS, and impersonation signals without opening the URL.'}
+          </span>
+          <span className="hub-card-foot">
+            {hi ? 'लिंक जांचें' : 'Check link'}
+            <ArrowRight size={16} />
+          </span>
+        </button>
+
+        <button type="button" className="hub-card" onClick={onOpenDashboard}>
+          <span className="hub-card-icon"><BarChart3 size={22} /></span>
+          <span className="hub-card-title">{hi ? 'साइबर सुरक्षा डैशबोर्ड' : 'Cyber safety dashboard'}</span>
+          <span className="hub-card-meta">
+            {hi
+              ? 'अपनी checks, analyses और छोटे सुरक्षा सुझाव देखें।'
+              : 'View your checks, analyses, and concise safety recommendations.'}
+          </span>
+          <span className="hub-card-foot">
+            {hi ? 'डैशबोर्ड देखें' : 'Open dashboard'}
             <ArrowRight size={16} />
           </span>
         </button>

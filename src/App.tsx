@@ -30,6 +30,7 @@ import {
   type SavedDraft,
 } from './services/storageService';
 import { CyberSafetyQuiz } from './components/CyberSafetyQuiz';
+import { CyberSafetyTools, type CyberSafetyTool } from './components/CyberSafetyTools';
 import { WronglyAccusedCaseCard } from './components/WronglyAccusedCaseCard';
 import { HomeHub } from './components/HomeHub';
 
@@ -77,6 +78,7 @@ export const App: React.FC = () => {
   const [showMockedHub, setShowMockedHub] = useState<boolean>(false);
 
   const [showQuiz, setShowQuiz] = useState<boolean>(false);
+  const [cyberSafetyTool, setCyberSafetyTool] = useState<CyberSafetyTool | null>(null);
   const [intakeResetKey, setIntakeResetKey] = useState(0);
   const [furthestStep, setFurthestStep] = useState<number>(0);
   const [showHub, setShowHub] = useState(true);
@@ -476,6 +478,9 @@ export const App: React.FC = () => {
               || (savedDraft?.payload && 'ackNumber' in savedDraft.payload ? savedDraft.payload.ackNumber : null)
               || null
             }
+            onOpenScamAnalyzer={() => setCyberSafetyTool('analyzer')}
+            onOpenLinkChecker={() => setCyberSafetyTool('link')}
+            onOpenDashboard={() => setCyberSafetyTool('dashboard')}
           />
         ) : currentStep === 'intake' && (
           <EmergencyIntake
@@ -603,6 +608,14 @@ export const App: React.FC = () => {
 
       {showQuiz && (
         <CyberSafetyQuiz currentLang={currentLang} onClose={() => setShowQuiz(false)} />
+      )}
+
+      {cyberSafetyTool && (
+        <CyberSafetyTools
+          currentLang={currentLang}
+          initialTool={cyberSafetyTool}
+          onClose={() => setCyberSafetyTool(null)}
+        />
       )}
 
       <ComplaintAssistant currentLang={currentLang} />
