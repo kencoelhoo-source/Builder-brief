@@ -13,6 +13,7 @@ import { SocialVerificationCard } from './components/SocialVerificationCard';
 import { TakedownDispatchCard } from './components/TakedownDispatchCard';
 import { EscalationTracker } from './components/EscalationTracker';
 import { FIRDraftModal } from './components/FIRDraftModal';
+import { ComplaintAssistant } from './components/ComplaintAssistant';
 import { SiteFooter } from './components/SiteFooter';
 import { LoginScreen } from './components/LoginScreen';
 import type { AppStep, Language, CyberIncident, FinancialIncident, SocialIncident, CFCFRMSPayload, Sec79Payload } from './types';
@@ -457,6 +458,8 @@ export const App: React.FC = () => {
           onClose={() => setShowMockedHub(false)}
         />
       )}
+
+      <ComplaintAssistant currentLang={currentLang} />
     </div>
   );
 };

@@ -7,10 +7,17 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Node & Package manager caches
 node_modules
+.npm-cache
 dist
 dist-ssr
 *.local
+
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
 
 # Editor directories and files
 .vscode/*
