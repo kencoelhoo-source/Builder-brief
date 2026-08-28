@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Mic, ArrowRight, CreditCard, ShieldAlert, MessageCircleQuestionMark } from 'lucide-react';
+import { Mic, ArrowRight, CreditCard, ShieldAlert, FileCheck2, MessageCircleQuestionMark } from 'lucide-react';
 import type { Language, FraudPersona } from '../types';
 import type { SavedDraft } from '../services/storageService';
 import { MOCK_PERSONAS } from '../data/mockPersonas';
@@ -77,6 +77,8 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
   const [socialPlatform, setSocialPlatform] = useState('');
   const [socialUrl, setSocialUrl] = useState('');
   const [socialSummary, setSocialSummary] = useState('');
+  const [socialListening, setSocialListening] = useState(false);
+  const [socialVoiceHint, setSocialVoiceHint] = useState('');
   const [dropOver, setDropOver] = useState<'money' | 'social' | null>(null);
   const [voiceHint, setVoiceHint] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -137,6 +139,42 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
     if (started) setIsListening(true);
   };
 
+  const handleToggleSocialVoice = () => {
+    if (!voiceSupported) {
+      setSocialVoiceHint(
+        hi
+          ? 'इस ब्राउज़र में आवाज़ उपलब्ध नहीं है। नीचे टाइप करें।'
+          : 'Voice is not available in this browser. Type in the field instead.'
+      );
+      return;
+    }
+    if (socialListening) {
+      speechService.stopListening();
+      setSocialListening(false);
+      return;
+    }
+    setSocialVoiceHint('');
+    const started = speechService.startListening(
+      currentLang,
+      (transcript, isFinal) => {
+        setSocialSummary(transcript);
+        if (isFinal) {
+          speechService.stopListening();
+          setSocialListening(false);
+        }
+      },
+      () => {
+        setSocialListening(false);
+        setSocialVoiceHint(
+          hi
+            ? 'माइक्रोफ़ोन चालू नहीं हो सका। नीचे टाइप करें।'
+            : 'Microphone could not start. Type in the field instead.'
+        );
+      }
+    );
+    if (started) setSocialListening(true);
+  };
+
   const handleTypedVoiceSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (spokenText.trim()) onVoiceTranscribe(spokenText);
@@ -184,7 +222,7 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
     <div className="page-wrap page-stack intake">
       {panel !== 'home' && (
         <p className="mb-6">
-          <button type="button" className="btn-link" onClick={() => { speechService.stopListening(); setIsListening(false); setPanel('home'); }}>
+          <button type="button" className="btn-link" onClick={() => { speechService.stopListening(); setIsListening(false); setSocialListening(false); setPanel('home'); }}>
             {hi ? '← वापस' : '← Back'}
           </button>
         </p>
@@ -241,12 +279,16 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
                 ? 'एक कार्ड चुनें। रसीद या चैट की फोटो उसी कार्ड पर छोड़ सकते हैं।'
                 : 'Pick one card. If you have a photo of the receipt or chat, drop it on that card.'}
             </p>
-            <div className="notice notice-urgent intake-urgent" role="note">
+            <div className="notice intake-proof-note" role="note">
+              <span className="intake-proof-icon" aria-hidden="true"><FileCheck2 size={17} /></span>
               <div>
-                <strong>{hi ? 'पैसे अभी-अभी गए हैं?' : 'Money just left?'}</strong>
-                <p>{hi ? 'पहले बैंक को बताएं और 1930 पर कॉल करें। यह साइट खाता नहीं रोकती।' : 'Call your bank and 1930 first. This site does not freeze accounts.'}</p>
+                <strong>{hi ? 'मूल सबूत सुरक्षित रखें' : 'Keep the original evidence'}</strong>
+                <p>
+                  {hi
+                    ? 'रसीद या बैंक SMS को न बदलें। साफ़ फोटो अपलोड करें ताकि ज़रूरी विवरण पढ़े जा सकें।'
+                    : 'Don’t edit or delete the receipt or bank SMS. Upload a clear photo so the important details stay readable.'}
+                </p>
               </div>
-              <a className="btn-emergency intake-call-btn" href="tel:1930">1930</a>
             </div>
           </header>
 
@@ -394,6 +436,10 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
               ? 'UTR वह 12 अंकों का नंबर है जो GPay, PhonePe या बैंक SMS पर छपता है। साथ में राशि और संदिग्ध UPI ID लिखें।'
               : 'UTR is the 12-digit Unique Transaction Reference printed on GPay, PhonePe or the bank SMS. Also enter the amount and the suspect UPI ID.'}
           </p>
+          <button type="button" className="intake-voice-link" onClick={() => setPanel('voice')}>
+            <Mic size={15} />
+            <span>{hi ? 'आवाज़ से बताएं' : 'Use voice instead'}</span>
+          </button>
           </header>
           <form onSubmit={handleManualFormSubmit} className="space-y-4">
             <div>
@@ -500,14 +546,35 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
               <label htmlFor="social-summary" className="block text-xs font-semibold text-muted mb-1">
                 {hi ? 'क्या हुआ' : 'What happened'}
               </label>
-              <textarea
-                id="social-summary"
-                rows={4}
-                value={socialSummary}
-                onChange={(e) => setSocialSummary(e.target.value)}
-                className="input-field resize-none"
-                required
-              />
+              <div className="textarea-with-voice">
+                <textarea
+                  id="social-summary"
+                  rows={4}
+                  value={socialSummary}
+                  onChange={(e) => setSocialSummary(e.target.value)}
+                  className="input-field resize-none"
+                  required
+                />
+                <button
+                  type="button"
+                  className={`textarea-voice-button ${socialListening ? 'is-recording' : ''}`}
+                  onClick={handleToggleSocialVoice}
+                  aria-label={
+                    socialListening
+                      ? (hi ? 'आवाज़ रोकें' : 'Stop voice input')
+                      : (hi ? 'आवाज़ से क्या हुआ बताएं' : 'Describe what happened by voice')
+                  }
+                  aria-pressed={socialListening}
+                  title={
+                    socialListening
+                      ? (hi ? 'आवाज़ रोकें' : 'Stop voice input')
+                      : (hi ? 'आवाज़ से बताएं' : 'Use voice input')
+                  }
+                >
+                  <Mic size={16} />
+                </button>
+              </div>
+              {socialVoiceHint && <p className="field-hint">{socialVoiceHint}</p>}
             </div>
             <button
               type="submit"
