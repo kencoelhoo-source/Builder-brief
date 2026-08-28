@@ -1,0 +1,140 @@
+import React, { useState } from 'react';
+import { ShieldCheck, Radio } from 'lucide-react';
+import type { SocialIncident, Language, Sec79Payload } from '../types';
+import { MyApplicationsTab } from './MyApplicationsTab';
+
+interface EscalationTrackerProps {
+  transaction: SocialIncident;
+  payload: Sec79Payload;
+  currentLang: Language;
+  onGeneratePetition: () => void;
+  onBack: () => void;
+}
+
+export const EscalationTracker: React.FC<EscalationTrackerProps> = ({
+  transaction,
+  payload,
+  currentLang,
+  onGeneratePetition,
+  onBack,
+}) => {
+  const hi = currentLang === 'hi';
+  const [viewTab, setViewTab] = useState<'status' | 'application'>('status');
+
+  return (
+    <div className="page-wrap page-stack max-w-3xl">
+      <p className="mb-6">
+        <button type="button" className="btn-link" onClick={onBack}>
+          ← {hi ? 'कार्रवाई पर लौटें' : 'Back to act'}
+        </button>
+      </p>
+
+      {/* Segmented Tab Switcher with Smooth Sliding Indicator */}
+      <div className="relative inline-flex items-center p-1 rounded-full bg-soft border border-line mb-6 w-full max-w-sm">
+        {/* Sliding Pill Indicator */}
+        <div
+          className="absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-full bg-card shadow-sm transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
+          style={{
+            left: viewTab === 'status' ? '4px' : 'calc(50%)',
+          }}
+        />
+
+        <button
+          type="button"
+          onClick={() => setViewTab('status')}
+          className={`relative z-10 flex-1 h-9 flex items-center justify-center gap-1.5 px-3 rounded-full text-xs font-semibold whitespace-nowrap transition-colors duration-200 ${
+            viewTab === 'status'
+              ? 'text-ink'
+              : 'text-muted hover:text-ink'
+          }`}
+        >
+          <Radio size={13} className={viewTab === 'status' ? 'text-[#15803d]' : 'text-muted'} />
+          <span>{hi ? 'टेकडाउन रडार' : 'Takedown Radar'}</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setViewTab('application')}
+          className={`relative z-10 flex-1 h-9 flex items-center justify-center gap-1.5 px-3 rounded-full text-xs font-semibold whitespace-nowrap transition-colors duration-200 ${
+            viewTab === 'application'
+              ? 'text-ink'
+              : 'text-muted hover:text-ink'
+          }`}
+        >
+          <ShieldCheck size={13} className={viewTab === 'application' ? 'text-amber-600' : 'text-muted'} />
+          <span>{hi ? 'मेरी शिकायत' : 'My Application'}</span>
+        </button>
+      </div>
+
+      {viewTab === 'status' ? (
+        <div className="anim-slide-left">
+          <p className="text-success font-bold text-sm">
+            {hi ? 'नोटिस भेज दिया गया' : 'The notice has been sent'}
+          </p>
+          <h1 className="text-3xl md:text-4xl font-bold mt-2">
+            {hi ? 'टेकडाउन की स्थिति' : 'Takedown status'}
+          </h1>
+          <p className="mt-3 text-base sm:text-lg text-muted">
+            {payload.takedownToken} · {transaction.platform}
+          </p>
+
+          <ol className="mt-8 border-t border-line">
+            <li className="py-4 sm:py-5 border-b border-line">
+              <p className="text-muted text-xs sm:text-sm">1. {hi ? 'पूर्ण' : 'Done'}</p>
+              <p className="font-bold text-base sm:text-lg mt-0.5 text-ink">
+                {hi ? 'Sec 79 नोटिस भेजा गया' : 'Section 79 notice dispatched'}
+              </p>
+              <p className="text-muted text-xs sm:text-sm mt-1">
+                {new Date(payload.dispatchedAt).toLocaleString('en-IN')}
+              </p>
+            </li>
+            <li className="py-4 sm:py-5 border-b border-line">
+              <p className="text-muted text-xs sm:text-sm">2. {hi ? 'चल रहा है' : 'In progress'}</p>
+              <p className="font-bold text-base sm:text-lg mt-0.5 text-ink">
+                {hi ? 'प्लेटफ़ॉर्म समीक्षा' : 'Platform review'}
+              </p>
+              <p className="text-muted text-xs sm:text-sm mt-1">
+                {payload.grievanceOfficerEmail} · {hi ? '36 घंटे की अवधि सक्रिय' : '36-hour window is running'}
+              </p>
+            </li>
+            <li className="py-4 sm:py-5 border-b border-line">
+              <p className="text-muted text-xs sm:text-sm">3. {hi ? 'यदि आवश्यक हो' : 'If needed'}</p>
+              <p className="font-bold text-base sm:text-lg mt-0.5 text-ink">
+                {hi ? 'FIR और पुलिस जाँच' : 'FIR and police investigation'}
+              </p>
+              <p className="text-muted text-xs sm:text-sm mt-1">
+                {hi
+                  ? 'यदि प्लेटफ़ॉर्म कार्रवाई न करे तो स्थानीय साइबर सेल को भेजा जाएगा।'
+                  : 'If the platform does not comply, this goes to the local cyber cell.'}
+              </p>
+            </li>
+          </ol>
+
+          <div className="notice mt-8 text-sm text-muted">
+            <p className="font-semibold text-ink">
+              {hi ? 'आगे क्या करना है?' : 'What to do next:'}
+            </p>
+            <p className="mt-1">
+              {hi
+                ? 'यदि 36 घंटे के भीतर सामग्री नहीं हटाई जाती, तो धारा 154 CrPC / 173 BNSS के तहत तैयार FIR ड्राफ्ट डाउनलोड करके अपने स्थानीय साइबर सेल में शिकायत दर्ज कराएं।'
+                : 'If the platform fails to take down the content within 36 hours, download the pre-formatted FIR draft (compliant with Sec 154 CrPC / 173 BNSS) to submit at your nearest Cyber Police Station.'}
+            </p>
+          </div>
+
+          <button type="button" onClick={onGeneratePetition} className="btn-primary mt-6">
+            {hi ? 'FIR ड्राफ्ट तैयार करें' : 'Generate FIR draft'}
+          </button>
+        </div>
+      ) : (
+        <div className="anim-slide-right">
+          <MyApplicationsTab
+            transaction={transaction}
+            payload={payload}
+            currentLang={currentLang}
+            onOpenCourtPetition={onGeneratePetition}
+            onViewReceipt={() => {}}
+          />
+        </div>
+      )}
+    </div>
+  );
+};
