@@ -15,7 +15,10 @@ import { EscalationTracker } from './components/EscalationTracker';
 import { FIRDraftModal } from './components/FIRDraftModal';
 import { SiteFooter } from './components/SiteFooter';
 import { LoginScreen } from './components/LoginScreen';
+<<<<<<< HEAD
 import { ComplaintAssistant } from './components/ComplaintAssistant';
+=======
+>>>>>>> c35d628e34ce95338da8a5b5bc364803b8db1392
 import type { AppStep, Language, CyberIncident, FinancialIncident, SocialIncident, CFCFRMSPayload, Sec79Payload } from './types';
 import { parseScreenshotOCR, parseVoiceTranscription } from './services/ocrService';
 import {
@@ -458,8 +461,11 @@ export const App: React.FC = () => {
           onClose={() => setShowMockedHub(false)}
         />
       )}
+<<<<<<< HEAD
 
       <ComplaintAssistant currentLang={currentLang} />
+=======
+>>>>>>> c35d628e34ce95338da8a5b5bc364803b8db1392
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+<<<<<<< HEAD
 import { defineConfig, type Plugin } from 'vite'
 
 const demoNumbers = [
@@ -126,4 +127,10 @@ const chatAssistantApi = (): Plugin => ({
 
 export default defineConfig({
   plugins: [chatAssistantApi(), tailwindcss(), react()],
+=======
+import { defineConfig } from 'vite'
+
+export default defineConfig({
+  plugins: [tailwindcss(), react()],
+>>>>>>> c35d628e34ce95338da8a5b5bc364803b8db1392
 })

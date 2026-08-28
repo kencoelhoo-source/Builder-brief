@@ -267,6 +267,7 @@ h1, h2, h3, h4 {
   white-space: nowrap;
   flex-shrink: 0;
 }
+<<<<<<< HEAD
 .topbar-flag {
   position: relative;
   display: inline-block;
@@ -287,6 +288,8 @@ h1, h2, h3, h4 {
   border: 1px solid #000080;
   border-radius: 50%;
 }
+=======
+>>>>>>> c35d628e34ce95338da8a5b5bc364803b8db1392
 .topbar-steps {
   display: none;
   align-items: center;
@@ -742,6 +745,7 @@ h1, h2, h3, h4 {
   .print-content { position: absolute !important; inset: 0; padding: 1cm !important; }
   .no-print, header, footer, .sticky, nav, button, .mobile-helpline { display: none !important; }
 }
+<<<<<<< HEAD
 
 .complaint-assistant {
   position: fixed;
@@ -1034,3 +1038,5 @@ h1, h2, h3, h4 {
     min-width: 108px;
   }
 }
+=======
+>>>>>>> c35d628e34ce95338da8a5b5bc364803b8db1392

@@ -7,8 +7,12 @@
     "dev": "vite --port 5173 --host",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
+<<<<<<< HEAD
     "preview": "vite preview",
     "start": "node server.mjs"
+=======
+    "preview": "vite preview"
+>>>>>>> c35d628e34ce95338da8a5b5bc364803b8db1392
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",

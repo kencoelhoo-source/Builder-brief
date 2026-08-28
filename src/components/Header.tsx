@@ -44,9 +44,12 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="page-wrap topbar">
         <button type="button" onClick={onResetToHome} className="topbar-brand">
           Kavach Omni
+<<<<<<< HEAD
           <span className="topbar-flag" aria-hidden="true">
             <span className="topbar-flag-chakra" />
           </span>
+=======
+>>>>>>> c35d628e34ce95338da8a5b5bc364803b8db1392
         </button>
 
         <nav className="topbar-steps" aria-label="Progress">
