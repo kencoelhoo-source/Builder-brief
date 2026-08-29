@@ -10,6 +10,18 @@ interface SocialVerificationCardProps {
   onBackToIntake: () => void;
 }
 
+interface FieldProps {
+  label: string;
+  children: React.ReactNode;
+}
+
+const Field: React.FC<FieldProps> = ({ label, children }) => (
+  <div className="detail-row">
+    <p className="field-label">{label}</p>
+    {children}
+  </div>
+);
+
 export const SocialVerificationCard: React.FC<SocialVerificationCardProps> = ({
   transaction,
   currentLang,
@@ -25,19 +37,6 @@ export const SocialVerificationCard: React.FC<SocialVerificationCardProps> = ({
     e.preventDefault();
     onProceedToTakedown(formData);
   };
-
-  const Field = ({
-    label,
-    children,
-  }: {
-    label: string;
-    children: React.ReactNode;
-  }) => (
-    <div className="detail-row">
-      <p className="field-label">{label}</p>
-      {children}
-    </div>
-  );
 
   return (
     <div className="page-wrap page-stack flow-page">

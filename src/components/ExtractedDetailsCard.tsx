@@ -11,6 +11,20 @@ interface ExtractedDetailsCardProps {
   onBackToIntake: () => void;
 }
 
+interface FieldProps {
+  label: string;
+  hint?: string;
+  children: React.ReactNode;
+}
+
+const Field: React.FC<FieldProps> = ({ label, hint, children }) => (
+  <div className="detail-row">
+    <p className="field-label">{label}</p>
+    {children}
+    {hint ? <p className="field-hint">{hint}</p> : null}
+  </div>
+);
+
 export const ExtractedDetailsCard: React.FC<ExtractedDetailsCardProps> = ({
   transaction,
   currentLang,
@@ -32,22 +46,6 @@ export const ExtractedDetailsCard: React.FC<ExtractedDetailsCardProps> = ({
     e.preventDefault();
     onProceedToFreeze(formData);
   };
-
-  const Field = ({
-    label,
-    hint,
-    children,
-  }: {
-    label: string;
-    hint?: string;
-    children: React.ReactNode;
-  }) => (
-    <div className="detail-row">
-      <p className="field-label">{label}</p>
-      {children}
-      {hint ? <p className="field-hint">{hint}</p> : null}
-    </div>
-  );
 
   return (
     <div className="page-wrap page-stack flow-page">

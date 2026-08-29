@@ -9,6 +9,9 @@ interface EscalationTrackerProps {
   currentLang: Language;
   onGeneratePetition: () => void;
   onBack: () => void;
+  onSubmitFinalReport?: () => void;
+  onReturnHome?: () => void;
+  initialTab?: 'status' | 'application';
 }
 
 export const EscalationTracker: React.FC<EscalationTrackerProps> = ({
@@ -17,9 +20,18 @@ export const EscalationTracker: React.FC<EscalationTrackerProps> = ({
   currentLang,
   onGeneratePetition,
   onBack,
+  onSubmitFinalReport,
+  onReturnHome,
+  initialTab = 'status',
 }) => {
   const hi = currentLang === 'hi';
-  const [viewTab, setViewTab] = useState<'status' | 'application'>('status');
+  const [viewTab, setViewTab] = useState<'status' | 'application'>(initialTab);
+
+  React.useEffect(() => {
+    if (initialTab) {
+      setViewTab(initialTab);
+    }
+  }, [initialTab]);
 
   return (
     <div className="page-wrap page-stack flow-page">
@@ -130,6 +142,8 @@ export const EscalationTracker: React.FC<EscalationTrackerProps> = ({
             currentLang={currentLang}
             onOpenCourtPetition={onGeneratePetition}
             onViewReceipt={() => undefined}
+            onSubmitFinalReport={onSubmitFinalReport}
+            onReturnHome={onReturnHome}
           />
         </div>
       )}

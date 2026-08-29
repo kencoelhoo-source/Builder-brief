@@ -70,10 +70,10 @@ export const FIRDraftModal: React.FC<FIRDraftModalProps> = ({
         </div>
 
         {/* Printable Legal Document Body */}
-        <div className="fir-modal-body p-3 sm:p-6 overflow-y-auto bg-[#f8fafc] dark:bg-[#0f172a] print-content flex justify-center">
+        <div className="fir-modal-body p-3 sm:p-6 overflow-y-auto bg-[#f8fafc] dark:bg-[#0f172a] print-content flex items-start justify-center min-w-0">
           <div
             id="fir-document-content"
-            className="fir-document w-full max-w-[720px] bg-white text-[#111827] p-5 sm:p-8 rounded-lg shadow-sm border border-[#e2e8f0] text-[12.5px] leading-relaxed text-left space-y-3"
+            className="fir-document w-full max-w-[720px] bg-white text-[#111827] p-5 sm:p-8 rounded-lg shadow-sm border border-[#e2e8f0] text-[12.5px] leading-relaxed text-left space-y-3 shrink-0 h-auto my-1 sm:my-2"
             style={{ fontFamily: '"Times New Roman", Times, serif', boxSizing: 'border-box' }}
           >
             <div className="text-center pb-2 border-b border-[#cbd5e1]">

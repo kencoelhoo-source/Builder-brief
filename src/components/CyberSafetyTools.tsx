@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { AlertTriangle, BarChart3, CheckCircle2, Link2, Search, ShieldCheck, X } from 'lucide-react';
+import { AlertTriangle, BarChart3, CheckCircle2, Link2, Search, X } from 'lucide-react';
 import type { Language } from '../types';
 import {
   analyzeScamContent,
@@ -31,7 +31,7 @@ export const CyberSafetyTools: React.FC<CyberSafetyToolsProps> = ({
   onClose,
 }) => {
   const hi = currentLang === 'hi';
-  const [activeTool, setActiveTool] = useState<CyberSafetyTool>(initialTool);
+  const activeTool = initialTool;
   const [scamText, setScamText] = useState('');
   const [scamResult, setScamResult] = useState<ScamAnalysisResult | null>(null);
   const [linkInput, setLinkInput] = useState('');
@@ -39,12 +39,6 @@ export const CyberSafetyTools: React.FC<CyberSafetyToolsProps> = ({
   const [activity, setActivity] = useState(getCyberSafetyActivity);
 
   const score = useMemo(() => calculateCyberSafetyScore(activity), [activity]);
-
-  const tabs: { id: CyberSafetyTool; label: string; icon: React.ReactNode }[] = [
-    { id: 'analyzer', label: hi ? 'स्कैम विश्लेषक' : 'Scam Analyzer', icon: <AlertTriangle size={16} /> },
-    { id: 'link', label: hi ? 'लिंक चेकर' : 'Link Checker', icon: <Link2 size={16} /> },
-    { id: 'dashboard', label: hi ? 'डैशबोर्ड' : 'Dashboard', icon: <BarChart3 size={16} /> },
-  ];
 
   const runScamAnalysis = () => {
     const trimmed = scamText.trim();
@@ -74,17 +68,21 @@ export const CyberSafetyTools: React.FC<CyberSafetyToolsProps> = ({
       >
         <header className="flex items-start justify-between gap-4 p-4 sm:p-5 border-b border-line bg-soft rounded-t-2xl">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-[#15803d] text-white flex items-center justify-center shrink-0">
-              <ShieldCheck size={18} />
+            <div className="w-9 h-9 rounded-full bg-soft text-ink border border-line flex items-center justify-center shrink-0">
+              {activeTool === 'analyzer' && <AlertTriangle size={17} />}
+              {activeTool === 'link' && <Link2 size={17} />}
+              {activeTool === 'dashboard' && <BarChart3 size={17} />}
             </div>
             <div>
               <h2 id="cyber-safety-tools-title" className="text-lg font-bold">
-                {hi ? 'साइबर सुरक्षा उपकरण' : 'Cyber Safety Tools'}
+                {activeTool === 'analyzer' && (hi ? 'AI स्कैम विश्लेषक' : 'AI Scam Analyzer')}
+                {activeTool === 'link' && (hi ? 'संदिग्ध लिंक चेकर' : 'Suspicious Link Checker')}
+                {activeTool === 'dashboard' && (hi ? 'साइबर सुरक्षा डैशबोर्ड' : 'Cyber Safety Dashboard')}
               </h2>
               <p className="text-xs text-muted">
-                {hi
-                  ? 'AI आकलन गलत हो सकता है; संवेदनशील जानकारी साझा न करें।'
-                  : 'AI assessments can be wrong; do not share sensitive information.'}
+                {activeTool === 'analyzer' && (hi ? 'SMS, WhatsApp, ईमेल या कॉल में साइबर ठगी के पैटर्न जांचें।' : 'Analyze SMS, WhatsApp, email, or call descriptions for fraud patterns.')}
+                {activeTool === 'link' && (hi ? 'URL खोले बिना domain, SSL और impersonation संकेत जांचें।' : 'Assess domain, HTTPS, and impersonation signals without opening the URL.')}
+                {activeTool === 'dashboard' && (hi ? 'अपनी checks, analyses और सुरक्षा स्कोरकार्ड देखें।' : 'View your checks, analyses, and personal safety recommendations.')}
               </p>
             </div>
           </div>
@@ -92,28 +90,6 @@ export const CyberSafetyTools: React.FC<CyberSafetyToolsProps> = ({
             <X size={18} />
           </button>
         </header>
-
-        <div className="border-b border-line px-4 sm:px-5 py-3 bg-card">
-          <div className="flex flex-wrap gap-2" role="tablist" aria-label={hi ? 'सुरक्षा उपकरण' : 'Cyber safety tools'}>
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                role="tab"
-                aria-selected={activeTool === tab.id}
-                className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold ${
-                  activeTool === tab.id
-                    ? 'bg-ink text-[var(--accent-fg)] border-ink'
-                    : 'bg-card text-ink border-line-strong hover:bg-soft'
-                }`}
-                onClick={() => setActiveTool(tab.id)}
-              >
-                {tab.icon}
-                {tab.label}
-              </button>
-            ))}
-          </div>
-        </div>
 
         <div className="overflow-y-auto p-4 sm:p-6">
           {activeTool === 'analyzer' && (

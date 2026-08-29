@@ -15,6 +15,7 @@ import { EscalationTracker } from './components/EscalationTracker';
 import { FIRDraftModal } from './components/FIRDraftModal';
 import { ComplaintAssistant } from './components/ComplaintAssistant';
 import { SiteFooter } from './components/SiteFooter';
+import { EvidenceTipsModal } from './components/EvidenceTipsModal';
 
 import { LoginScreen } from './components/LoginScreen';
 import type { AppStep, Language, CyberIncident, FinancialIncident, SocialIncident, CFCFRMSPayload, Sec79Payload } from './types';
@@ -76,12 +77,14 @@ export const App: React.FC = () => {
   const [showReceiptModal, setShowReceiptModal] = useState<boolean>(false);
   const [showFIRModal, setShowFIRModal] = useState<boolean>(false);
   const [showMockedHub, setShowMockedHub] = useState<boolean>(false);
+  const [showTipsModal, setShowTipsModal] = useState<boolean>(false);
 
   const [showQuiz, setShowQuiz] = useState<boolean>(false);
   const [cyberSafetyTool, setCyberSafetyTool] = useState<CyberSafetyTool | null>(null);
   const [intakeResetKey, setIntakeResetKey] = useState(0);
   const [furthestStep, setFurthestStep] = useState<number>(0);
   const [showHub, setShowHub] = useState(true);
+  const [radarInitialTab, setRadarInitialTab] = useState<'radar' | 'application' | 'status'>('radar');
   const [sessionPhone, setSessionPhone] = useState<string | null>(() => {
     try {
       return sessionStorage.getItem('kavach_session');
@@ -99,6 +102,17 @@ export const App: React.FC = () => {
     }
   }, [theme]);
 
+  const handleToggleTheme = () => {
+    const nextTheme: Theme = theme === 'light' ? 'dark' : 'light';
+    if (typeof document !== 'undefined' && 'startViewTransition' in document) {
+      (document as unknown as { startViewTransition: (cb: () => void) => void }).startViewTransition(() => {
+        setTheme(nextTheme);
+      });
+    } else {
+      setTheme(nextTheme);
+    }
+  };
+
   useEffect(() => {
     try {
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -108,9 +122,48 @@ export const App: React.FC = () => {
   }, [currentStep]);
 
   useEffect(() => {
-    // Always start at intake on fresh load/refresh
-    window.history.replaceState({ step: 'intake' }, '');
-  }, []);
+    if (!sessionPhone) {
+      window.history.replaceState({ view: 'login' }, '');
+    } else {
+      window.history.replaceState({ view: 'hub' }, '');
+    }
+  }, [sessionPhone]);
+
+  const handleOpenTool = (tool: 'analyzer' | 'link' | 'dashboard') => {
+    setCyberSafetyTool(tool);
+    window.history.pushState({ view: 'tool', tool }, '');
+  };
+
+  const handleOpenModal = (modalName: 'quiz' | 'mocked' | 'tips' | 'petition' | 'receipt' | 'fir' | 'login-quiz') => {
+    if (modalName === 'quiz' || modalName === 'login-quiz') setShowQuiz(true);
+    if (modalName === 'mocked') setShowMockedHub(true);
+    if (modalName === 'tips') setShowTipsModal(true);
+    if (modalName === 'petition') setShowPetitionModal(true);
+    if (modalName === 'receipt') setShowReceiptModal(true);
+    if (modalName === 'fir') setShowFIRModal(true);
+    window.history.pushState({ view: modalName === 'login-quiz' ? 'login-quiz' : 'modal', modal: modalName }, '');
+  };
+
+  const handleCloseAnyModalOrTool = () => {
+    const st = window.history.state as { view?: string } | null;
+    if (st && (st.view === 'modal' || st.view === 'tool' || st.view === 'login-quiz')) {
+      window.history.back();
+    } else {
+      setCyberSafetyTool(null);
+      setShowQuiz(false);
+      setShowMockedHub(false);
+      setShowTipsModal(false);
+      setShowPetitionModal(false);
+      setShowReceiptModal(false);
+      setShowFIRModal(false);
+    }
+  };
+
+  const handleStartReport = () => {
+    setShowHub(false);
+    setCurrentStep('intake');
+    window.history.pushState({ view: 'flow', step: 'intake' }, '');
+  };
 
   const goToStep = (
     step: AppStep,
@@ -128,21 +181,54 @@ export const App: React.FC = () => {
     if (source === 'flow') {
       setFurthestStep((n) => Math.max(n, idx));
     }
+    setShowHub(false);
     setCurrentStep(step);
     if (options.persist !== false && nextTransaction) {
       saveDraftToStorage(nextTransaction, nextPayload, step);
       setSavedDraft(getDraftFromStorage());
     }
     if (source !== 'pop') {
-      window.history.pushState({ step }, '');
+      window.history.pushState({ view: 'flow', step }, '');
     }
   };
 
   useEffect(() => {
     const onPop = (event: PopStateEvent) => {
-      const step = event.state?.step as AppStep | undefined;
-      if (step && STEP_ORDER.includes(step)) {
-        setCurrentStep(step);
+      const state = event.state as {
+        view?: 'hub' | 'flow' | 'tool' | 'modal' | 'login' | 'login-quiz';
+        step?: AppStep;
+        tool?: 'analyzer' | 'link' | 'dashboard';
+        modal?: string;
+      } | null;
+
+      // Handle Modals
+      setShowPetitionModal(state?.view === 'modal' && state.modal === 'petition');
+      setShowReceiptModal(state?.view === 'modal' && state.modal === 'receipt');
+      setShowFIRModal(state?.view === 'modal' && state.modal === 'fir');
+      setShowMockedHub(state?.view === 'modal' && state.modal === 'mocked');
+      setShowTipsModal(state?.view === 'modal' && state.modal === 'tips');
+      setShowQuiz((state?.view === 'modal' && state.modal === 'quiz') || state?.view === 'login-quiz');
+
+      // Handle Tools
+      if (state?.view === 'tool' && state.tool) {
+        setCyberSafetyTool(state.tool);
+        return;
+      }
+      setCyberSafetyTool(null);
+
+      // If this pop is for a modal or login, do not alter hub/flow step
+      if (state?.view === 'modal' || state?.view === 'login-quiz' || state?.view === 'login') {
+        return;
+      }
+
+      // Handle Flow Steps
+      if (state?.view === 'flow' && state.step && STEP_ORDER.includes(state.step)) {
+        setShowHub(false);
+        setCurrentStep(state.step);
+      } else {
+        // Hub / root view
+        setShowHub(true);
+        setCurrentStep('intake');
       }
     };
     window.addEventListener('popstate', onPop);
@@ -173,13 +259,15 @@ export const App: React.FC = () => {
 
   const handleSelectPreset = async (personaId: string) => {
     setIsLoading(true);
+    setShowHub(false);
     try {
       const extracted = await parseScreenshotOCR(personaId);
       setPayload(null);
       setSec79Payload(null);
       setTransaction(extracted);
+      setShowHub(false);
       goToStep('review', 'flow', { transaction: extracted, payload: null });
-      triggerToast(currentLang === 'hi' ? 'AI ने ट्रांसक्शन विवरण निकाल लिया है' : 'Vision AI parsed screenshot details');
+      triggerToast(currentLang === 'hi' ? 'मॉक केस लोड हुआ — विवरण जाँचें' : 'Mock case loaded — review details');
     } catch (e) {
       console.error(e);
       triggerToast(currentLang === 'hi' ? 'डेमो रिपोर्ट लोड नहीं हो सकी' : 'Could not load that demo report');
@@ -324,18 +412,42 @@ export const App: React.FC = () => {
   const handleGoHub = () => {
     setShowHub(true);
     setCurrentStep('intake');
-    window.history.replaceState({ step: 'intake' }, '');
+    window.history.pushState({ view: 'hub' }, '');
+  };
+
+  const handleSubmitFinalReport = () => {
+    const livePayload = payload || sec79Payload;
+    if (transaction && livePayload) {
+      saveDraftToStorage(transaction, livePayload, 'radar');
+      setSavedDraft(getDraftFromStorage());
+    }
+    const ack =
+      payload?.ackNumber ||
+      sec79Payload?.ackNumber ||
+      (savedDraft?.payload && 'ackNumber' in savedDraft.payload
+        ? (savedDraft.payload as { ackNumber?: string }).ackNumber
+        : 'DEMO-CASE');
+    triggerToast(
+      currentLang === 'hi'
+        ? `अंतिम रिपोर्ट सबमिट हो गई! संदर्भ सं: ${ack}`
+        : `Final report submitted! Reference: ${ack}`
+    );
+    setShowHub(true);
+    setCurrentStep('intake');
+    window.history.pushState({ view: 'hub' }, '');
   };
 
   const handleTrack = () => {
     const livePayload = payload || sec79Payload;
     if (transaction && livePayload) {
+      setRadarInitialTab('application');
       setShowHub(false);
       goToStep('radar', 'nav', { transaction, payload: livePayload });
       return;
     }
     const draft = getDraftFromStorage();
     if (draft?.transaction && draft.payload) {
+      setRadarInitialTab('application');
       handleResumeDraft();
       setShowHub(false);
       return;
@@ -397,7 +509,7 @@ export const App: React.FC = () => {
     setIntakeResetKey((key) => key + 1);
     setCurrentStep('intake');
     setShowHub(true);
-    window.history.replaceState({ step: 'intake' }, '');
+    window.history.pushState({ view: 'hub' }, '');
     triggerToast(currentLang === 'hi' ? 'नया केस शुरू किया गया' : 'Ready for a new report');
   };
 
@@ -428,12 +540,12 @@ export const App: React.FC = () => {
           currentLang={currentLang}
           onToggleLang={handleToggleLang}
           theme={theme}
-          onToggleTheme={() => setTheme((t) => (t === 'light' ? 'dark' : 'light'))}
+          onToggleTheme={handleToggleTheme}
           onLogin={handleLogin}
-          onOpenQuiz={() => setShowQuiz(true)}
+          onOpenQuiz={() => handleOpenModal('login-quiz')}
         />
         {showQuiz && (
-          <CyberSafetyQuiz currentLang={currentLang} onClose={() => setShowQuiz(false)} />
+          <CyberSafetyQuiz currentLang={currentLang} onClose={handleCloseAnyModalOrTool} />
         )}
       </>
     );
@@ -453,7 +565,7 @@ export const App: React.FC = () => {
         onToggleLang={handleToggleLang}
         onGoHome={handleGoHub}
         theme={theme}
-        onToggleTheme={() => setTheme((t) => (t === 'light' ? 'dark' : 'light'))}
+        onToggleTheme={handleToggleTheme}
         onLogout={handleLogout}
         furthestStep={furthestStep}
         onGoToStep={(step) => {
@@ -469,7 +581,7 @@ export const App: React.FC = () => {
         {showHub ? (
           <HomeHub
             currentLang={currentLang}
-            onReport={() => setShowHub(false)}
+            onReport={handleStartReport}
             onTrack={handleTrack}
             canTrack={Boolean((payload || sec79Payload) && transaction) || Boolean(savedDraft?.payload)}
             ackNumber={
@@ -478,15 +590,15 @@ export const App: React.FC = () => {
               || (savedDraft?.payload && 'ackNumber' in savedDraft.payload ? savedDraft.payload.ackNumber : null)
               || null
             }
-            onOpenScamAnalyzer={() => setCyberSafetyTool('analyzer')}
-            onOpenLinkChecker={() => setCyberSafetyTool('link')}
-            onOpenDashboard={() => setCyberSafetyTool('dashboard')}
+            onSelectPreset={handleSelectPreset}
+            onOpenScamAnalyzer={() => handleOpenTool('analyzer')}
+            onOpenLinkChecker={() => handleOpenTool('link')}
+            onOpenDashboard={() => handleOpenTool('dashboard')}
           />
         ) : currentStep === 'intake' && (
           <EmergencyIntake
             key={intakeResetKey}
             currentLang={currentLang}
-            onSelectPreset={handleSelectPreset}
             onUploadFile={handleUploadFile}
             onVoiceTranscribe={handleVoiceTranscribe}
             onManualSubmit={handleManualSubmit}
@@ -549,17 +661,23 @@ export const App: React.FC = () => {
               transaction={transaction as FinancialIncident}
               payload={payload}
               currentLang={currentLang}
-              onOpenCourtPetition={() => setShowPetitionModal(true)}
-              onViewReceipt={() => setShowReceiptModal(true)}
+              onOpenCourtPetition={() => handleOpenModal('petition')}
+              onViewReceipt={() => handleOpenModal('receipt')}
               onBack={() => goToStep('freeze', 'nav')}
+              onSubmitFinalReport={handleSubmitFinalReport}
+              onReturnHome={handleGoHub}
+              initialTab={radarInitialTab === 'application' ? 'application' : 'radar'}
             />
           ) : transaction.incidentType === 'SOCIAL' && sec79Payload ? (
             <EscalationTracker
               transaction={transaction as SocialIncident}
               payload={sec79Payload}
               currentLang={currentLang}
-              onGeneratePetition={() => setShowFIRModal(true)}
+              onGeneratePetition={() => handleOpenModal('fir')}
               onBack={() => goToStep('freeze', 'nav')}
+              onSubmitFinalReport={handleSubmitFinalReport}
+              onReturnHome={handleGoHub}
+              initialTab={radarInitialTab === 'application' ? 'application' : 'status'}
             />
           ) : null
         )}
@@ -568,8 +686,9 @@ export const App: React.FC = () => {
       <SiteFooter
         currentLang={currentLang}
         onResetToHome={handleResetToHome}
-        onOpenMockedHub={() => setShowMockedHub(true)}
-        onOpenQuiz={() => setShowQuiz(true)}
+        onOpenMockedHub={() => handleOpenModal('mocked')}
+        onOpenQuiz={() => handleOpenModal('quiz')}
+        onOpenTips={() => handleOpenModal('tips')}
       />
 
       {showPetitionModal && transaction && payload && (
@@ -577,7 +696,7 @@ export const App: React.FC = () => {
           transaction={transaction as FinancialIncident}
           payload={payload}
           currentLang={currentLang}
-          onClose={() => setShowPetitionModal(false)}
+          onClose={handleCloseAnyModalOrTool}
         />
       )}
 
@@ -586,7 +705,7 @@ export const App: React.FC = () => {
           transaction={transaction as FinancialIncident}
           payload={payload}
           currentLang={currentLang}
-          onClose={() => setShowReceiptModal(false)}
+          onClose={handleCloseAnyModalOrTool}
         />
       )}
 
@@ -595,26 +714,33 @@ export const App: React.FC = () => {
           transaction={transaction as SocialIncident}
           payload={sec79Payload}
           currentLang={currentLang}
-          onClose={() => setShowFIRModal(false)}
+          onClose={handleCloseAnyModalOrTool}
         />
       )}
 
       {showMockedHub && (
         <MockedTransparencyHub
           currentLang={currentLang}
-          onClose={() => setShowMockedHub(false)}
+          onClose={handleCloseAnyModalOrTool}
+        />
+      )}
+
+      {showTipsModal && (
+        <EvidenceTipsModal
+          currentLang={currentLang}
+          onClose={handleCloseAnyModalOrTool}
         />
       )}
 
       {showQuiz && (
-        <CyberSafetyQuiz currentLang={currentLang} onClose={() => setShowQuiz(false)} />
+        <CyberSafetyQuiz currentLang={currentLang} onClose={handleCloseAnyModalOrTool} />
       )}
 
       {cyberSafetyTool && (
         <CyberSafetyTools
           currentLang={currentLang}
           initialTool={cyberSafetyTool}
-          onClose={() => setCyberSafetyTool(null)}
+          onClose={handleCloseAnyModalOrTool}
         />
       )}
 

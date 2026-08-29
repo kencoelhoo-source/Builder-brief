@@ -11,6 +11,9 @@ interface FundTrailRadarProps {
   onOpenCourtPetition: () => void;
   onViewReceipt: () => void;
   onBack: () => void;
+  onSubmitFinalReport?: () => void;
+  onReturnHome?: () => void;
+  initialTab?: 'radar' | 'application';
 }
 
 export const FundTrailRadar: React.FC<FundTrailRadarProps> = ({
@@ -20,9 +23,18 @@ export const FundTrailRadar: React.FC<FundTrailRadarProps> = ({
   onOpenCourtPetition,
   onViewReceipt,
   onBack,
+  onSubmitFinalReport,
+  onReturnHome,
+  initialTab = 'radar',
 }) => {
   const hi = currentLang === 'hi';
-  const [viewTab, setViewTab] = useState<'radar' | 'application'>('radar');
+  const [viewTab, setViewTab] = useState<'radar' | 'application'>(initialTab);
+
+  React.useEffect(() => {
+    if (initialTab) {
+      setViewTab(initialTab);
+    }
+  }, [initialTab]);
 
   const nodes: RadarNode[] = [
     {
@@ -179,6 +191,8 @@ export const FundTrailRadar: React.FC<FundTrailRadarProps> = ({
             currentLang={currentLang}
             onOpenCourtPetition={onOpenCourtPetition}
             onViewReceipt={onViewReceipt}
+            onSubmitFinalReport={onSubmitFinalReport}
+            onReturnHome={onReturnHome}
           />
         </div>
       )}

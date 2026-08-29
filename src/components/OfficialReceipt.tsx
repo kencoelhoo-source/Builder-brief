@@ -59,10 +59,10 @@ export const OfficialReceipt: React.FC<OfficialReceiptProps> = ({
         </div>
 
             {/* Printable prototype summary */}
-        <div className="p-3 sm:p-6 overflow-y-auto bg-[#f8fafc] dark:bg-[#0f172a] print-content flex justify-center">
+        <div className="p-3 sm:p-6 overflow-y-auto bg-[#f8fafc] dark:bg-[#0f172a] print-content flex items-start justify-center min-w-0">
           <div
             id="receipt-document-content"
-            className="w-full max-w-[680px] bg-white text-[#111827] p-5 sm:p-7 rounded-lg border-2 border-[#1e3a8a] shadow-sm flex flex-col gap-3.5"
+            className="w-full max-w-[680px] bg-white text-[#111827] p-5 sm:p-7 rounded-lg border-2 border-[#1e3a8a] shadow-sm flex flex-col gap-3.5 shrink-0 h-auto my-1 sm:my-2"
             style={{ boxSizing: 'border-box' }}
           >
             {/* Prototype header */}
@@ -97,21 +97,21 @@ export const OfficialReceipt: React.FC<OfficialReceiptProps> = ({
 
             {/* Acknowledgment & Token Matrix */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-              <div className="bg-[#f8fafc] p-2.5 rounded border border-[#cbd5e1]">
-                <span className="text-[9px] text-[#64748b] block font-bold uppercase">NCRP ACK NO.</span>
-                <span className="text-xs font-mono font-black text-[#1e3a8a]">{payload.ackNumber}</span>
+              <div className="bg-[#f8fafc] p-2.5 rounded-lg border border-[#cbd5e1] flex flex-col items-center justify-center text-center min-h-[64px]">
+                <span className="text-[9.5px] text-[#64748b] font-bold uppercase tracking-wider block mb-1 text-center">NCRP ACK NO.</span>
+                <span className="text-[11.5px] sm:text-xs font-mono font-black text-[#1e3a8a] break-all leading-tight text-center">{payload.ackNumber}</span>
               </div>
-              <div className="bg-[#f8fafc] p-2.5 rounded border border-[#cbd5e1]">
-                <span className="text-[9px] text-[#64748b] block font-bold uppercase">CFCFRMS TOKEN</span>
-                <span className="text-xs font-mono font-bold text-[#334155]">{payload.cfcfrmsToken}</span>
+              <div className="bg-[#f8fafc] p-2.5 rounded-lg border border-[#cbd5e1] flex flex-col items-center justify-center text-center min-h-[64px]">
+                <span className="text-[9.5px] text-[#64748b] font-bold uppercase tracking-wider block mb-1 text-center">CFCFRMS TOKEN</span>
+                <span className="text-[11.5px] sm:text-xs font-mono font-bold text-[#334155] break-all leading-tight text-center">{payload.cfcfrmsToken}</span>
               </div>
-              <div className="bg-[#f8fafc] p-2.5 rounded border border-[#cbd5e1]">
-                <span className="text-[9px] text-[#64748b] block font-bold uppercase">TRANSACTION UTR</span>
-                <span className="text-xs font-mono font-bold text-[#0f172a]">{transaction.utr}</span>
+              <div className="bg-[#f8fafc] p-2.5 rounded-lg border border-[#cbd5e1] flex flex-col items-center justify-center text-center min-h-[64px]">
+                <span className="text-[9.5px] text-[#64748b] font-bold uppercase tracking-wider block mb-1 text-center">TRANSACTION UTR</span>
+                <span className="text-[11.5px] sm:text-xs font-mono font-bold text-[#0f172a] break-all leading-tight text-center">{transaction.utr}</span>
               </div>
-              <div className="bg-[#fef2f2] p-2.5 rounded border border-[#fecaca]">
-                <span className="text-[9px] text-[#991b1b] block font-bold uppercase">DISPUTED AMOUNT</span>
-                <span className="text-xs font-mono font-black text-[#b91c1c]">{formatINR(transaction.amount)}</span>
+              <div className="bg-[#fef2f2] p-2.5 rounded-lg border border-[#fecaca] flex flex-col items-center justify-center text-center min-h-[64px]">
+                <span className="text-[9.5px] text-[#991b1b] font-bold uppercase tracking-wider block mb-1 text-center">DISPUTED AMOUNT</span>
+                <span className="text-[11.5px] sm:text-xs font-mono font-black text-[#b91c1c] leading-tight text-center">{formatINR(transaction.amount)}</span>
               </div>
             </div>
 

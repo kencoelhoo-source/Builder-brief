@@ -1,15 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Mic, ArrowRight, CreditCard, ShieldAlert, FileCheck2, MessageCircleQuestionMark } from 'lucide-react';
-import type { Language, FraudPersona } from '../types';
+import { Mic, ArrowRight, CreditCard, ShieldAlert, MessageCircleQuestionMark, FileText, Trash2, ChevronRight } from 'lucide-react';
+import type { Language } from '../types';
 import type { SavedDraft } from '../services/storageService';
-import { MOCK_PERSONAS } from '../data/mockPersonas';
 import { speechService } from '../services/speechService';
 import { formatINR } from '../utils/formatters';
 import { isValidSuspectUrl, isValidVPA } from '../utils/sanitizers';
 
 interface EmergencyIntakeProps {
   currentLang: Language;
-  onSelectPreset: (personaId: string) => void;
   onUploadFile: (file: File) => void;
   onVoiceTranscribe: (transcript: string) => void;
   onManualSubmit: (utr: string, amount: number, beneficiaryVpa: string) => void;
@@ -22,25 +20,8 @@ interface EmergencyIntakeProps {
 
 type Panel = 'home' | 'voice' | 'manual' | 'social';
 
-const demoLabel = (persona: FraudPersona, hi: boolean) => {
-  if (persona.id === 'gpay-phishing') {
-    return { title: hi ? 'गूगल पे' : 'Google Pay', meta: '₹48,500' };
-  }
-  if (persona.id === 'instagram-fake') {
-    return { title: hi ? 'फर्जी इंस्टाग्राम' : 'Fake Instagram', meta: persona.platform || '' };
-  }
-  if (persona.id === 'digital-arrest') {
-    return { title: hi ? 'डिजिटल अरेस्ट' : 'Digital arrest', meta: '₹1,50,000' };
-  }
-  if (persona.id === 'wrongly-accused-freeze') {
-    return { title: hi ? 'गलत फ्रीज' : 'Wrong freeze', meta: '₹72,000' };
-  }
-  return { title: hi ? persona.nameHi : persona.name, meta: persona.amount ? formatINR(persona.amount) : '' };
-};
-
 export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
   currentLang,
-  onSelectPreset,
   onUploadFile,
   onVoiceTranscribe,
   onManualSubmit,
@@ -230,41 +211,45 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
 
       {panel === 'home' && (
         <div className="panel-enter intake-home">
-          {/* Active Saved Draft Banner if page was refreshed */}
+          {/* Active Saved Draft Banner: Sleek, Compact & Responsive */}
           {draftTx && onResumeDraft && (
-            <div className="saved-draft-card">
-              <div className="saved-draft-copy">
-                <p className="saved-draft-kicker">
-                  {hi ? 'सहेजी गई शिकायत' : 'Saved complaint'}
-                </p>
-                <p className="saved-draft-name">
-                  {'amount' in draftTx ? formatINR(draftTx.amount) : draftTx.platform}
-                </p>
-                <p className="saved-draft-category">{draftTx.fraudCategoryLabel}</p>
-                <p className="saved-draft-meta">
-                  {hi ? 'आपका डेटा सुरक्षित है और समीक्षा के लिए तैयार है।' : 'Your details are safe and ready for review.'}
-                </p>
+            <div className="mb-5 p-3.5 sm:p-5 rounded-2xl bg-card border border-line-strong shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 transition-all">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-soft border border-line flex items-center justify-center shrink-0 text-ink">
+                  <FileText size={18} />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shrink-0" />
+                    <span className="text-xs sm:text-sm font-bold text-ink tracking-tight">
+                      {hi ? 'सहेजा गया ड्राफ्ट:' : 'Draft in Progress:'}{' '}
+                      <span className="font-extrabold text-ink">{'amount' in draftTx ? formatINR(draftTx.amount) : draftTx.platform}</span>
+                    </span>
+                  </div>
+                  <p className="text-[11px] sm:text-xs text-muted truncate mt-0.5">
+                    <span className="font-medium text-ink/80">{draftTx.fraudCategoryLabel}</span> · {hi ? 'डिवाइस पर सुरक्षित' : 'Saved locally on device'}
+                  </p>
+                </div>
               </div>
-              <span className="saved-draft-status">
-                {hi ? 'समीक्षा के लिए तैयार' : 'Ready to review'}
-              </span>
-              <div className="saved-draft-actions">
+
+              <div className="grid grid-cols-2 sm:flex sm:items-center gap-2.5 w-full sm:w-auto pt-2.5 sm:pt-0 border-t border-line/40 sm:border-t-0">
                 {onClearDraft && (
                   <button
                     type="button"
                     onClick={onClearDraft}
-                    className="saved-draft-discard"
+                    className="draft-action-btn draft-action-discard"
                     title={hi ? 'ड्राफ्ट हटाएं' : 'Discard draft'}
                   >
-                    {hi ? 'हटाएं' : 'Discard'}
+                    <Trash2 size={13} />
+                    <span>{hi ? 'हटाएं' : 'Discard'}</span>
                   </button>
                 )}
                 <button
                   type="button"
                   onClick={onResumeDraft}
-                  className="btn-primary saved-draft-resume"
+                  className="draft-action-btn draft-action-resume"
                 >
-                  <span>{hi ? 'समीक्षा जारी रखें' : 'Resume review'}</span>
+                  <span>{hi ? 'समीक्षा जारी रखें' : 'Resume Review'}</span>
                   <ArrowRight size={13} />
                 </button>
               </div>
@@ -272,24 +257,20 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
           )}
 
           <header className="intake-hero">
-            <p className="crumb">{hi ? 'शिकायत' : 'Report'}</p>
+            <p className="crumb font-extrabold tracking-wider">{hi ? 'शिकायत' : 'Report'}</p>
             <h1>{hi ? 'क्या हुआ?' : 'What happened?'}</h1>
-            <p className="lede">
+            {/* Desktop / Tablet: Full descriptive instructions */}
+            <p className="lede hidden sm:block">
               {hi
-                ? 'एक कार्ड चुनें। रसीद या चैट की फोटो उसी कार्ड पर छोड़ सकते हैं।'
-                : 'Pick one card. If you have a photo of the receipt or chat, drop it on that card.'}
+                ? 'अपनी शिकायत शुरू करने के लिए नीचे उपयुक्त श्रेणी चुनें। आप रसीद फोटो, चैट स्क्रीनशॉट अपलोड कर सकते हैं या बोलकर बता सकते हैं।'
+                : 'Select the incident category below to start your guided report. You can upload a payment receipt, chat export, or speak directly.'}
             </p>
-            <div className="notice intake-proof-note" role="note">
-              <span className="intake-proof-icon" aria-hidden="true"><FileCheck2 size={17} /></span>
-              <div>
-                <strong>{hi ? 'मूल सबूत सुरक्षित रखें' : 'Keep the original evidence'}</strong>
-                <p>
-                  {hi
-                    ? 'रसीद या बैंक SMS को न बदलें। साफ़ फोटो अपलोड करें ताकि ज़रूरी विवरण पढ़े जा सकें।'
-                    : 'Don’t edit or delete the receipt or bank SMS. Upload a clear photo so the important details stay readable.'}
-                </p>
-              </div>
-            </div>
+            {/* Mobile: Concise, airy, breathable one-liner */}
+            <p className="lede block sm:hidden text-xs text-muted mt-1 leading-normal">
+              {hi
+                ? 'शुरू करने के लिए नीचे उपयुक्त विकल्प चुनें।'
+                : 'Choose an option below to start your report.'}
+            </p>
           </header>
 
           <input
@@ -308,14 +289,18 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
               {...uploadBind('money')}
             >
               <span className="intake-choice-icon"><CreditCard size={20} /></span>
-              <span className="intake-choice-title">{hi ? 'मेरे पैसे चले गए' : 'I lost money'}</span>
-              <span className="intake-choice-meta">
-                {isLoading
-                  ? hi ? 'पढ़ा जा रहा है…' : 'Reading…'
-                  : hi ? 'UPI रसीद या बैंक SMS की फोटो यहीं छोड़ें या चुनें।' : 'Drop or choose the UPI receipt or bank SMS photo.'}
-              </span>
-              <span className="intake-choice-foot">{hi ? 'JPG, PNG, WEBP · 10 MB तक' : 'JPG, PNG or WEBP · up to 10 MB'}</span>
+              <div className="intake-choice-body">
+                <span className="intake-choice-title">{hi ? 'मेरे पैसे चले गए' : 'I lost money'}</span>
+                <span className="intake-choice-meta">
+                  {isLoading
+                    ? hi ? 'पढ़ा जा रहा है…' : 'Reading…'
+                    : hi ? 'UPI रसीद या बैंक SMS की फोटो अपलोड करें।' : 'Upload UPI receipt or bank SMS photo.'}
+                </span>
+                <span className="intake-choice-foot">{hi ? 'JPG, PNG, WEBP · 10 MB तक' : 'JPG, PNG or WEBP · up to 10 MB'}</span>
+              </div>
+              <span className="intake-choice-arrow" aria-hidden="true"><ChevronRight size={18} /></span>
             </button>
+
             <button
               type="button"
               className={`intake-choice ${dropOver === 'social' ? 'is-over' : ''} ${isLoading ? 'is-busy' : ''}`}
@@ -323,12 +308,16 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
               {...uploadBind('social')}
             >
               <span className="intake-choice-icon"><ShieldAlert size={20} /></span>
-              <span className="intake-choice-title">{hi ? 'फेक प्रोफाइल / धमकी' : 'Fake profile / threat'}</span>
-              <span className="intake-choice-meta">
-                {hi ? 'चैट, प्रोफाइल या पोस्ट की फोटो यहीं छोड़ें या चुनें।' : 'Drop or choose a photo of the chat, profile or post.'}
-              </span>
-              <span className="intake-choice-foot">{hi ? 'JPG, PNG, WEBP · 10 MB तक' : 'JPG, PNG or WEBP · up to 10 MB'}</span>
+              <div className="intake-choice-body">
+                <span className="intake-choice-title">{hi ? 'फेक प्रोफाइल / धमकी' : 'Fake profile / threat'}</span>
+                <span className="intake-choice-meta">
+                  {hi ? 'चैट, प्रोफाइल या पोस्ट का स्क्रीनशॉट अपलोड करें।' : 'Upload screenshot of chat, profile or post.'}
+                </span>
+                <span className="intake-choice-foot">{hi ? 'JPG, PNG, WEBP · 10 MB तक' : 'JPG, PNG or WEBP · up to 10 MB'}</span>
+              </div>
+              <span className="intake-choice-arrow" aria-hidden="true"><ChevronRight size={18} /></span>
             </button>
+
             <button
               type="button"
               className="intake-choice"
@@ -336,47 +325,29 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
               onClick={() => setPanel('voice')}
             >
               <span className="intake-choice-icon"><MessageCircleQuestionMark size={20} /></span>
-              <span className="intake-choice-title">{hi ? 'समझ नहीं आ रहा' : 'I’m not sure'}</span>
-              <span className="intake-choice-meta">
-                {hi ? 'टाइप करें या बोलें — फोटो बाद में जोड़ सकते हैं।' : 'Type or speak. You can add a photo later.'}
-              </span>
-              <span className="intake-choice-foot">{hi ? 'आवाज़ या टेक्स्ट' : 'Voice or text'}</span>
+              <div className="intake-choice-body">
+                <span className="intake-choice-title">{hi ? 'समझ नहीं आ रहा' : 'I’m not sure'}</span>
+                <span className="intake-choice-meta">
+                  {hi ? 'टाइप करें या बोलें — साक्ष्य बाद में जोड़ सकते हैं।' : 'Type or speak. You can add evidence later.'}
+                </span>
+                <span className="intake-choice-foot">{hi ? 'आवाज़ या टेक्स्ट' : 'Voice or text'}</span>
+              </div>
+              <span className="intake-choice-arrow" aria-hidden="true"><ChevronRight size={18} /></span>
             </button>
           </div>
 
-          <div className="intake-fallbacks">
-            <p className="intake-fallback-copy">
+          <div className="intake-fallbacks mt-6 pt-4 border-t border-line/60">
+            <p className="intake-fallback-copy !font-extrabold !text-ink">
               {hi ? 'फोटो नहीं है?' : 'No photo?'}
             </p>
-            <button type="button" className="btn-secondary" onClick={() => setPanel('manual')}>
-              {hi ? 'पेमेंट नंबर लिखें' : 'Type the payment ID'}
-            </button>
-            <button type="button" className="btn-secondary" onClick={() => setPanel('social')}>
-              {hi ? 'प्रोफाइल लिंक लिखें' : 'Type the profile link'}
-            </button>
-          </div>
-
-          <p className="demo-label">{hi ? 'समीक्षकों के लिए मॉक केस' : 'Mock cases'}</p>
-          <div className="mock-case-grid">
-            {MOCK_PERSONAS.map((persona: FraudPersona) => {
-              const label = demoLabel(persona, hi);
-              return (
-                <button key={persona.id} type="button" className="mock-case-card" onClick={() => onSelectPreset(persona.id)} disabled={isLoading}>
-                  <span className="mock-case-kind">
-                    {persona.incidentType === 'SOCIAL' ? (hi ? 'सोशल' : 'Social') : (hi ? 'पैसा' : 'Money')}
-                  </span>
-                  <span className="mock-case-title">{persona.profile.fullName}</span>
-                  <span className="mock-case-category">
-                    {label.title}{label.meta ? ` · ${label.meta}` : ''}
-                  </span>
-                  <span className={`mock-case-role ${persona.casePerspective === 'WRONGLY_ACCUSED' ? 'is-warning' : ''}`}>
-                    {persona.casePerspective === 'WRONGLY_ACCUSED'
-                      ? hi ? 'गलत आरोप' : 'Wrongly accused'
-                      : hi ? 'शिकायतकर्ता' : 'Reporting victim'}
-                  </span>
-                </button>
-              );
-            })}
+            <div className="intake-fallback-buttons">
+              <button type="button" className="btn-secondary font-bold" onClick={() => setPanel('manual')}>
+                {hi ? 'पेमेंट नंबर लिखें' : 'Type the payment ID'}
+              </button>
+              <button type="button" className="btn-secondary font-bold" onClick={() => setPanel('social')}>
+                {hi ? 'प्रोफाइल लिंक लिखें' : 'Type the profile link'}
+              </button>
+            </div>
           </div>
         </div>
       )}
