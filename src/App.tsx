@@ -72,6 +72,7 @@ export const App: React.FC = () => {
   const toastTimerRef = React.useRef<{ hide?: number; clear?: number }>({});
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
   const [savedDraft, setSavedDraft] = useState<SavedDraft | null>(() => getDraftFromStorage());
+  const [isReportSubmitted, setIsReportSubmitted] = useState<boolean>(() => Boolean(getDraftFromStorage()?.isSubmitted));
 
   const [showPetitionModal, setShowPetitionModal] = useState<boolean>(false);
   const [showReceiptModal, setShowReceiptModal] = useState<boolean>(false);
@@ -410,28 +411,11 @@ export const App: React.FC = () => {
   };
 
   const handleGoHub = () => {
-    setShowHub(true);
-    setCurrentStep('intake');
-    window.history.pushState({ view: 'hub' }, '');
-  };
-
-  const handleSubmitFinalReport = () => {
     const livePayload = payload || sec79Payload;
     if (transaction && livePayload) {
-      saveDraftToStorage(transaction, livePayload, 'radar');
+      saveDraftToStorage(transaction, livePayload, 'radar', isReportSubmitted);
       setSavedDraft(getDraftFromStorage());
     }
-    const ack =
-      payload?.ackNumber ||
-      sec79Payload?.ackNumber ||
-      (savedDraft?.payload && 'ackNumber' in savedDraft.payload
-        ? (savedDraft.payload as { ackNumber?: string }).ackNumber
-        : 'DEMO-CASE');
-    triggerToast(
-      currentLang === 'hi'
-        ? `अंतिम रिपोर्ट सबमिट हो गई! संदर्भ सं: ${ack}`
-        : `Final report submitted! Reference: ${ack}`
-    );
     setShowHub(true);
     setCurrentStep('intake');
     window.history.pushState({ view: 'hub' }, '');
@@ -465,6 +449,8 @@ export const App: React.FC = () => {
       triggerToast(currentLang === 'hi' ? 'सहेजा हुआ ड्राफ्ट उपलब्ध नहीं है' : 'Saved draft is no longer available');
       return;
     }
+
+    setIsReportSubmitted(Boolean(draft.isSubmitted));
 
     const isFinancial = draft.transaction.incidentType === 'FINANCIAL';
     const hasCompatiblePayload = Boolean(
@@ -664,7 +650,6 @@ export const App: React.FC = () => {
               onOpenCourtPetition={() => handleOpenModal('petition')}
               onViewReceipt={() => handleOpenModal('receipt')}
               onBack={() => goToStep('freeze', 'nav')}
-              onSubmitFinalReport={handleSubmitFinalReport}
               onReturnHome={handleGoHub}
               initialTab={radarInitialTab === 'application' ? 'application' : 'radar'}
             />
@@ -675,7 +660,6 @@ export const App: React.FC = () => {
               currentLang={currentLang}
               onGeneratePetition={() => handleOpenModal('fir')}
               onBack={() => goToStep('freeze', 'nav')}
-              onSubmitFinalReport={handleSubmitFinalReport}
               onReturnHome={handleGoHub}
               initialTab={radarInitialTab === 'application' ? 'application' : 'status'}
             />

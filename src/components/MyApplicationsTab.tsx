@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldCheck, Copy, Check, Clock, FileText, Scale, CheckCircle2, Home, RotateCcw } from 'lucide-react';
+import { ShieldCheck, Copy, Check, Clock, CheckCircle2, Home, RotateCcw } from 'lucide-react';
 import type { CyberIncident, CFCFRMSPayload, Sec79Payload, Language } from '../types';
 import { formatINR } from '../utils/formatters';
 import { getBankNodalOfficer } from '../data/bankNodalDirectory';
@@ -9,9 +9,7 @@ interface MyApplicationsTabProps {
   transaction: CyberIncident;
   payload: CFCFRMSPayload | Sec79Payload;
   currentLang: Language;
-  onOpenCourtPetition: () => void;
-  onViewReceipt: () => void;
-  onSubmitFinalReport?: () => void;
+  onViewReceipt?: () => void;
   onReturnHome?: () => void;
 }
 
@@ -19,9 +17,7 @@ export const MyApplicationsTab: React.FC<MyApplicationsTabProps> = ({
   transaction,
   payload,
   currentLang,
-  onOpenCourtPetition,
   onViewReceipt,
-  onSubmitFinalReport,
   onReturnHome,
 }) => {
   const hi = currentLang === 'hi';
@@ -60,7 +56,7 @@ export const MyApplicationsTab: React.FC<MyApplicationsTabProps> = ({
 
   const dispatchedAt = Date.parse(payload.dispatchedAt);
   const escalationDeadline = Number.isFinite(dispatchedAt)
-    ? dispatchedAt + 24 * 60 * 60 * 1000
+    ? dispatchedAt + 12 * 60 * 60 * 1000
     : now;
   const secondsRemaining = Math.max(0, Math.ceil((escalationDeadline - now) / 1000));
 
@@ -97,49 +93,66 @@ export const MyApplicationsTab: React.FC<MyApplicationsTabProps> = ({
   return (
     <div className="space-y-6">
       {/* Case Overview Card */}
-      <div className="p-5 sm:p-6 rounded-2xl border border-line bg-card shadow-sm relative overflow-hidden">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <span className="relative flex h-3 w-3">
+      <div className="p-4 sm:p-5 rounded-2xl border border-line-strong bg-card shadow-xs relative overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+          <div className="min-w-0 flex-1">
+            {/* Clean Status Text (No pill container) */}
+            <div className="flex items-center gap-2 text-xs font-bold text-emerald-700 dark:text-emerald-400 mb-1.5">
+              <span className="relative flex h-2 w-2 shrink-0">
                 <span className="anim-pulse-ring absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-600" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600 dark:bg-emerald-400" />
               </span>
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
-                {hi ? 'सक्रिय केस ट्रैक' : 'Live Active Case'}
+              <span className="whitespace-nowrap">
+                {hi ? 'सक्रिय केस · बैंक नोटिस प्रेषित' : 'Live Case · Bank Freeze Dispatched'}
               </span>
             </div>
 
-            <div className="flex items-center gap-2 mt-2">
-              <span className="text-xl sm:text-2xl font-mono font-bold text-ink tracking-tight">
+            {/* Reference Number and Copy Button (Same Line) */}
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h2 className="text-xl sm:text-2xl font-extrabold text-ink tracking-tight whitespace-nowrap m-0 p-0">
                 {ackNumber}
-              </span>
+              </h2>
               <button
                 type="button"
                 onClick={handleCopy}
-                className="btn-icon !w-8 !h-8 text-muted hover:text-ink transition-transform active:scale-95"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-soft hover:bg-soft-hover border border-line text-xs font-semibold text-ink transition-colors shrink-0 shadow-2xs cursor-pointer"
                 title={hi ? 'पावती नंबर कॉपी करें' : 'Copy Acknowledgment Number'}
                 aria-label="Copy Acknowledgment"
               >
-                {copied ? <Check size={15} className="text-emerald-600" /> : <Copy size={15} />}
+                {copied ? (
+                  <>
+                    <Check size={13} className="text-emerald-600 dark:text-emerald-400" />
+                    <span className="text-emerald-600 dark:text-emerald-400 font-bold">{hi ? 'कॉपी किया' : 'Copied'}</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy size={13} className="text-muted" />
+                    <span className="text-muted">{hi ? 'कॉपी' : 'Copy'}</span>
+                  </>
+                )}
               </button>
             </div>
 
-            <p className="text-xs text-muted mt-1">
-              {transaction.victimName} · {isFinancial ? `${formatINR(transaction.amount)} · ${transaction.remitterBank}` : transaction.platform} · {new Date().toLocaleDateString('en-IN')}
-            </p>
+            {/* Metadata Single-Line Strip */}
+            <div className="flex items-center gap-2 text-xs text-muted mt-2 font-medium flex-wrap">
+              <span className="font-bold text-ink">{transaction.victimName}</span>
+              <span className="text-line-strong">•</span>
+              <span>{isFinancial ? `${formatINR(transaction.amount)} · ${transaction.remitterBank}` : transaction.platform}</span>
+              <span className="text-line-strong">•</span>
+              <span>{new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+            </div>
           </div>
 
-          {/* Demo countdown derived from the dispatch timestamp */}
-          <div className="p-3.5 sm:p-4 rounded-xl bg-soft border border-line flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-amber-500/10 flex items-center justify-center flex-shrink-0 text-amber-600 dark:text-amber-400 anim-live-glow">
-              <Clock size={18} />
+          {/* Compact 12h SLA Countdown Widget */}
+          <div className="px-3.5 py-2.5 rounded-xl bg-soft border border-line flex items-center gap-3 shrink-0 shadow-2xs self-start sm:self-center">
+            <div className="w-8 h-8 rounded-lg bg-amber-500/10 dark:bg-amber-400/10 border border-amber-500/20 flex items-center justify-center flex-shrink-0 text-amber-700 dark:text-amber-300">
+              <Clock size={15} />
             </div>
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-muted">
-                 {hi ? 'स्तर 2 एस्केलेशन टाइमर' : 'Level 2 SLA Timer'}
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted whitespace-nowrap leading-none">
+                {hi ? '12h SLA टाइमर' : '12h SLA Timer'}
               </p>
-              <p className="text-base font-mono font-bold text-ink mt-0.5">
+              <p className="text-xs sm:text-sm font-extrabold text-ink mt-1 tracking-tight whitespace-nowrap tabular-nums leading-none">
                 {formatCountdown(secondsRemaining)}
               </p>
             </div>
@@ -317,62 +330,33 @@ export const MyApplicationsTab: React.FC<MyApplicationsTabProps> = ({
         </div>
       </div>
 
-      {/* Quick Action Dock: Download Documents */}
-      <div className="p-5 rounded-2xl border border-line bg-card flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h4 className="text-sm font-bold text-ink">
-            {hi ? 'डेमो दस्तावेज़' : 'Demo documents'}
-          </h4>
-          <p className="text-xs text-muted mt-0.5">
-            {hi ? 'प्रोटोटाइप से तैयार किए गए रिकॉर्ड डाउनलोड करें।' : 'Download prototype-generated copies for review.'}
-          </p>
-        </div>
-        <div className="btn-group sm:ml-auto">
-          {isFinancial ? (
-            <button onClick={onOpenCourtPetition} className="btn-primary">
-              <Scale size={15} />
-              <span>{hi ? 'न्यायालय याचिका' : 'Court Petition'}</span>
-            </button>
-          ) : (
-            <button onClick={onOpenCourtPetition} className="btn-primary">
-              <FileText size={15} />
-              <span>{hi ? 'FIR ड्राफ्ट' : 'FIR Draft'}</span>
-            </button>
-          )}
-          {isFinancial && (
-            <button onClick={onViewReceipt} className="btn-secondary">
-              <ShieldCheck size={15} />
-              <span>{hi ? 'डेमो रसीद' : 'Demo receipt'}</span>
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Final Report Submission & Return to Home Dock */}
-      <div className="p-5 sm:p-6 rounded-2xl border-2 border-line bg-card shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6">
-        <div className="max-w-xl">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-            <h4 className="text-sm sm:text-base font-extrabold text-ink">
-              {hi ? 'अंतिम रिपोर्ट सबमिट करें' : 'Submit Final Report'}
-            </h4>
+      {/* Case Management & Return to Home Dock */}
+      <div className="p-4 sm:p-5 rounded-2xl border border-line-strong bg-card shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        {/* Left: Icon + Title + Reference Badge */}
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 dark:bg-emerald-400/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0 shadow-2xs">
+            <CheckCircle2 size={20} />
           </div>
-          <p className="text-xs text-muted mt-1 leading-relaxed">
-            {hi
-              ? 'अपनी शिकायत को सुरक्षित रूप से सहेजें ताकि आप होम पेज से "शिकायत ट्रैक करें" पर कभी भी लाइव स्थिति देख सकें।'
-              : 'Save your completed report to track live SLA, freeze notices, and court petitions from the Home Hub.'}
-          </p>
+          <div className="min-w-0">
+            <h4 className="text-sm sm:text-base font-extrabold text-ink leading-tight m-0 p-0">
+              {hi ? 'केस आधिकारिक रूप से दर्ज व सक्रिय है' : 'Official Case Active & Recorded'}
+            </h4>
+            <p className="text-xs text-muted font-medium mt-0.5 truncate">
+              {hi ? `रेफरेंस: ${ackNumber} · 24h SLA सक्रिय` : `Ref: ${ackNumber} · 24h SLA Active`}
+            </p>
+          </div>
         </div>
 
-        <div className="btn-group shrink-0 flex flex-row items-center gap-3 w-full sm:w-auto">
-          {onSubmitFinalReport && (
+        {/* Right: Actions */}
+        <div className="btn-group shrink-0 flex items-center gap-2.5 w-full sm:w-auto">
+          {onViewReceipt && (
             <button
               type="button"
-              onClick={onSubmitFinalReport}
-              className="btn-primary flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 !px-5 !py-3 whitespace-nowrap shadow-sm"
+              onClick={onViewReceipt}
+              className="btn-primary flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 !px-4 !py-2.5 text-xs sm:text-sm whitespace-nowrap shadow-sm cursor-pointer"
             >
-              <CheckCircle2 size={16} />
-              <span>{hi ? 'अंतिम रिपोर्ट सबमिट करें' : 'Submit final report'}</span>
+              <ShieldCheck size={16} />
+              <span>{hi ? 'डेमो रसीद' : 'View Receipt'}</span>
             </button>
           )}
 
@@ -380,7 +364,7 @@ export const MyApplicationsTab: React.FC<MyApplicationsTabProps> = ({
             <button
               type="button"
               onClick={onReturnHome}
-              className="btn-secondary flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 !px-5 !py-3 whitespace-nowrap"
+              className="btn-secondary flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 !px-4 !py-2.5 text-xs sm:text-sm whitespace-nowrap cursor-pointer"
             >
               <Home size={16} />
               <span>{hi ? 'होम पर लौटें' : 'Return to Home'}</span>

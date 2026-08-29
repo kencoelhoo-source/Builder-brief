@@ -9,7 +9,6 @@ interface EscalationTrackerProps {
   currentLang: Language;
   onGeneratePetition: () => void;
   onBack: () => void;
-  onSubmitFinalReport?: () => void;
   onReturnHome?: () => void;
   initialTab?: 'status' | 'application';
 }
@@ -20,7 +19,6 @@ export const EscalationTracker: React.FC<EscalationTrackerProps> = ({
   currentLang,
   onGeneratePetition,
   onBack,
-  onSubmitFinalReport,
   onReturnHome,
   initialTab = 'status',
 }) => {
@@ -140,9 +138,6 @@ export const EscalationTracker: React.FC<EscalationTrackerProps> = ({
             transaction={transaction}
             payload={payload}
             currentLang={currentLang}
-            onOpenCourtPetition={onGeneratePetition}
-            onViewReceipt={() => undefined}
-            onSubmitFinalReport={onSubmitFinalReport}
             onReturnHome={onReturnHome}
           />
         </div>

@@ -19,41 +19,47 @@ export const SiteFooter: React.FC<SiteFooterProps> = ({
   const hi = currentLang === 'hi';
 
   return (
-    <footer className="site-footer no-print">
-      <div className="page-wrap py-6 grid grid-cols-2 md:flex md:flex-wrap items-center gap-x-8 gap-y-3 text-xs text-muted">
+    <footer className="site-footer no-print w-full max-w-full overflow-hidden border-t border-line/60 bg-card/60 backdrop-blur-sm">
+      <div className="max-w-4xl mx-auto px-4 py-3 sm:py-3.5 flex flex-wrap items-center justify-center gap-x-3 sm:gap-x-5 gap-y-1.5 text-xs text-muted overflow-hidden">
         <button
           type="button"
           onClick={onResetToHome}
-          className="btn-link inline-flex items-center gap-2 font-medium w-fit text-left"
+          className="hover:text-ink transition-colors font-medium cursor-pointer"
         >
-          <span className="w-1.5 h-1.5 rounded-full bg-ink dark:bg-white shrink-0 shadow-xs" aria-hidden="true" />
-          <span>{hi ? 'नई रिपोर्ट' : 'New report'}</span>
+          {hi ? 'नई रिपोर्ट' : 'New report'}
         </button>
+
+        <span className="text-line-strong select-none" aria-hidden="true">•</span>
+
         <button
           type="button"
           onClick={onOpenMockedHub}
-          className="btn-link inline-flex items-center gap-2 font-medium w-fit text-left"
+          className="hover:text-ink transition-colors font-medium cursor-pointer"
         >
-          <span className="w-1.5 h-1.5 rounded-full bg-ink dark:bg-white shrink-0 shadow-xs" aria-hidden="true" />
-          <span>{hi ? 'क्या मॉक है' : "What's mocked"}</span>
+          {hi ? 'क्या मॉक है' : "What's mocked"}
         </button>
+
+        <span className="text-line-strong select-none" aria-hidden="true">•</span>
+
         <button
           type="button"
           onClick={onOpenQuiz}
-          className="btn-link inline-flex items-center gap-2 font-medium w-fit text-left"
+          className="hover:text-ink transition-colors font-medium cursor-pointer"
         >
-          <span className="w-1.5 h-1.5 rounded-full bg-ink dark:bg-white shrink-0 shadow-xs" aria-hidden="true" />
-          <span>{hi ? 'साइबर सुरक्षा सीखें' : 'Learn cyber safety'}</span>
+          {hi ? 'साइबर सुरक्षा सीखें' : 'Learn cyber safety'}
         </button>
+
         {onOpenTips && (
-          <button
-            type="button"
-            onClick={onOpenTips}
-            className="btn-link inline-flex items-center gap-2 font-medium w-fit text-left"
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-ink dark:bg-white shrink-0 shadow-xs" aria-hidden="true" />
-            <span>{hi ? 'साक्ष्य व रिपोर्टिंग सुझाव' : 'Evidence & reporting tips'}</span>
-          </button>
+          <>
+            <span className="text-line-strong select-none" aria-hidden="true">•</span>
+            <button
+              type="button"
+              onClick={onOpenTips}
+              className="hover:text-ink transition-colors font-medium cursor-pointer"
+            >
+              {hi ? 'साक्ष्य व सुझाव' : 'Evidence & tips'}
+            </button>
+          </>
         )}
       </div>
     </footer>

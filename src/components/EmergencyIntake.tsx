@@ -197,7 +197,8 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
     }
   };
 
-  const draftTx = savedDraft?.transaction;
+  const isUncompletedDraft = savedDraft && savedDraft.step !== 'radar';
+  const draftTx = isUncompletedDraft ? savedDraft.transaction : null;
 
   return (
     <div className="page-wrap page-stack intake">
@@ -288,9 +289,11 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
               disabled={isLoading}
               {...uploadBind('money')}
             >
-              <span className="intake-choice-icon"><CreditCard size={20} /></span>
+              <div className="flex items-center gap-3 mb-2.5 w-full">
+                <span className="intake-choice-icon !mb-0 shrink-0"><CreditCard size={20} /></span>
+                <span className="intake-choice-title font-extrabold">{hi ? 'मेरे पैसे चले गए' : 'I lost money'}</span>
+              </div>
               <div className="intake-choice-body">
-                <span className="intake-choice-title">{hi ? 'मेरे पैसे चले गए' : 'I lost money'}</span>
                 <span className="intake-choice-meta">
                   {isLoading
                     ? hi ? 'पढ़ा जा रहा है…' : 'Reading…'
@@ -307,9 +310,11 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
               disabled={isLoading}
               {...uploadBind('social')}
             >
-              <span className="intake-choice-icon"><ShieldAlert size={20} /></span>
+              <div className="flex items-center gap-3 mb-2.5 w-full">
+                <span className="intake-choice-icon !mb-0 shrink-0"><ShieldAlert size={20} /></span>
+                <span className="intake-choice-title font-extrabold">{hi ? 'फेक प्रोफाइल / धमकी' : 'Fake profile / threat'}</span>
+              </div>
               <div className="intake-choice-body">
-                <span className="intake-choice-title">{hi ? 'फेक प्रोफाइल / धमकी' : 'Fake profile / threat'}</span>
                 <span className="intake-choice-meta">
                   {hi ? 'चैट, प्रोफाइल या पोस्ट का स्क्रीनशॉट अपलोड करें।' : 'Upload screenshot of chat, profile or post.'}
                 </span>
@@ -324,9 +329,11 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
               disabled={isLoading}
               onClick={() => setPanel('voice')}
             >
-              <span className="intake-choice-icon"><MessageCircleQuestionMark size={20} /></span>
+              <div className="flex items-center gap-3 mb-2.5 w-full">
+                <span className="intake-choice-icon !mb-0 shrink-0"><MessageCircleQuestionMark size={20} /></span>
+                <span className="intake-choice-title font-extrabold">{hi ? 'समझ नहीं आ रहा' : 'I’m not sure'}</span>
+              </div>
               <div className="intake-choice-body">
-                <span className="intake-choice-title">{hi ? 'समझ नहीं आ रहा' : 'I’m not sure'}</span>
                 <span className="intake-choice-meta">
                   {hi ? 'टाइप करें या बोलें — साक्ष्य बाद में जोड़ सकते हैं।' : 'Type or speak. You can add evidence later.'}
                 </span>

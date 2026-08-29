@@ -15,13 +15,15 @@ export interface SavedDraft {
   transaction: CyberIncident | null;
   payload: CFCFRMSPayload | Sec79Payload | null;
   step?: AppStep;
+  isSubmitted?: boolean;
   updatedAt: string;
 }
 
 export const saveDraftToStorage = (
   transaction: CyberIncident | null,
   payload: CFCFRMSPayload | Sec79Payload | null,
-  step?: AppStep
+  step?: AppStep,
+  isSubmitted?: boolean
 ) => {
   try {
     const draft: SavedDraft = {
@@ -29,6 +31,7 @@ export const saveDraftToStorage = (
       transaction,
       payload,
       step,
+      isSubmitted: Boolean(isSubmitted),
       updatedAt: new Date().toISOString(),
     };
     localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));

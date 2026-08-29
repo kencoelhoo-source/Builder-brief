@@ -278,98 +278,80 @@ export const HomeHub: React.FC<HomeHubProps> = ({
       </section>
 
       {/* 2. Primary Incident Actions (High-Contrast Full-Width 2-Column Grid) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-5 lg:gap-6 items-stretch">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 lg:gap-5 items-stretch">
         {/* Card 1: Report a complaint (HERO CTA) */}
         <button
           type="button"
-          className="hub-card hub-card-primary group !p-5 sm:!p-6 cursor-pointer text-left flex flex-col justify-between h-full"
+          className="hub-card hub-card-primary group !p-4 sm:!p-5 cursor-pointer text-left flex flex-col justify-between w-full transition-all"
           onClick={onReport}
         >
-          <div className="flex flex-col">
-            {/* Header: Soft Warm Icon + Title */}
-            <div className="flex items-center gap-3.5 mb-3">
-              <span className="hub-card-icon !w-11 !h-11 shrink-0 flex items-center justify-center rounded-xl shadow-xs">
-                <FilePlus className="w-6 h-6 text-amber-700 dark:text-amber-400" />
+          <div className="w-full">
+            {/* Top Row: Icon + Title */}
+            <div className="flex items-center gap-3 sm:gap-3.5 mb-2.5 sm:mb-3 w-full">
+              <span className="hub-card-icon !w-10 !h-10 sm:!w-11 sm:!h-11 shrink-0 flex items-center justify-center rounded-xl shadow-xs">
+                <FilePlus className="w-5 h-5 sm:w-6 sm:h-6 text-amber-700 dark:text-amber-400" />
               </span>
-              <h3 className="hub-card-title text-base sm:text-xl font-extrabold text-ink tracking-tight leading-tight m-0 p-0">
+              <h3 className="hub-card-title text-base sm:text-lg font-extrabold text-ink tracking-tight leading-tight m-0 p-0">
                 {hi ? 'शिकायत दर्ज करें' : 'Report an incident'}
               </h3>
             </div>
 
-            {/* Meta Description */}
-            <p className="hub-card-meta text-xs sm:text-sm leading-relaxed text-muted mt-1">
-              {hi
-                ? 'रसीद फोटो, चैट स्क्रीनशॉट, या SMS विवरण अपलोड करें।'
-                : 'Upload a payment receipt photo, WhatsApp chat screenshot, or SMS.'}
-            </p>
+            {/* Feature Highlights Strip (Full-Width Responsive 3-Col spanning 100%) */}
+            <div className="grid grid-cols-3 gap-1.5 sm:gap-2 my-2 sm:my-2.5 p-2 sm:p-2.5 rounded-xl bg-amber-500/5 dark:bg-amber-400/5 border border-amber-500/15 text-[11px] sm:text-xs font-semibold text-ink w-full">
+              <div className="text-center py-0.5 truncate">{hi ? '✓ UTR निष्कर्षण' : '✓ UTR Extraction'}</div>
+              <div className="text-center py-0.5 border-x border-amber-500/15 truncate">{hi ? '✓ बैंक फ्रीज' : '✓ Bank Freeze'}</div>
+              <div className="text-center py-0.5 truncate">{hi ? '✓ धारा १५४ FIR' : '✓ Sec 154 FIR'}</div>
+            </div>
           </div>
 
           {/* Action Footer */}
-          <div className="hub-card-foot mt-5 pt-3 border-t border-amber-500/20 text-xs sm:text-sm font-bold flex items-center justify-between text-ink group-hover:text-amber-700 dark:group-hover:text-amber-300 transition-colors">
-            <span>{hi ? 'शुरू करें' : 'Start complaint report'}</span>
-            <ArrowRight className="w-4 h-4 text-muted group-hover:text-amber-700 dark:group-hover:text-amber-300 transition-all group-hover:translate-x-1.5" />
+          <div className="mt-2 pt-2.5 sm:pt-3 border-t border-amber-500/20 text-xs sm:text-sm font-bold flex items-center justify-between text-ink group-hover:text-amber-700 dark:group-hover:text-amber-300 transition-colors w-full">
+            <span className="text-[11px] sm:text-xs text-muted font-medium">{hi ? '२४/७ सहायता' : 'Device-Private · 24/7 Active'}</span>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <span>{hi ? 'रिपोर्ट शुरू करें' : 'Start incident report'}</span>
+              <ArrowRight className="w-4 h-4 shrink-0" />
+            </div>
           </div>
         </button>
 
         {/* Card 2: Track a complaint */}
         <button
           type="button"
-          className="hub-card group !p-5 sm:!p-6 cursor-pointer text-left flex flex-col justify-between h-full relative"
+          className="hub-card group !p-4 sm:!p-5 cursor-pointer text-left flex flex-col justify-between w-full transition-all"
           onClick={onTrack}
         >
-          <div className="flex flex-col">
-            {/* Header: Icon + Title + Active Live Badge */}
-            <div className="flex items-center justify-between gap-3 mb-2.5">
-              <div className="flex items-center gap-3.5">
-                <span className="hub-card-icon !w-11 !h-11 shrink-0 flex items-center justify-center bg-soft border border-line rounded-xl shadow-xs">
-                  <Search className="w-6 h-6 text-ink" />
-                </span>
-                <div>
-                  <h3 className="hub-card-title text-base sm:text-xl font-extrabold text-ink tracking-tight leading-tight m-0 p-0">
-                    {hi ? 'शिकायत ट्रैक करें' : 'Track complaint'}
-                  </h3>
-                  <p className="text-[11px] text-muted font-medium mt-0.5">
-                    {canTrack ? (hi ? 'रीयल-टाइम एस्केलेशन ट्रैकर' : 'Live escalation tracker') : (hi ? 'स्थिति एवं समयसीमा' : 'Real-time timeline')}
-                  </p>
-                </div>
-              </div>
-              {canTrack ? (
-                <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-500/20 inline-flex items-center gap-1.5 shrink-0">
-                  <span className="w-2 h-2 rounded-full bg-emerald-600 dark:bg-emerald-400 animate-pulse" />
-                  {hi ? 'केस सक्रिय' : 'Active Case'}
-                </span>
-              ) : (
-                <span className="text-[10px] sm:text-[11px] font-medium px-2 py-0.5 rounded-md bg-soft border border-line text-muted shrink-0">
-                  {hi ? 'लाइव मॉनिटर' : 'Live Monitor'}
-                </span>
-              )}
+          <div className="w-full">
+            {/* Top Row: Icon + Title */}
+            <div className="flex items-center gap-3 sm:gap-3.5 mb-2.5 sm:mb-3 w-full">
+              <span className="hub-card-icon !w-10 !h-10 sm:!w-11 sm:!h-11 shrink-0 flex items-center justify-center bg-soft border border-line rounded-xl shadow-xs">
+                <Search className="w-5 h-5 sm:w-6 sm:h-6 text-ink" />
+              </span>
+              <h3 className="hub-card-title text-base sm:text-lg font-extrabold text-ink tracking-tight leading-tight m-0 p-0">
+                {hi ? 'शिकायत ट्रैक करें' : 'Track complaint'}
+              </h3>
             </div>
 
-            {/* Case Details Badge Strip / Micro Tracker */}
-            {canTrack ? (
-              <div className="mt-2.5 p-2.5 sm:p-3 rounded-xl bg-soft/70 border border-line/70 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-semibold text-muted">{hi ? 'केस संदर्भ:' : 'Ref ID:'}</span>
-                  <span className="font-mono text-xs font-bold text-ink">{ackNumber}</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-800 dark:text-emerald-300">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                  <span>{hi ? 'स्तर 1-4 सक्रिय' : 'Level 1-4 Active'}</span>
-                </div>
-              </div>
-            ) : (
-              <p className="hub-card-meta text-xs sm:text-sm leading-relaxed mt-2 text-muted">
-                {hi
-                  ? 'रिपोर्ट सबमिट करने के बाद आपकी लाइव शिकायत स्थिति, बैंक SLA टाइमर व न्यायालय याचिका यहाँ दिखेगी।'
-                  : 'Monitor real-time bank freeze notices, 24h SLA timers, and legal escalation after filing.'}
-              </p>
-            )}
+            {/* Micro Tracker Strip (Full-Width Responsive 3-Col spanning 100%) */}
+            <div className="grid grid-cols-3 gap-1.5 sm:gap-2 my-2 sm:my-2.5 p-2 sm:p-2.5 rounded-xl bg-soft/70 border border-line/70 text-[11px] sm:text-xs font-semibold text-ink w-full">
+              <div className="text-center py-0.5 text-muted truncate">{hi ? '१. नोडल (०-२h)' : '1. Nodal (0-2h)'}</div>
+              <div className="text-center py-0.5 border-x border-line/70 text-muted truncate">{hi ? '२. रिस्क (२४h)' : '2. Risk (24h)'}</div>
+              <div className="text-center py-0.5 text-muted truncate">{hi ? '३. कोर्ट (७२h)' : '3. Court (72h)'}</div>
+            </div>
           </div>
 
           {/* Action Footer */}
-          <div className="hub-card-foot mt-5 pt-3 border-t border-line/60 text-xs sm:text-sm font-bold flex items-center justify-between text-ink group-hover:text-amber-700 dark:group-hover:text-amber-300 transition-colors">
-            <span>{canTrack ? (hi ? 'लाइव स्थिति व SLA देखें' : 'View live status & SLA') : (hi ? 'केस ट्रैक करें' : 'Track complaint progress')}</span>
-            <ArrowRight className="w-4 h-4 text-muted group-hover:text-amber-700 dark:group-hover:text-amber-300 transition-all group-hover:translate-x-1.5" />
+          <div className="mt-2 pt-2.5 sm:pt-3 border-t border-line/60 text-xs sm:text-sm font-bold flex items-center justify-between text-ink group-hover:text-amber-700 dark:group-hover:text-amber-300 transition-colors w-full">
+            <span className="text-[11px] sm:text-xs text-muted font-medium truncate">
+              {canTrack ? `Ref: ${ackNumber}` : (hi ? 'रीयल-टाइम SLA' : 'Real-time SLA Timeline')}
+            </span>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <span>
+                {canTrack
+                  ? (hi ? 'लाइव स्थिति ट्रैक करें' : 'View live tracker')
+                  : (hi ? 'ट्रैक करें' : 'View live tracker')}
+              </span>
+              <ArrowRight className="w-4 h-4 shrink-0" />
+            </div>
           </div>
         </button>
       </div>
@@ -383,7 +365,7 @@ export const HomeHub: React.FC<HomeHubProps> = ({
         </div>
 
         {/* 2-Col Mobile / 4-Col Desktop Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5">
           {MOCK_PERSONAS.map((persona) => {
             const meta = getPersonaMeta(persona, hi);
             return (
@@ -391,29 +373,22 @@ export const HomeHub: React.FC<HomeHubProps> = ({
                 key={persona.id}
                 type="button"
                 onClick={() => onSelectPreset(persona.id)}
-                className="mock-scenario-card group !p-3.5 sm:!p-5 text-left flex flex-col justify-between cursor-pointer"
+                className="mock-scenario-card group !p-3.5 sm:!p-4 text-left flex flex-col justify-between cursor-pointer"
               >
-                <div>
-                  {/* Header Row: Warm Icon + Extra-Bold Title */}
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2 sm:mb-2.5">
-                    <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg ${meta.iconBg} border flex items-center justify-center shrink-0 shadow-2xs !mb-0 transition-transform group-hover:scale-105`}>
-                      {meta.icon}
-                    </div>
-                    <h3 className="text-xs sm:text-sm font-extrabold text-ink leading-snug m-0 p-0 line-clamp-1 sm:line-clamp-none">
-                      {hi ? persona.nameHi : persona.name}
-                    </h3>
+                {/* Header Row: Always Horizontal Side-by-Side Icon + Extra-Bold Title */}
+                <div className="flex items-center gap-2.5 sm:gap-3">
+                  <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg ${meta.iconBg} border flex items-center justify-center shrink-0 shadow-2xs`}>
+                    {meta.icon}
                   </div>
-
-                  {/* Description */}
-                  <p className="text-[11px] sm:text-xs text-muted leading-relaxed line-clamp-2 mt-1">
-                    {meta.sub}
-                  </p>
+                  <h3 className="text-xs sm:text-sm font-extrabold text-ink leading-snug m-0 p-0 line-clamp-1">
+                    {hi ? persona.nameHi : persona.name}
+                  </h3>
                 </div>
 
-                {/* Footer Action */}
-                <div className={`mt-3 sm:mt-4 pt-2 sm:pt-2.5 border-t border-line/60 flex items-center justify-between text-[11px] sm:text-xs font-bold ${meta.footCls} w-full transition-colors`}>
+                {/* Footer Action (Matching Text & Arrow Color, No Movement) */}
+                <div className="mt-3 pt-2 sm:pt-2.5 border-t border-line/60 flex items-center justify-between text-[11px] sm:text-xs font-bold text-ink group-hover:text-amber-700 dark:group-hover:text-amber-300 w-full transition-colors">
                   <span>{hi ? 'टेस्ट करें' : 'Test Persona'}</span>
-                  <ArrowRight className="w-3.5 h-3.5 text-muted group-hover:text-amber-700 dark:group-hover:text-amber-300 transition-all group-hover:translate-x-1" />
+                  <ArrowRight className="w-3.5 h-3.5 shrink-0" />
                 </div>
               </button>
             );
@@ -429,73 +404,79 @@ export const HomeHub: React.FC<HomeHubProps> = ({
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4 lg:gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3.5">
           {/* Tool 1: AI scam analyzer */}
-          <button type="button" className="hub-card group !p-4 sm:!p-5 cursor-pointer text-left flex flex-col justify-between" onClick={onOpenScamAnalyzer}>
-            <div>
-              <div className="flex items-center gap-3 mb-2.5">
-                <span className="hub-card-icon !w-9 !h-9 sm:!w-10 sm:!h-10 !mb-0 shrink-0 flex items-center justify-center bg-stone-500/10 dark:bg-stone-400/10 border border-stone-500/20 rounded-xl shadow-xs">
-                  <ShieldAlert className="w-5 h-5 text-stone-700 dark:text-stone-300" />
-                </span>
-                <h3 className="hub-card-title text-sm sm:text-base font-extrabold text-ink leading-snug m-0 p-0 flex items-center">
-                  {hi ? 'AI स्कैम विश्लेषक' : 'AI scam analyzer'}
-                </h3>
-              </div>
-              <p className="hub-card-meta text-xs leading-relaxed text-muted">
-                {hi
-                  ? 'संदिग्ध SMS, ईमेल, व्हाट्सएप चैट व कॉल संदेश जांचें।'
-                  : 'Check SMS, email, WhatsApp, or call descriptions for fraud signals.'}
-              </p>
+          <button
+            type="button"
+            className="hub-card group !p-3.5 sm:!p-4 cursor-pointer text-left flex flex-col justify-between"
+            onClick={onOpenScamAnalyzer}
+          >
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <span className="hub-card-icon !w-8 !h-8 sm:!w-9 sm:!h-9 shrink-0 flex items-center justify-center bg-stone-500/10 dark:bg-stone-400/10 border border-stone-500/20 rounded-lg shadow-xs">
+                <ShieldAlert className="w-4 h-4 text-stone-700 dark:text-stone-300" />
+              </span>
+              <h3 className="hub-card-title text-sm sm:text-base font-extrabold text-ink leading-tight m-0 p-0">
+                {hi ? 'AI स्कैम विश्लेषक' : 'AI scam analyzer'}
+              </h3>
             </div>
-            <div className="hub-card-foot mt-4 pt-2 text-xs font-bold flex items-center justify-between text-ink group-hover:text-amber-700 dark:group-hover:text-amber-300 transition-colors">
-              <span>{hi ? 'जांचें' : 'Analyze'}</span>
-              <ArrowRight className="w-3.5 h-3.5 text-muted group-hover:text-amber-700 dark:group-hover:text-amber-300 transition-all group-hover:translate-x-1" />
+            <div className="mt-3 pt-2 sm:pt-2.5 border-t border-line/60 flex items-center justify-between text-xs font-bold text-ink group-hover:text-amber-700 dark:group-hover:text-amber-300 transition-colors w-full">
+              <div className="flex items-center gap-1.5">
+                <span>{hi ? 'संदेश जांचें' : 'Analyze message'}</span>
+                <ArrowRight className="w-3.5 h-3.5 shrink-0" />
+              </div>
+              <span className="text-[10px] font-semibold text-muted bg-soft px-2 py-0.5 rounded-md border border-line">
+                {hi ? 'AI टूल' : 'AI Tool'}
+              </span>
             </div>
           </button>
 
           {/* Tool 2: Suspicious link checker */}
-          <button type="button" className="hub-card group !p-4 sm:!p-5 cursor-pointer text-left flex flex-col justify-between" onClick={onOpenLinkChecker}>
-            <div>
-              <div className="flex items-center gap-3 mb-2.5">
-                <span className="hub-card-icon !w-9 !h-9 sm:!w-10 sm:!h-10 !mb-0 shrink-0 flex items-center justify-center bg-amber-500/10 dark:bg-amber-400/10 border border-amber-500/20 rounded-xl shadow-xs">
-                  <Link2 className="w-5 h-5 text-amber-800 dark:text-amber-300" />
-                </span>
-                <h3 className="hub-card-title text-sm sm:text-base font-extrabold text-ink leading-snug m-0 p-0 flex items-center">
-                  {hi ? 'संदिग्ध लिंक चेकर' : 'Suspicious link checker'}
-                </h3>
-              </div>
-              <p className="hub-card-meta text-xs leading-relaxed text-muted">
-                {hi
-                  ? 'डोमेन, HTTPS व फ़िशिंग संकेतों की सुरक्षित जांच करें।'
-                  : 'Assess domain, HTTPS, and impersonation signals safely without opening the URL.'}
-              </p>
+          <button
+            type="button"
+            className="hub-card group !p-3.5 sm:!p-4 cursor-pointer text-left flex flex-col justify-between"
+            onClick={onOpenLinkChecker}
+          >
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <span className="hub-card-icon !w-8 !h-8 sm:!w-9 sm:!h-9 shrink-0 flex items-center justify-center bg-amber-500/10 dark:bg-amber-400/10 border border-amber-500/20 rounded-lg shadow-xs">
+                <Link2 className="w-4 h-4 text-amber-800 dark:text-amber-300" />
+              </span>
+              <h3 className="hub-card-title text-sm sm:text-base font-extrabold text-ink leading-tight m-0 p-0">
+                {hi ? 'संदिग्ध लिंक चेकर' : 'Suspicious link checker'}
+              </h3>
             </div>
-            <div className="hub-card-foot mt-4 pt-2 text-xs font-bold flex items-center justify-between text-ink group-hover:text-amber-700 dark:group-hover:text-amber-300 transition-colors">
-              <span>{hi ? 'जांचें' : 'Check link'}</span>
-              <ArrowRight className="w-3.5 h-3.5 text-muted group-hover:text-amber-700 dark:group-hover:text-amber-300 transition-all group-hover:translate-x-1" />
+            <div className="mt-3 pt-2 sm:pt-2.5 border-t border-line/60 flex items-center justify-between text-xs font-bold text-ink group-hover:text-amber-700 dark:group-hover:text-amber-300 transition-colors w-full">
+              <div className="flex items-center gap-1.5">
+                <span>{hi ? 'लिंक जांचें' : 'Check link'}</span>
+                <ArrowRight className="w-3.5 h-3.5 shrink-0" />
+              </div>
+              <span className="text-[10px] font-semibold text-muted bg-soft px-2 py-0.5 rounded-md border border-line">
+                {hi ? 'URL टूल' : 'URL Tool'}
+              </span>
             </div>
           </button>
 
           {/* Tool 3: Cyber safety dashboard */}
-          <button type="button" className="hub-card group !p-4 sm:!p-5 cursor-pointer text-left flex flex-col justify-between" onClick={onOpenDashboard}>
-            <div>
-              <div className="flex items-center gap-3 mb-2.5">
-                <span className="hub-card-icon !w-9 !h-9 sm:!w-10 sm:!h-10 !mb-0 shrink-0 flex items-center justify-center bg-stone-500/10 dark:bg-stone-400/10 border border-stone-500/20 rounded-xl shadow-xs">
-                  <BarChart3 className="w-5 h-5 text-stone-700 dark:text-stone-300" />
-                </span>
-                <h3 className="hub-card-title text-sm sm:text-base font-extrabold text-ink leading-snug m-0 p-0 flex items-center">
-                  {hi ? 'सुरक्षा डैशबोर्ड' : 'Cyber safety dashboard'}
-                </h3>
-              </div>
-              <p className="hub-card-meta text-xs leading-relaxed text-muted">
-                {hi
-                  ? 'अपने सुरक्षा विश्लेषण, स्कोर व जरूरी सलाह देखें।'
-                  : 'View your safety score, past analyses, and personalized protection tips.'}
-              </p>
+          <button
+            type="button"
+            className="hub-card group !p-3.5 sm:!p-4 cursor-pointer text-left flex flex-col justify-between"
+            onClick={onOpenDashboard}
+          >
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <span className="hub-card-icon !w-8 !h-8 sm:!w-9 sm:!h-9 shrink-0 flex items-center justify-center bg-stone-500/10 dark:bg-stone-400/10 border border-stone-500/20 rounded-lg shadow-xs">
+                <BarChart3 className="w-4 h-4 text-stone-700 dark:text-stone-300" />
+              </span>
+              <h3 className="hub-card-title text-sm sm:text-base font-extrabold text-ink leading-tight m-0 p-0">
+                {hi ? 'सुरक्षा डैशबोर्ड' : 'Cyber safety dashboard'}
+              </h3>
             </div>
-            <div className="hub-card-foot mt-4 pt-2 text-xs font-bold flex items-center justify-between text-ink group-hover:text-amber-700 dark:group-hover:text-amber-300 transition-colors">
-              <span>{hi ? 'डैशबोर्ड खोलें' : 'Open dashboard'}</span>
-              <ArrowRight className="w-3.5 h-3.5 text-muted group-hover:text-amber-700 dark:group-hover:text-amber-300 transition-all group-hover:translate-x-1" />
+            <div className="mt-3 pt-2 sm:pt-2.5 border-t border-line/60 flex items-center justify-between text-xs font-bold text-ink group-hover:text-amber-700 dark:group-hover:text-amber-300 transition-colors w-full">
+              <div className="flex items-center gap-1.5">
+                <span>{hi ? 'डैशबोर्ड खोलें' : 'Open dashboard'}</span>
+                <ArrowRight className="w-3.5 h-3.5 shrink-0" />
+              </div>
+              <span className="text-[10px] font-semibold text-muted bg-soft px-2 py-0.5 rounded-md border border-line">
+                {hi ? 'स्कोरकार्ड' : 'Scorecard'}
+              </span>
             </div>
           </button>
         </div>

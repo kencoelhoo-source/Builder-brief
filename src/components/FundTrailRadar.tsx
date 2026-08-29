@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Radio, ShieldCheck } from 'lucide-react';
+import { Radio, ShieldCheck, Home } from 'lucide-react';
 import type { ExtractedTransaction, Language, CFCFRMSPayload, RadarNode } from '../types';
 import { formatINR } from '../utils/formatters';
 import { MyApplicationsTab } from './MyApplicationsTab';
@@ -11,7 +11,6 @@ interface FundTrailRadarProps {
   onOpenCourtPetition: () => void;
   onViewReceipt: () => void;
   onBack: () => void;
-  onSubmitFinalReport?: () => void;
   onReturnHome?: () => void;
   initialTab?: 'radar' | 'application';
 }
@@ -23,7 +22,6 @@ export const FundTrailRadar: React.FC<FundTrailRadarProps> = ({
   onOpenCourtPetition,
   onViewReceipt,
   onBack,
-  onSubmitFinalReport,
   onReturnHome,
   initialTab = 'radar',
 }) => {
@@ -173,13 +171,19 @@ export const FundTrailRadar: React.FC<FundTrailRadarProps> = ({
                 ? 'यह डेमो दिखाता है कि वास्तविक बैंक कार्रवाई के बाद कौन से दस्तावेज़ उपयोगी हो सकते हैं। इस प्रोटोटाइप से कोई फ्रीज या वापसी नहीं होती।'
                 : 'This demo shows which documents could be useful after a real bank action. No freeze or recovery happens from this prototype.'}
             </p>
-            <div className="btn-group mt-6">
+            <div className="btn-group mt-6 flex flex-wrap items-center gap-3">
               <button type="button" onClick={onOpenCourtPetition} className="btn-primary">
                 {hi ? 'डेमो याचिका देखें' : 'View demo petition'}
               </button>
               <button type="button" onClick={onViewReceipt} className="btn-secondary">
                 {hi ? 'डेमो रसीद देखें' : 'View demo receipt'}
               </button>
+              {onReturnHome && (
+                <button type="button" onClick={onReturnHome} className="btn-secondary flex items-center gap-2">
+                  <Home className="w-4 h-4" />
+                  <span>{hi ? 'होम पर लौटें' : 'Return to Home'}</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -189,9 +193,7 @@ export const FundTrailRadar: React.FC<FundTrailRadarProps> = ({
             transaction={transaction}
             payload={payload}
             currentLang={currentLang}
-            onOpenCourtPetition={onOpenCourtPetition}
             onViewReceipt={onViewReceipt}
-            onSubmitFinalReport={onSubmitFinalReport}
             onReturnHome={onReturnHome}
           />
         </div>
