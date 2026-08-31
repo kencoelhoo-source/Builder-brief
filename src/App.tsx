@@ -34,6 +34,7 @@ import { CyberSafetyQuiz } from './components/CyberSafetyQuiz';
 import { CyberSafetyTools, type CyberSafetyTool } from './components/CyberSafetyTools';
 import { WronglyAccusedCaseCard } from './components/WronglyAccusedCaseCard';
 import { HomeHub } from './components/HomeHub';
+import { detectBankFromVpa } from './data/bankNodalDirectory';
 
 
 type Theme = 'light' | 'dark';
@@ -85,7 +86,7 @@ export const App: React.FC = () => {
   const [intakeResetKey, setIntakeResetKey] = useState(0);
   const [furthestStep, setFurthestStep] = useState<number>(0);
   const [showHub, setShowHub] = useState(true);
-  const [radarInitialTab, setRadarInitialTab] = useState<'radar' | 'application' | 'status'>('radar');
+  const [radarInitialTab, setRadarInitialTab] = useState<'track' | 'details' | 'radar' | 'application' | 'status'>('track');
   const [sessionPhone, setSessionPhone] = useState<string | null>(() => {
     try {
       return sessionStorage.getItem('kavach_session');
@@ -185,7 +186,8 @@ export const App: React.FC = () => {
     setShowHub(false);
     setCurrentStep(step);
     if (options.persist !== false && nextTransaction) {
-      saveDraftToStorage(nextTransaction, nextPayload, step);
+      const isSub = Boolean(nextPayload || isReportSubmitted);
+      saveDraftToStorage(nextTransaction, nextPayload, step, isSub);
       setSavedDraft(getDraftFromStorage());
     }
     if (source !== 'pop') {
@@ -268,7 +270,7 @@ export const App: React.FC = () => {
       setTransaction(extracted);
       setShowHub(false);
       goToStep('review', 'flow', { transaction: extracted, payload: null });
-      triggerToast(currentLang === 'hi' ? 'मॉक केस लोड हुआ — विवरण जाँचें' : 'Mock case loaded — review details');
+      triggerToast(currentLang === 'hi' ? 'मॉक केस लोड हुआ: विवरण जाँचें' : 'Mock case loaded: review details');
     } catch (e) {
       console.error(e);
       triggerToast(currentLang === 'hi' ? 'डेमो रिपोर्ट लोड नहीं हो सकी' : 'Could not load that demo report');
@@ -300,10 +302,10 @@ export const App: React.FC = () => {
       triggerToast(
         currentLang === 'hi'
           ? thin
-            ? 'स्क्रीनशॉट पढ़ा गया — विवरण जाँचें और खाली फ़ील्ड भरें'
+            ? 'स्क्रीनशॉट पढ़ा गया: विवरण जाँचें और खाली फ़ील्ड भरें'
             : 'स्क्रीनशॉट से विवरण निकाले गए'
           : thin
-            ? 'Screenshot read — check details and fill anything missing'
+            ? 'Screenshot read: check details and fill anything missing'
             : 'Details extracted from the screenshot'
       );
     } catch (e) {
@@ -345,6 +347,7 @@ export const App: React.FC = () => {
   };
 
   const handleManualSubmit = (utr: string, amount: number, beneficiaryVpa: string) => {
+    const detectedBank = detectBankFromVpa(beneficiaryVpa);
     const manualTxn: FinancialIncident = {
       incidentType: 'FINANCIAL',
       utr,
@@ -353,7 +356,7 @@ export const App: React.FC = () => {
       remitterBank: 'HDFC Bank Ltd.',
       remitterAccount: 'XXXX-XXXX-4012',
       beneficiaryVpa,
-      beneficiaryBank: 'Unknown bank — please verify',
+      beneficiaryBank: detectedBank,
       fraudCategory: 'UPI_PHISHING',
       fraudCategoryLabel: 'Manually Entered UTR Report',
       incidentSummary: `Unauthorized transaction reported with UTR ${utr}.`,
@@ -370,11 +373,18 @@ export const App: React.FC = () => {
 
   const handleProceedToAction = (updatedTxn: CyberIncident) => {
     setTransaction(updatedTxn);
+    const livePayload = payload || sec79Payload;
+    if (livePayload) {
+      goToStep('radar', 'flow', { transaction: updatedTxn, payload: livePayload });
+      triggerToast(currentLang === 'hi' ? 'लाइव ट्रैकर खोला गया' : 'Returning to live tracker');
+      return;
+    }
     goToStep('freeze', 'flow', { transaction: updatedTxn, payload: null });
     triggerToast(currentLang === 'hi' ? 'कार्रवाई योजना तैयार' : 'Action Plan Ready');
   };
 
   const handleDispatchComplete = (generatedPayload: CFCFRMSPayload | Sec79Payload) => {
+    setIsReportSubmitted(true);
     if ('cfcfrmsToken' in generatedPayload) {
       setPayload(generatedPayload as CFCFRMSPayload);
       triggerToast(currentLang === 'hi' ? 'डेमो फ्रीज नोटिस तैयार हुआ' : 'Demo freeze notice prepared');
@@ -385,6 +395,8 @@ export const App: React.FC = () => {
 
     saveLastAcknowledgment(generatedPayload.ackNumber);
     if (transaction) {
+      saveDraftToStorage(transaction, generatedPayload, 'radar', true);
+      setSavedDraft(getDraftFromStorage());
       goToStep('radar', 'flow', { transaction, payload: generatedPayload });
     }
   };
@@ -612,6 +624,9 @@ export const App: React.FC = () => {
               currentLang={currentLang}
               onProceedToFreeze={handleProceedToAction}
               onBackToIntake={() => goToStep('intake', 'nav')}
+              isDispatched={Boolean(payload)}
+              ackNumber={payload?.ackNumber}
+              onViewLiveTracker={() => goToStep('radar', 'nav', { transaction, payload })}
             />
           ) : (
             <SocialVerificationCard
@@ -619,6 +634,9 @@ export const App: React.FC = () => {
               currentLang={currentLang}
               onProceedToTakedown={handleProceedToAction}
               onBackToIntake={() => goToStep('intake', 'nav')}
+              isDispatched={Boolean(sec79Payload)}
+              ackNumber={sec79Payload?.ackNumber}
+              onViewLiveTracker={() => goToStep('radar', 'nav', { transaction, payload: sec79Payload })}
             />
           )
         )}
@@ -630,6 +648,8 @@ export const App: React.FC = () => {
               currentLang={currentLang}
               onDispatchComplete={handleDispatchComplete}
               onBack={() => goToStep('review', 'nav')}
+              existingPayload={payload}
+              onViewLiveTracker={() => goToStep('radar', 'nav', { transaction, payload })}
             />
           ) : (
             <TakedownDispatchCard
@@ -637,6 +657,8 @@ export const App: React.FC = () => {
               currentLang={currentLang}
               onDispatchComplete={handleDispatchComplete}
               onBack={() => goToStep('review', 'nav')}
+              existingPayload={sec79Payload}
+              onViewLiveTracker={() => goToStep('radar', 'nav', { transaction, payload: sec79Payload })}
             />
           )
         )}
@@ -649,9 +671,9 @@ export const App: React.FC = () => {
               currentLang={currentLang}
               onOpenCourtPetition={() => handleOpenModal('petition')}
               onViewReceipt={() => handleOpenModal('receipt')}
-              onBack={() => goToStep('freeze', 'nav')}
+              onBack={() => goToStep('review', 'nav')}
               onReturnHome={handleGoHub}
-              initialTab={radarInitialTab === 'application' ? 'application' : 'radar'}
+              initialTab={radarInitialTab === 'details' ? 'details' : 'track'}
             />
           ) : transaction.incidentType === 'SOCIAL' && sec79Payload ? (
             <EscalationTracker
@@ -659,9 +681,9 @@ export const App: React.FC = () => {
               payload={sec79Payload}
               currentLang={currentLang}
               onGeneratePetition={() => handleOpenModal('fir')}
-              onBack={() => goToStep('freeze', 'nav')}
+              onBack={() => goToStep('review', 'nav')}
               onReturnHome={handleGoHub}
-              initialTab={radarInitialTab === 'application' ? 'application' : 'status'}
+              initialTab={radarInitialTab === 'details' ? 'details' : 'track'}
             />
           ) : null
         )}

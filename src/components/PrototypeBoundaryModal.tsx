@@ -52,8 +52,8 @@ export const PrototypeBoundaryModal: React.FC<PrototypeBoundaryModalProps> = ({ 
         <div className="p-5 sm:p-6">
           <p className="text-sm sm:text-base text-muted leading-relaxed">
             {hi
-              ? 'अधिकृत CFCFRMS / I4C वर्कफ़्लो से पहले नागरिकों के लिए प्री-इंजेशन लेयर — यह सरकारी सिस्टम नहीं है और इसमें कोई आधिकारिक चिह्न या उपाधि नहीं है।'
-              : 'A citizen pre-ingestion layer in front of a future authorised CFCFRMS / I4C workflow — not a government system, emblem or title.'}
+              ? 'अधिकृत CFCFRMS / I4C वर्कफ़्लो से पहले नागरिकों के लिए प्री-इंजेशन लेयर (यह सरकारी सिस्टम नहीं है और इसमें कोई आधिकारिक चिह्न या उपाधि नहीं है)।'
+              : 'A citizen pre-ingestion layer in front of a future authorised CFCFRMS / I4C workflow (not a government system, emblem or title).'}
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6">

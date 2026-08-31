@@ -10,7 +10,7 @@ interface EscalationTrackerProps {
   onGeneratePetition: () => void;
   onBack: () => void;
   onReturnHome?: () => void;
-  initialTab?: 'status' | 'application';
+  initialTab?: 'track' | 'details' | 'status' | 'application';
 }
 
 export const EscalationTracker: React.FC<EscalationTrackerProps> = ({
@@ -20,14 +20,18 @@ export const EscalationTracker: React.FC<EscalationTrackerProps> = ({
   onGeneratePetition,
   onBack,
   onReturnHome,
-  initialTab = 'status',
+  initialTab = 'track',
 }) => {
   const hi = currentLang === 'hi';
-  const [viewTab, setViewTab] = useState<'status' | 'application'>(initialTab);
+  const normalizeTab = (t?: string): 'track' | 'details' => {
+    if (t === 'details' || t === 'status') return 'details';
+    return 'track';
+  };
+  const [viewTab, setViewTab] = useState<'track' | 'details'>(normalizeTab(initialTab));
 
   React.useEffect(() => {
     if (initialTab) {
-      setViewTab(initialTab);
+      setViewTab(normalizeTab(initialTab));
     }
   }, [initialTab]);
 
@@ -35,56 +39,51 @@ export const EscalationTracker: React.FC<EscalationTrackerProps> = ({
     <div className="page-wrap page-stack flow-page">
       <p className="mb-6">
         <button type="button" className="btn-link" onClick={onBack}>
-          ← {hi ? 'कार्रवाई पर लौटें' : 'Back to act'}
+          ← {hi ? 'मामले की समीक्षा पर लौटें' : 'Back to case review'}
         </button>
       </p>
 
+      <header className="page-head mb-4">
+        <p className="eyebrow">{hi ? 'डेमो नोटिस तैयार है' : 'Demo notice is ready'}</p>
+        <h1>{hi ? 'टेकडाउन की स्थिति' : 'Takedown status'}</h1>
+        <p className="lede">
+          {payload.takedownToken} · {transaction.platform}
+        </p>
+      </header>
+
       {/* Segmented Tab Switcher with Smooth Sliding Indicator */}
-      <div className="relative inline-flex items-center p-1 rounded-full bg-soft border border-line mb-6 w-full max-w-sm">
-        {/* Sliding Pill Indicator */}
-        <div
-          className="absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-full bg-card shadow-sm transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
-          style={{
-            left: viewTab === 'status' ? '4px' : 'calc(50%)',
-          }}
-        />
+      <div className="tab-switcher">
+        <div className={`tab-indicator ${viewTab === 'details' ? 'is-right' : 'is-left'}`} />
 
         <button
           type="button"
-          onClick={() => setViewTab('status')}
-          className={`relative z-10 flex-1 h-9 flex items-center justify-center gap-1.5 px-3 rounded-full text-xs font-semibold whitespace-nowrap transition-colors duration-200 ${
-            viewTab === 'status'
-              ? 'text-ink'
-              : 'text-muted hover:text-ink'
-          }`}
+          onClick={() => setViewTab('track')}
+          className={`tab-btn ${viewTab === 'track' ? 'is-active' : ''}`}
         >
-          <Radio size={13} className={viewTab === 'status' ? 'text-[#15803d]' : 'text-muted'} />
-          <span>{hi ? 'टेकडाउन रडार' : 'Takedown Radar'}</span>
+          <Radio size={16} className={viewTab === 'track' ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted'} />
+          <span>{hi ? 'ट्रैक' : 'Track'}</span>
         </button>
         <button
           type="button"
-          onClick={() => setViewTab('application')}
-          className={`relative z-10 flex-1 h-9 flex items-center justify-center gap-1.5 px-3 rounded-full text-xs font-semibold whitespace-nowrap transition-colors duration-200 ${
-            viewTab === 'application'
-              ? 'text-ink'
-              : 'text-muted hover:text-ink'
-          }`}
+          onClick={() => setViewTab('details')}
+          className={`tab-btn ${viewTab === 'details' ? 'is-active' : ''}`}
         >
-          <ShieldCheck size={13} className={viewTab === 'application' ? 'text-amber-600' : 'text-muted'} />
-          <span>{hi ? 'मेरी शिकायत' : 'My Application'}</span>
+          <ShieldCheck size={16} className={viewTab === 'details' ? 'text-amber-600 dark:text-amber-400' : 'text-muted'} />
+          <span>{hi ? 'विवरण' : 'Details'}</span>
         </button>
       </div>
 
-      {viewTab === 'status' ? (
+      {viewTab === 'track' ? (
         <div className="anim-slide-left">
-          <header className="page-head">
-            <p className="eyebrow">{hi ? 'डेमो नोटिस तैयार है' : 'Demo notice is ready'}</p>
-            <h1>{hi ? 'टेकडाउन की स्थिति' : 'Takedown status'}</h1>
-            <p className="lede">
-              {payload.takedownToken} · {transaction.platform}
-            </p>
-          </header>
-
+          <MyApplicationsTab
+            transaction={transaction}
+            payload={payload}
+            currentLang={currentLang}
+            onReturnHome={onReturnHome}
+          />
+        </div>
+      ) : (
+        <div className="anim-slide-right">
           <ol className="trail-list">
             <li>
               <div>
@@ -129,17 +128,8 @@ export const EscalationTracker: React.FC<EscalationTrackerProps> = ({
           </div>
 
           <button type="button" onClick={onGeneratePetition} className="btn-primary mt-6">
-            {hi ? 'FIR ड्राफ्ट तैयार करें' : 'Generate FIR draft'}
+            {hi ? 'पुलिस शिकायत (FIR ड्राफ्ट) देखें' : 'View Police Complaint (FIR Draft)'}
           </button>
-        </div>
-      ) : (
-        <div className="anim-slide-right">
-          <MyApplicationsTab
-            transaction={transaction}
-            payload={payload}
-            currentLang={currentLang}
-            onReturnHome={onReturnHome}
-          />
         </div>
       )}
     </div>

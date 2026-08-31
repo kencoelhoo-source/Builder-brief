@@ -77,7 +77,7 @@ export const FIRDraftModal: React.FC<FIRDraftModalProps> = ({
             style={{ fontFamily: '"Times New Roman", Times, serif', boxSizing: 'border-box' }}
           >
             <div className="text-center pb-2 border-b border-[#cbd5e1]">
-              <p className="text-[10px] font-black text-[#b91c1c] uppercase mb-1">PROTOTYPE TEMPLATE — NOT A FILED FIR</p>
+              <p className="text-[10px] font-black text-[#b91c1c] uppercase mb-1">PROTOTYPE TEMPLATE (NOT A FILED FIR)</p>
               <h1 className="text-[14px] font-bold uppercase tracking-wide">
                 FORMAL POLICE COMPLAINT / FIRST INFORMATION REPORT (FIR) - CYBER CRIME
               </h1>

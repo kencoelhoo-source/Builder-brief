@@ -82,7 +82,7 @@ export const CourtPetitionModal: React.FC<CourtPetitionModalProps> = ({
           >
             {/* Court Header */}
             <div className="text-center pb-2 border-b border-[#cbd5e1]">
-              <p className="text-[10px] font-black text-[#b91c1c] uppercase mb-1">PROTOTYPE TEMPLATE — NOT FILED WITH ANY COURT</p>
+              <p className="text-[10px] font-black text-[#b91c1c] uppercase mb-1">PROTOTYPE TEMPLATE (NOT FILED WITH ANY COURT)</p>
               <p className="text-[13px] font-bold uppercase leading-snug">
                 IN THE COURT OF LD. CHIEF JUDICIAL MAGISTRATE / DISTRICT MAGISTRATE AT [DISTRICT]
               </p>

@@ -2,12 +2,16 @@ import React, { useState } from 'react';
 import type { SocialIncident, Language } from '../types';
 import { isValidSuspectUrl } from '../utils/sanitizers';
 import { PersonProfileSummary } from './PersonProfileSummary';
+import { CustomSelect } from './CustomSelect';
 
 interface SocialVerificationCardProps {
   transaction: SocialIncident;
   currentLang: Language;
   onProceedToTakedown: (updatedTxn: SocialIncident) => void;
   onBackToIntake: () => void;
+  isDispatched?: boolean;
+  ackNumber?: string;
+  onViewLiveTracker?: () => void;
 }
 
 interface FieldProps {
@@ -27,6 +31,9 @@ export const SocialVerificationCard: React.FC<SocialVerificationCardProps> = ({
   currentLang,
   onProceedToTakedown,
   onBackToIntake,
+  isDispatched = false,
+  ackNumber,
+  onViewLiveTracker,
 }) => {
   const [formData, setFormData] = useState<SocialIncident>({ ...transaction });
   const [isEditing, setIsEditing] = useState(false);
@@ -35,6 +42,10 @@ export const SocialVerificationCard: React.FC<SocialVerificationCardProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isDispatched && onViewLiveTracker) {
+      onViewLiveTracker();
+      return;
+    }
     onProceedToTakedown(formData);
   };
 
@@ -45,6 +56,32 @@ export const SocialVerificationCard: React.FC<SocialVerificationCardProps> = ({
         <span className="crumb-sep" aria-hidden="true">/</span>
         <span>{hi ? 'जाँच' : 'Check'}</span>
       </p>
+
+      {isDispatched && (
+        <div className="p-3.5 sm:p-4 rounded-xl bg-emerald-500/10 dark:bg-emerald-400/10 border border-emerald-500/20 flex items-center justify-between gap-3 mb-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="relative flex h-2 w-2 shrink-0">
+              <span className="anim-pulse-ring absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600 dark:bg-emerald-400" />
+            </span>
+            <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 truncate">
+              {hi
+                ? `धारा 79 नोटिस प्रेषित व केस सक्रिय है (${ackNumber || 'सक्रिय'})`
+                : `Section 79 Notice Dispatched & Case Active (${ackNumber || 'Active'})`}
+            </span>
+          </div>
+          {onViewLiveTracker && (
+            <button
+              type="button"
+              onClick={onViewLiveTracker}
+              className="live-status-link shrink-0 cursor-pointer"
+            >
+              <span>{hi ? 'लाइव स्थिति देखें' : 'View Live Status'}</span>
+              <span className="link-arrow" aria-hidden="true">→</span>
+            </button>
+          )}
+        </div>
+      )}
 
       <header className="page-head">
         <h1>{hi ? 'ये विवरण जाँचें।' : 'Check these details.'}</h1>
@@ -85,27 +122,28 @@ export const SocialVerificationCard: React.FC<SocialVerificationCardProps> = ({
                 className="input-field"
               />
             ) : (
-              <p className="detail-value font-mono">{formData.suspectUrl || '—'}</p>
+              <p className="detail-value font-mono">{formData.suspectUrl || '-'}</p>
             )}
           </Field>
 
           <Field label={hi ? 'सामग्री' : 'Content type'}>
             {isEditing ? (
-              <select
-                value={formData.contentType}
-                onChange={(e) =>
+              <CustomSelect
+                value={formData.contentType || 'FAKE_PROFILE'}
+                onChange={(val) =>
                   setFormData({
                     ...formData,
-                    contentType: e.target.value as SocialIncident['contentType'],
+                    contentType: val as SocialIncident['contentType'],
                   })
                 }
-                className="input-field"
-              >
-                <option value="FAKE_PROFILE">Fake profile / impersonation</option>
-                <option value="HARASSING_POST">Harassing / threatening post</option>
-                <option value="PRIVATE_IMAGES">Non-consensual private images</option>
-                <option value="HACKED_ACCOUNT">Hacked account</option>
-              </select>
+                options={[
+                  { value: 'FAKE_PROFILE', label: 'Fake profile / impersonation' },
+                  { value: 'HARASSING_POST', label: 'Harassing / threatening post' },
+                  { value: 'PRIVATE_IMAGES', label: 'Non-consensual private images' },
+                  { value: 'HACKED_ACCOUNT', label: 'Hacked account' },
+                ]}
+                ariaLabel={hi ? 'सामग्री का प्रकार' : 'Content type'}
+              />
             ) : (
               <p className="detail-value">{(formData.contentType || 'CONTENT').replace(/_/g, ' ')}</p>
             )}
@@ -136,7 +174,9 @@ export const SocialVerificationCard: React.FC<SocialVerificationCardProps> = ({
 
         <div className="btn-group flow-actions">
           <button type="submit" className="btn-primary" disabled={!canProceed}>
-            {hi ? 'आगे बढ़ें' : 'Continue'}
+            {isDispatched
+              ? (hi ? 'लाइव ट्रैकर देखें' : 'View Live Tracker')
+              : (hi ? 'आगे बढ़ें' : 'Continue')}
           </button>
           <button type="button" onClick={() => setIsEditing(!isEditing)} className="btn-secondary">
             {isEditing ? (hi ? 'सहेजें' : 'Save') : (hi ? 'विवरण बदलें' : 'Change details')}

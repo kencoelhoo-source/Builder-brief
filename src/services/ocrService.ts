@@ -251,7 +251,7 @@ const classifyAndBuild = (text: string, confidence: number): CyberIncident => {
       fraudCategory: category,
       fraudCategoryLabel:
         contentType === 'HARASSING_POST' ? 'Harassment / threatening content' : 'Social media impersonation',
-      incidentSummary: text.slice(0, 600) || 'Social media screenshot — please confirm the profile URL.',
+      incidentSummary: text.slice(0, 600) || 'Social media screenshot: please confirm the profile URL.',
       victimName: 'Citizen (Demo User)',
       victimMobile: '+91-98765-43210',
       confidenceScore: Math.round(confidence * 10) / 10,
@@ -260,10 +260,10 @@ const classifyAndBuild = (text: string, confidence: number): CyberIncident => {
   }
 
   const banks = BANK_HINTS.filter((b) => b.match.test(text)).map((b) => b.name);
-  const remitterBank = banks[0] || guessBank(lower, 'Unknown bank — please edit');
+  const remitterBank = banks[0] || guessBank(lower, 'Unknown bank (please edit)');
   const beneficiaryBank = banks[1] || (vpaMatch
     ? guessBank(vpaMatch[0], remitterBank)
-    : 'Unknown bank — please edit');
+    : 'Unknown bank (please edit)');
 
   let category: FraudCategory = 'OTHER';
   let categoryLabel = 'Screenshot report';
@@ -360,10 +360,10 @@ export const parseVoiceTranscription = async (
     utr,
     amount,
     timestamp: nowStamp(),
-    remitterBank: guessBank(lower, 'Unknown bank — please edit'),
+    remitterBank: guessBank(lower, 'Unknown bank (please edit)'),
     remitterAccount: 'XXXX',
     beneficiaryVpa: vpa,
-    beneficiaryBank: guessBank(vpa || lower, 'Unknown bank — please edit'),
+    beneficiaryBank: guessBank(vpa || lower, 'Unknown bank (please edit)'),
     fraudCategory: 'UPI_PHISHING',
     fraudCategoryLabel: 'Spoken emergency report',
     incidentSummary: text,

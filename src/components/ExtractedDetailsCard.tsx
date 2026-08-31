@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import type { ExtractedTransaction, Language } from '../types';
+import { BANK_NODAL_DIRECTORY } from '../data/bankNodalDirectory';
 import { formatINR } from '../utils/formatters';
 import { isValidUTR, isValidVPA } from '../utils/sanitizers';
 import { PersonProfileSummary } from './PersonProfileSummary';
@@ -9,6 +10,9 @@ interface ExtractedDetailsCardProps {
   currentLang: Language;
   onProceedToFreeze: (updatedTxn: ExtractedTransaction) => void;
   onBackToIntake: () => void;
+  isDispatched?: boolean;
+  ackNumber?: string;
+  onViewLiveTracker?: () => void;
 }
 
 interface FieldProps {
@@ -30,6 +34,9 @@ export const ExtractedDetailsCard: React.FC<ExtractedDetailsCardProps> = ({
   currentLang,
   onProceedToFreeze,
   onBackToIntake,
+  isDispatched = false,
+  ackNumber,
+  onViewLiveTracker,
 }) => {
   const [formData, setFormData] = useState<ExtractedTransaction>({ ...transaction });
   const [isEditing, setIsEditing] = useState(false);
@@ -44,6 +51,10 @@ export const ExtractedDetailsCard: React.FC<ExtractedDetailsCardProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isDispatched && onViewLiveTracker) {
+      onViewLiveTracker();
+      return;
+    }
     onProceedToFreeze(formData);
   };
 
@@ -54,6 +65,32 @@ export const ExtractedDetailsCard: React.FC<ExtractedDetailsCardProps> = ({
         <span className="crumb-sep" aria-hidden="true">/</span>
         <span>{hi ? 'जाँच' : 'Check'}</span>
       </p>
+
+      {isDispatched && (
+        <div className="p-3.5 sm:p-4 rounded-xl bg-emerald-500/10 dark:bg-emerald-400/10 border border-emerald-500/20 flex items-center justify-between gap-3 mb-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="relative flex h-2 w-2 shrink-0">
+              <span className="anim-pulse-ring absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600 dark:bg-emerald-400" />
+            </span>
+            <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 truncate">
+              {hi
+                ? `नोटिस प्रेषित व केस सक्रिय है (${ackNumber || 'सक्रिय'})`
+                : `Notice Dispatched & Case Active (${ackNumber || 'Active'})`}
+            </span>
+          </div>
+          {onViewLiveTracker && (
+            <button
+              type="button"
+              onClick={onViewLiveTracker}
+              className="live-status-link shrink-0 cursor-pointer"
+            >
+              <span>{hi ? 'लाइव स्थिति देखें' : 'View Live Status'}</span>
+              <span className="link-arrow" aria-hidden="true">→</span>
+            </button>
+          )}
+        </div>
+      )}
 
       <header className="page-head">
         <h1>{hi ? 'ये विवरण जाँचें।' : 'Check these details.'}</h1>
@@ -97,39 +134,47 @@ export const ExtractedDetailsCard: React.FC<ExtractedDetailsCardProps> = ({
                 maxLength={12}
                 value={formData.utr}
                 onChange={(e) => setFormData({ ...formData, utr: e.target.value.trim() })}
-                className={`input-field ${!utrValid ? 'border-[var(--danger)]' : ''}`}
+                className={`input-field font-mono ${!utrValid ? 'border-[var(--danger)]' : ''}`}
               />
             ) : (
-              <p className="detail-value font-mono">{formData.utr || '—'}</p>
+              <p className="detail-value font-mono">{formData.utr || '-'}</p>
             )}
           </Field>
 
           <Field
-            label={hi ? 'संदिग्ध UPI ID (VPA)' : 'Suspect UPI ID (VPA)'}
+            label={hi ? 'संदिग्ध UPI / VPA' : 'Suspect UPI ID'}
             hint={hi
-              ? 'VPA = Virtual Payment Address, जैसे name@oksbi — पैसे इसी पते पर गए।'
-              : 'VPA = Virtual Payment Address, like name@oksbi — the UPI ID the money went to.'}
+              ? 'VPA = Virtual Payment Address, जैसे name@oksbi (पैसे इसी पते पर गए)।'
+              : 'VPA = Virtual Payment Address, like name@oksbi (the UPI ID the money went to).'}
           >
             {isEditing ? (
               <input
                 type="text"
                 value={formData.beneficiaryVpa}
                 onChange={(e) => setFormData({ ...formData, beneficiaryVpa: e.target.value.trim() })}
-                className={`input-field ${!vpaValid ? 'border-[var(--danger)]' : ''}`}
+                className={`input-field font-mono ${!vpaValid ? 'border-[var(--danger)]' : ''}`}
               />
             ) : (
-              <p className="detail-value font-mono">{formData.beneficiaryVpa || '—'}</p>
+              <p className="detail-value font-mono">{formData.beneficiaryVpa || '-'}</p>
             )}
           </Field>
 
           <Field label={hi ? 'आपका बैंक' : 'Your bank'}>
             {isEditing ? (
-              <input
-                type="text"
-                value={formData.remitterBank}
-                onChange={(e) => setFormData({ ...formData, remitterBank: e.target.value })}
-                className="input-field"
-              />
+              <>
+                <input
+                  type="text"
+                  list="bank-directory-list"
+                  value={formData.remitterBank}
+                  onChange={(e) => setFormData({ ...formData, remitterBank: e.target.value })}
+                  className="input-field"
+                />
+                <datalist id="bank-directory-list">
+                  {Object.values(BANK_NODAL_DIRECTORY).map((bank) => (
+                    <option key={bank.bankCode} value={bank.bankName} />
+                  ))}
+                </datalist>
+              </>
             ) : (
               <p className="detail-value">{formData.remitterBank}</p>
             )}
@@ -139,6 +184,7 @@ export const ExtractedDetailsCard: React.FC<ExtractedDetailsCardProps> = ({
             {isEditing ? (
               <input
                 type="text"
+                list="bank-directory-list"
                 value={formData.beneficiaryBank}
                 onChange={(e) => setFormData({ ...formData, beneficiaryBank: e.target.value })}
                 className="input-field"
@@ -173,7 +219,9 @@ export const ExtractedDetailsCard: React.FC<ExtractedDetailsCardProps> = ({
 
         <div className="btn-group flow-actions">
           <button type="submit" className="btn-primary" disabled={!canProceed}>
-            {hi ? 'आगे बढ़ें' : 'Continue'}
+            {isDispatched
+              ? (hi ? 'लाइव ट्रैकर देखें' : 'View Live Tracker')
+              : (hi ? 'आगे बढ़ें' : 'Continue')}
           </button>
           <button type="button" onClick={() => setIsEditing(!isEditing)} className="btn-secondary">
             {isEditing ? (hi ? 'सहेजें' : 'Save') : (hi ? 'विवरण बदलें' : 'Change details')}

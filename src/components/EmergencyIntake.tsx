@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Mic, ArrowRight, CreditCard, ShieldAlert, MessageCircleQuestionMark, FileText, Trash2, ChevronRight } from 'lucide-react';
+import { Mic, ArrowRight, CreditCard, ShieldAlert, MessageCircleQuestionMark, FileText, Trash2, ChevronRight, CheckCircle2, Receipt, Globe } from 'lucide-react';
 import type { Language } from '../types';
 import type { SavedDraft } from '../services/storageService';
 import { speechService } from '../services/speechService';
@@ -197,7 +197,8 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
     }
   };
 
-  const isUncompletedDraft = savedDraft && savedDraft.step !== 'radar';
+  const isSubmittedCase = Boolean(savedDraft?.isSubmitted || savedDraft?.payload || savedDraft?.step === 'radar');
+  const isUncompletedDraft = Boolean(savedDraft && !isSubmittedCase && savedDraft.transaction);
   const draftTx = isUncompletedDraft ? savedDraft.transaction : null;
 
   return (
@@ -212,13 +213,56 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
 
       {panel === 'home' && (
         <div className="panel-enter intake-home">
-          {/* Active Saved Draft Banner: Sleek, Compact & Responsive */}
+          {/* 1. Active Submitted Case Banner */}
+          {isSubmittedCase && savedDraft?.transaction && onResumeDraft && (
+            <div className="mb-5 p-3.5 sm:p-4 rounded-2xl bg-emerald-500/10 dark:bg-emerald-400/10 border border-emerald-500/20 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 transition-all">
+              <div className="flex items-center gap-3">
+                <CheckCircle2 size={22} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                    <span className="text-xs sm:text-sm font-bold text-ink tracking-tight">
+                      {hi ? 'सक्रिय केस दर्ज है:' : 'Active Case In Progress:'}{' '}
+                      <span className="font-mono font-bold text-emerald-800 dark:text-emerald-300">
+                        {savedDraft.payload?.ackNumber || 'Active'}
+                      </span>
+                    </span>
+                  </div>
+                  <p className="text-[11px] sm:text-xs text-muted truncate mt-0.5">
+                    <span className="font-medium text-ink/80">{savedDraft.transaction.fraudCategoryLabel}</span> · {hi ? 'लाइव एस्केलेशन ट्रैकर में सक्रिय' : 'Active in live escalation tracker'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2.5 w-full sm:w-auto sm:min-w-[290px] pt-2.5 sm:pt-0 border-t border-emerald-600/20 sm:border-t-0 items-center">
+                {onClearDraft && (
+                  <button
+                    type="button"
+                    onClick={onClearDraft}
+                    className="draft-action-btn draft-action-discard"
+                    title={hi ? 'नया केस शुरू करें' : 'Start new report'}
+                  >
+                    <Trash2 size={13} />
+                    <span>{hi ? 'नया केस' : 'Start New'}</span>
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={onResumeDraft}
+                  className="draft-action-btn draft-action-resume"
+                >
+                  <span>{hi ? 'लाइव स्थिति देखें' : 'View Live Status'}</span>
+                  <ArrowRight size={13} />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* 2. Uncompleted Draft Banner (Only when NOT submitted) */}
           {draftTx && onResumeDraft && (
             <div className="mb-5 p-3.5 sm:p-5 rounded-2xl bg-card border border-line-strong shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 transition-all">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-soft border border-line flex items-center justify-center shrink-0 text-ink">
-                  <FileText size={18} />
-                </div>
+                <FileText size={22} className="text-ink shrink-0" />
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shrink-0" />
@@ -233,7 +277,7 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 sm:flex sm:items-center gap-2.5 w-full sm:w-auto pt-2.5 sm:pt-0 border-t border-line/40 sm:border-t-0">
+              <div className="grid grid-cols-2 gap-2.5 w-full sm:w-auto sm:min-w-[290px] pt-2.5 sm:pt-0 border-t border-line/40 sm:border-t-0 items-center">
                 {onClearDraft && (
                   <button
                     type="button"
@@ -260,18 +304,6 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
           <header className="intake-hero">
             <p className="crumb font-extrabold tracking-wider">{hi ? 'शिकायत' : 'Report'}</p>
             <h1>{hi ? 'क्या हुआ?' : 'What happened?'}</h1>
-            {/* Desktop / Tablet: Full descriptive instructions */}
-            <p className="lede hidden sm:block">
-              {hi
-                ? 'अपनी शिकायत शुरू करने के लिए नीचे उपयुक्त श्रेणी चुनें। आप रसीद फोटो, चैट स्क्रीनशॉट अपलोड कर सकते हैं या बोलकर बता सकते हैं।'
-                : 'Select the incident category below to start your guided report. You can upload a payment receipt, chat export, or speak directly.'}
-            </p>
-            {/* Mobile: Concise, airy, breathable one-liner */}
-            <p className="lede block sm:hidden text-xs text-muted mt-1 leading-normal">
-              {hi
-                ? 'शुरू करने के लिए नीचे उपयुक्त विकल्प चुनें।'
-                : 'Choose an option below to start your report.'}
-            </p>
           </header>
 
           <input
@@ -283,76 +315,115 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
           />
 
           <div className="intake-choice-grid" aria-label={hi ? 'घटना का प्रकार चुनें' : 'Choose incident type'}>
+            {/* Option 1: Financial Incident */}
             <button
               type="button"
-              className={`intake-choice ${dropOver === 'money' ? 'is-over' : ''} ${isLoading ? 'is-busy' : ''}`}
+              className={`intake-choice intake-choice-financial ${dropOver === 'money' ? 'is-over' : ''} ${isLoading ? 'is-busy' : ''}`}
               disabled={isLoading}
               {...uploadBind('money')}
             >
-              <div className="flex items-center gap-3 mb-2.5 w-full">
-                <span className="intake-choice-icon !mb-0 shrink-0"><CreditCard size={20} /></span>
-                <span className="intake-choice-title font-extrabold">{hi ? 'मेरे पैसे चले गए' : 'I lost money'}</span>
+              <div className="intake-choice-header">
+                <span className="intake-choice-icon"><CreditCard size={24} /></span>
+                <span className="intake-choice-arrow" aria-hidden="true"><ChevronRight size={18} /></span>
               </div>
-              <div className="intake-choice-body">
-                <span className="intake-choice-meta">
+              <div className="intake-choice-content">
+                <span className="intake-choice-title">{hi ? 'मेरे पैसे चले गए' : 'I lost money'}</span>
+                <p className="intake-choice-meta">
                   {isLoading
                     ? hi ? 'पढ़ा जा रहा है…' : 'Reading…'
                     : hi ? 'UPI रसीद या बैंक SMS की फोटो अपलोड करें।' : 'Upload UPI receipt or bank SMS photo.'}
-                </span>
-                <span className="intake-choice-foot">{hi ? 'JPG, PNG, WEBP · 10 MB तक' : 'JPG, PNG or WEBP · up to 10 MB'}</span>
+                </p>
               </div>
-              <span className="intake-choice-arrow" aria-hidden="true"><ChevronRight size={18} /></span>
+              <div className="intake-choice-foot">
+                <span className="intake-choice-pill">{hi ? 'JPG, PNG, WEBP · 10 MB तक' : 'JPG, PNG or WEBP · up to 10 MB'}</span>
+              </div>
             </button>
 
+            {/* Option 2: Social / Harassment */}
             <button
               type="button"
-              className={`intake-choice ${dropOver === 'social' ? 'is-over' : ''} ${isLoading ? 'is-busy' : ''}`}
+              className={`intake-choice intake-choice-social ${dropOver === 'social' ? 'is-over' : ''} ${isLoading ? 'is-busy' : ''}`}
               disabled={isLoading}
               {...uploadBind('social')}
             >
-              <div className="flex items-center gap-3 mb-2.5 w-full">
-                <span className="intake-choice-icon !mb-0 shrink-0"><ShieldAlert size={20} /></span>
-                <span className="intake-choice-title font-extrabold">{hi ? 'फेक प्रोफाइल / धमकी' : 'Fake profile / threat'}</span>
+              <div className="intake-choice-header">
+                <span className="intake-choice-icon"><ShieldAlert size={24} /></span>
+                <span className="intake-choice-arrow" aria-hidden="true"><ChevronRight size={18} /></span>
               </div>
-              <div className="intake-choice-body">
-                <span className="intake-choice-meta">
+              <div className="intake-choice-content">
+                <span className="intake-choice-title">{hi ? 'फेक प्रोफाइल / धमकी' : 'Fake profile / threat'}</span>
+                <p className="intake-choice-meta">
                   {hi ? 'चैट, प्रोफाइल या पोस्ट का स्क्रीनशॉट अपलोड करें।' : 'Upload screenshot of chat, profile or post.'}
-                </span>
-                <span className="intake-choice-foot">{hi ? 'JPG, PNG, WEBP · 10 MB तक' : 'JPG, PNG or WEBP · up to 10 MB'}</span>
+                </p>
               </div>
-              <span className="intake-choice-arrow" aria-hidden="true"><ChevronRight size={18} /></span>
+              <div className="intake-choice-foot">
+                <span className="intake-choice-pill">{hi ? 'JPG, PNG, WEBP · 10 MB तक' : 'JPG, PNG or WEBP · up to 10 MB'}</span>
+              </div>
             </button>
 
+            {/* Option 3: Unsure / Voice & Text */}
             <button
               type="button"
-              className="intake-choice"
+              className="intake-choice intake-choice-voice"
               disabled={isLoading}
               onClick={() => setPanel('voice')}
             >
-              <div className="flex items-center gap-3 mb-2.5 w-full">
-                <span className="intake-choice-icon !mb-0 shrink-0"><MessageCircleQuestionMark size={20} /></span>
-                <span className="intake-choice-title font-extrabold">{hi ? 'समझ नहीं आ रहा' : 'I’m not sure'}</span>
+              <div className="intake-choice-header">
+                <span className="intake-choice-icon"><MessageCircleQuestionMark size={24} /></span>
+                <span className="intake-choice-arrow" aria-hidden="true"><ChevronRight size={18} /></span>
               </div>
-              <div className="intake-choice-body">
-                <span className="intake-choice-meta">
-                  {hi ? 'टाइप करें या बोलें — साक्ष्य बाद में जोड़ सकते हैं।' : 'Type or speak. You can add evidence later.'}
-                </span>
-                <span className="intake-choice-foot">{hi ? 'आवाज़ या टेक्स्ट' : 'Voice or text'}</span>
+              <div className="intake-choice-content">
+                <span className="intake-choice-title">{hi ? 'समझ नहीं आ रहा' : 'I’m not sure'}</span>
+                <p className="intake-choice-meta">
+                  {hi ? 'टाइप करें या बोलें (साक्ष्य बाद में जोड़ सकते हैं)।' : 'Type or speak (you can add evidence later).'}
+                </p>
               </div>
-              <span className="intake-choice-arrow" aria-hidden="true"><ChevronRight size={18} /></span>
+              <div className="intake-choice-foot">
+                <span className="intake-choice-pill">{hi ? 'आवाज़ या टेक्स्ट' : 'Voice or text'}</span>
+              </div>
             </button>
           </div>
 
-          <div className="intake-fallbacks mt-6 pt-4 border-t border-line/60">
-            <p className="intake-fallback-copy !font-extrabold !text-ink">
-              {hi ? 'फोटो नहीं है?' : 'No photo?'}
-            </p>
-            <div className="intake-fallback-buttons">
-              <button type="button" className="btn-secondary font-bold" onClick={() => setPanel('manual')}>
-                {hi ? 'पेमेंट नंबर लिखें' : 'Type the payment ID'}
+          <div className="intake-fallbacks">
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <p className="text-xs font-bold text-muted uppercase tracking-wider">
+                {hi ? 'फोटो या स्क्रीनशॉट नहीं है? मैन्युअल दर्ज करें' : 'No photo or screenshot? Enter manually'}
+              </p>
+            </div>
+            
+            <div className="intake-fallback-grid">
+              {/* Option 1: Payment ID */}
+              <button
+                type="button"
+                className="intake-fallback-card intake-fallback-card-money"
+                onClick={() => setPanel('manual')}
+              >
+                <div className="intake-fallback-icon intake-fallback-icon-money">
+                  <Receipt size={17} />
+                </div>
+                <span className="intake-fallback-title">
+                  {hi ? 'पेमेंट ID (UTR) लिखें' : 'Type the payment ID'}
+                </span>
+                <span className="intake-fallback-arrow" aria-hidden="true">
+                  <ChevronRight size={15} />
+                </span>
               </button>
-              <button type="button" className="btn-secondary font-bold" onClick={() => setPanel('social')}>
-                {hi ? 'प्रोफाइल लिंक लिखें' : 'Type the profile link'}
+
+              {/* Option 2: Profile Link */}
+              <button
+                type="button"
+                className="intake-fallback-card intake-fallback-card-social"
+                onClick={() => setPanel('social')}
+              >
+                <div className="intake-fallback-icon intake-fallback-icon-social">
+                  <Globe size={17} />
+                </div>
+                <span className="intake-fallback-title">
+                  {hi ? 'प्रोफाइल लिंक लिखें' : 'Type the profile link'}
+                </span>
+                <span className="intake-fallback-arrow" aria-hidden="true">
+                  <ChevronRight size={15} />
+                </span>
               </button>
             </div>
           </div>
@@ -466,8 +537,8 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
               />
               <p className="field-hint">
                 {hi
-                  ? 'VPA मतलब Virtual Payment Address — name@oksbi जैसा पता जिससे पैसे गए।'
-                  : 'VPA means Virtual Payment Address — the name@oksbi style ID the money went to.'}
+                  ? 'VPA मतलब Virtual Payment Address (name@oksbi जैसा पता जिससे पैसे गए)।'
+                  : 'VPA means Virtual Payment Address (the name@oksbi style ID the money went to).'}
               </p>
             </div>
             <button

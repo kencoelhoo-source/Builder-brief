@@ -53,7 +53,7 @@ export const MockedTransparencyHub: React.FC<MockedTransparencyHubProps> = ({
             <h3 className="font-bold text-lg">{hi ? 'सिमुलेटेड' : 'Simulated'}</h3>
             <ul className="mt-2 space-y-1 text-muted list-disc pl-5">
               <li>{hi ? 'बैंक नोडल API और लियन लॉकिंग' : 'Bank nodal APIs and lien locking'}</li>
-              <li>{hi ? '1930 एक वास्तविक नंबर है — यह ऐप कॉल नहीं करता' : '1930 is a real number — this app does not place the call'}</li>
+              <li>{hi ? '1930 एक वास्तविक नंबर है (यह ऐप कॉल नहीं करता)' : '1930 is a real number (this app does not place the call)'}</li>
               <li>{hi ? 'सिर्फ सिंथेटिक / मॉक व्यक्ति' : 'Synthetic personas only'}</li>
               <li>{hi ? 'ब्राउज़र में सेशन डेटा, रीसेट पर साफ' : 'Session data in the browser, cleared on reset'}</li>
             </ul>

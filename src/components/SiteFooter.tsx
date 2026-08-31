@@ -19,12 +19,12 @@ export const SiteFooter: React.FC<SiteFooterProps> = ({
   const hi = currentLang === 'hi';
 
   return (
-    <footer className="site-footer no-print w-full max-w-full overflow-hidden border-t border-line/60 bg-card/60 backdrop-blur-sm">
+    <footer className="site-footer no-print w-full max-w-full overflow-hidden border-t border-line bg-card/85 dark:bg-card/95 backdrop-blur-md">
       <div className="max-w-4xl mx-auto px-4 py-3 sm:py-3.5 flex flex-wrap items-center justify-center gap-x-3 sm:gap-x-5 gap-y-1.5 text-xs text-muted overflow-hidden">
         <button
           type="button"
           onClick={onResetToHome}
-          className="hover:text-ink transition-colors font-medium cursor-pointer"
+          className="footer-link"
         >
           {hi ? 'नई रिपोर्ट' : 'New report'}
         </button>
@@ -34,7 +34,7 @@ export const SiteFooter: React.FC<SiteFooterProps> = ({
         <button
           type="button"
           onClick={onOpenMockedHub}
-          className="hover:text-ink transition-colors font-medium cursor-pointer"
+          className="footer-link"
         >
           {hi ? 'क्या मॉक है' : "What's mocked"}
         </button>
@@ -44,7 +44,7 @@ export const SiteFooter: React.FC<SiteFooterProps> = ({
         <button
           type="button"
           onClick={onOpenQuiz}
-          className="hover:text-ink transition-colors font-medium cursor-pointer"
+          className="footer-link"
         >
           {hi ? 'साइबर सुरक्षा सीखें' : 'Learn cyber safety'}
         </button>
@@ -55,7 +55,7 @@ export const SiteFooter: React.FC<SiteFooterProps> = ({
             <button
               type="button"
               onClick={onOpenTips}
-              className="hover:text-ink transition-colors font-medium cursor-pointer"
+              className="footer-link"
             >
               {hi ? 'साक्ष्य व सुझाव' : 'Evidence & tips'}
             </button>

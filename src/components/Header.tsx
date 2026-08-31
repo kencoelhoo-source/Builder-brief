@@ -84,8 +84,10 @@ export const Header: React.FC<HeaderProps> = ({
             aria-label={hi ? '1930 हेल्पलाइन' : '1930 Helpline'}
           >
             <PhoneCall size={12} strokeWidth={2.25} />
-            <span>1930</span>
-            <span className="hidden sm:inline">{hi ? 'हेल्पलाइन' : 'Helpline'}</span>
+            <span className="helpline-text">
+              <span>1930</span>
+              <span className="hidden sm:inline"> {hi ? 'हेल्पलाइन' : 'Helpline'}</span>
+            </span>
           </a>
           <div className="lang-switch">
             <button type="button" className={currentLang === 'en' ? 'is-active' : ''} onClick={() => onToggleLang('en')}>

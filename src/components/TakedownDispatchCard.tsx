@@ -9,6 +9,8 @@ interface TakedownDispatchCardProps {
   currentLang: Language;
   onDispatchComplete: (payload: Sec79Payload) => void;
   onBack: () => void;
+  existingPayload?: Sec79Payload | null;
+  onViewLiveTracker?: () => void;
 }
 
 export const TakedownDispatchCard: React.FC<TakedownDispatchCardProps> = ({
@@ -16,6 +18,8 @@ export const TakedownDispatchCard: React.FC<TakedownDispatchCardProps> = ({
   currentLang,
   onDispatchComplete,
   onBack,
+  existingPayload,
+  onViewLiveTracker,
 }) => {
   const [deadlineAt] = useState(() => getOrCreateSessionDeadline('takedown', 36 * 60 * 60));
   const [now, setNow] = useState(() => Date.now());
@@ -41,6 +45,10 @@ export const TakedownDispatchCard: React.FC<TakedownDispatchCardProps> = ({
   }, []);
 
   const handleExecuteDispatch = async () => {
+    if (existingPayload && onViewLiveTracker) {
+      onViewLiveTracker();
+      return;
+    }
     if (!canDispatch) return;
     setIsDispatching(true);
     try {
@@ -70,6 +78,32 @@ export const TakedownDispatchCard: React.FC<TakedownDispatchCardProps> = ({
         <span className="crumb-sep" aria-hidden="true">/</span>
         <span>{hi ? 'डेमो नोटिस' : 'Demo notice'}</span>
       </p>
+
+      {existingPayload && (
+        <div className="p-3.5 sm:p-4 rounded-xl bg-emerald-500/10 dark:bg-emerald-400/10 border border-emerald-500/20 flex items-center justify-between gap-3 mb-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="relative flex h-2 w-2 shrink-0">
+              <span className="anim-pulse-ring absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600 dark:bg-emerald-400" />
+            </span>
+            <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 truncate">
+              {hi
+                ? `धारा 79 नोटिस प्रेषित हो चुका है (Ref: ${existingPayload.ackNumber})`
+                : `Section 79 notice already dispatched (Ref: ${existingPayload.ackNumber})`}
+            </span>
+          </div>
+          {onViewLiveTracker && (
+            <button
+              type="button"
+              onClick={onViewLiveTracker}
+              className="text-xs font-bold text-emerald-700 dark:text-emerald-300 hover:underline shrink-0 cursor-pointer"
+            >
+              {hi ? 'लाइव ट्रैकर खोलें →' : 'Open Live Tracker →'}
+            </button>
+          )}
+        </div>
+      )}
+
       <div className="dossier-head">
         <header>
           <h1>{hi ? 'डेमो टेकडाउन नोटिस।' : 'Demo takedown notice.'}</h1>
@@ -88,7 +122,7 @@ export const TakedownDispatchCard: React.FC<TakedownDispatchCardProps> = ({
           <p className="detail-meta">{transaction.suspectUrl}</p>
           <p className="detail-meta">
             {hi
-              ? 'IT Act धारा 79(3)(b) के तहत अवैध सामग्री तक पहुँच बंद करने का अनुरोध — सिमुलेटेड।'
+              ? 'IT Act धारा 79(3)(b) के तहत अवैध सामग्री तक पहुँच बंद करने का अनुरोध (सिमुलेटेड)।'
               : 'Simulated request to disable access under Section 79(3)(b) of the IT Act.'}
           </p>
         </article>
@@ -121,16 +155,14 @@ export const TakedownDispatchCard: React.FC<TakedownDispatchCardProps> = ({
           <button
             type="button"
             onClick={handleExecuteDispatch}
-            disabled={isDispatching}
+            disabled={isDispatching || (!existingPayload && !canDispatch)}
             className="btn-emergency"
           >
-            {isDispatching
-              ? hi
-                ? 'भेजा जा रहा है…'
-                : 'Sending…'
-              : hi
-              ? 'डेमो टेकडाउन नोटिस देखें'
-              : 'Preview demo takedown notice'}
+            {existingPayload
+              ? (hi ? 'लाइव ट्रैकर देखें' : 'View Live Tracker')
+              : isDispatching
+              ? (hi ? 'भेजा जा रहा है…' : 'Sending…')
+              : (hi ? 'डेमो टेकडाउन नोटिस देखें' : 'Preview demo takedown notice')}
           </button>
           <button type="button" onClick={onBack} className="btn-secondary" disabled={isDispatching}>
             {hi ? 'पीछे' : 'Back'}
