@@ -199,7 +199,7 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
 
   const isSubmittedCase = Boolean(savedDraft?.isSubmitted || savedDraft?.payload || savedDraft?.step === 'radar');
   const isUncompletedDraft = Boolean(savedDraft && !isSubmittedCase && savedDraft.transaction);
-  const draftTx = isUncompletedDraft ? savedDraft.transaction : null;
+  const draftTx = (isUncompletedDraft && savedDraft) ? savedDraft.transaction : null;
 
   return (
     <div className="page-wrap page-stack intake">
@@ -224,12 +224,12 @@ export const EmergencyIntake: React.FC<EmergencyIntakeProps> = ({
                     <span className="text-xs sm:text-sm font-bold text-ink tracking-tight">
                       {hi ? 'सक्रिय केस दर्ज है:' : 'Active Case In Progress:'}{' '}
                       <span className="font-mono font-bold text-emerald-800 dark:text-emerald-300">
-                        {savedDraft.payload?.ackNumber || 'Active'}
+                        {savedDraft?.payload?.ackNumber || 'Active'}
                       </span>
                     </span>
                   </div>
                   <p className="text-[11px] sm:text-xs text-muted truncate mt-0.5">
-                    <span className="font-medium text-ink/80">{savedDraft.transaction.fraudCategoryLabel}</span> · {hi ? 'लाइव एस्केलेशन ट्रैकर में सक्रिय' : 'Active in live escalation tracker'}
+                    <span className="font-medium text-ink/80">{savedDraft?.transaction?.fraudCategoryLabel}</span> · {hi ? 'लाइव एस्केलेशन ट्रैकर में सक्रिय' : 'Active in live escalation tracker'}
                   </p>
                 </div>
               </div>
