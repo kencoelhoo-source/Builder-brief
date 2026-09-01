@@ -42,11 +42,30 @@ export const FIRDraftModal: React.FC<FIRDraftModalProps> = ({
   });
   const profile = transaction.personProfile;
 
+  const [isClosing, setIsClosing] = useState(false);
+
+  const handleSmoothClose = () => {
+    if (isClosing) return;
+    setIsClosing(true);
+    setTimeout(onClose, 150);
+  };
+
   return (
-    <div className="fir-modal fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto animate-fadeIn">
-      <div className="fir-modal-shell bg-card border border-line rounded-xl w-full max-w-3xl max-h-[94vh] flex flex-col p-0 shadow-2xl relative min-w-0">
+    <div
+      className={`fir-modal fixed inset-0 z-50 bg-black/65 flex items-center justify-center p-2 sm:p-4 overflow-y-auto overscroll-contain ${
+        isClosing ? 'modal-backdrop-exit' : 'modal-backdrop-enter'
+      }`}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) handleSmoothClose();
+      }}
+    >
+      <div
+        className={`fir-modal-shell bg-card border border-line-strong rounded-2xl w-full max-w-3xl max-h-[94vh] flex flex-col p-0 shadow-2xl relative min-w-0 overflow-hidden overscroll-contain ${
+          isClosing ? 'modal-content-exit' : 'modal-content-enter'
+        }`}
+      >
         {/* Header Bar */}
-        <div className="flex items-start justify-between gap-3 p-3.5 sm:p-4 border-b border-line bg-soft rounded-t-xl no-print">
+        <div className="flex items-start justify-between gap-3 p-3.5 sm:p-4 border-b border-line bg-soft/40 no-print">
           <div className="flex items-start gap-2 min-w-0">
             <Scale size={18} className="text-ink shrink-0 mt-0.5" />
             <div className="min-w-0">
@@ -61,11 +80,12 @@ export const FIRDraftModal: React.FC<FIRDraftModalProps> = ({
             </div>
           </div>
           <button
-            onClick={onClose}
-            className="btn-icon !w-8 !h-8"
+            type="button"
+            onClick={handleSmoothClose}
+            className="w-8 h-8 rounded-full bg-soft hover:bg-line border border-line flex items-center justify-center text-muted hover:text-ink transition-colors shrink-0 cursor-pointer"
             aria-label="Close"
           >
-            <X size={18} />
+            <X size={18} strokeWidth={2} />
           </button>
         </div>
 
@@ -153,7 +173,7 @@ export const FIRDraftModal: React.FC<FIRDraftModalProps> = ({
             Prototype template for review; obtain legal advice before filing
           </span>
           <div className="btn-group w-full sm:w-auto sm:ml-auto">
-            <button onClick={onClose} className="btn-secondary">
+            <button type="button" onClick={handleSmoothClose} className="btn-secondary">
               {currentLang === 'hi' ? 'बंद करें' : 'Close'}
             </button>
             <button onClick={handlePrint} className="btn-primary" disabled={isExporting}>

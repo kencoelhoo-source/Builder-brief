@@ -103,15 +103,22 @@
 * { -webkit-tap-highlight-color: transparent; }
 
 html {
-  scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
-  overflow-x: hidden;
+  touch-action: pan-x pan-y;
+  -webkit-overflow-scrolling: touch;
+  overflow-x: clip;
+}
+
+button, a, [role="button"] {
   touch-action: manipulation;
 }
 
-button, a, [role="button"], input, select, textarea {
-  touch-action: manipulation;
+/* Prevent mobile browsers from auto-zooming in on input focus */
+@media screen and (max-width: 768px) {
+  input, select, textarea, .input, .textarea {
+    font-size: 16px !important;
+  }
 }
 
 body {
@@ -124,7 +131,7 @@ body {
   min-height: 100dvh;
   width: 100%;
   max-width: 100%;
-  overflow-x: hidden;
+  overflow-x: clip;
   -webkit-font-smoothing: antialiased;
   position: relative;
   transition: background-color 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -142,11 +149,13 @@ body::before {
     radial-gradient(circle 850px at 50% 45%, rgba(255, 255, 255, 0.6) 0%, transparent 80%);
   background-size: 100% 100%;
   opacity: 1;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  contain: strict;
   transition: opacity 0.22s ease;
-  will-change: opacity;
 }
 
-/* Elegant Theme-Matching Dot Matrix Grid Background */
+/* Elegant Theme-Matching Dot Matrix Grid Background - GPU Layer Isolated */
 body::after {
   content: '';
   position: fixed;
@@ -156,6 +165,9 @@ body::after {
   background-image: radial-gradient(rgba(120, 53, 15, 0.14) 1.2px, transparent 1.2px);
   background-size: 24px 24px;
   opacity: 0.85;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  contain: strict;
 }
 
 [data-theme="dark"] body::before {
@@ -241,6 +253,61 @@ h1, h2, h3, h4 {
 }
 .page-enter, .panel-enter, .animate-fadeIn {
   animation: page-in 0.4s var(--ease) both;
+}
+
+/* Butter-Smooth Modal Animations (GPU Accelerated) */
+@keyframes modalBackdropIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes modalBackdropOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+@keyframes modalContentIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+@keyframes modalContentOut {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+}
+
+.modal-backdrop-enter {
+  animation: modalBackdropIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity;
+  transform: translate3d(0, 0, 0);
+}
+.modal-backdrop-exit {
+  animation: modalBackdropOut 0.15s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  will-change: opacity;
+  transform: translate3d(0, 0, 0);
+}
+.modal-content-enter {
+  animation: modalContentIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.modal-content-exit {
+  animation: modalContentOut 0.15s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  will-change: transform, opacity;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 /* Progress & Escalation Micro-Animations */
@@ -526,11 +593,19 @@ h1, h2, h3, h4 {
   position: sticky;
   top: 0;
   z-index: 30;
-  background: var(--header-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: var(--canvas);
   border-bottom: 1px solid var(--line);
   padding-top: env(safe-area-inset-top, 0px);
+  transform: translate3d(0, 0, 0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+@supports (backdrop-filter: blur(12px)) {
+  .site-header {
+    background: var(--header-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
 }
 .topbar {
   display: flex;
@@ -2757,6 +2832,28 @@ h1, h2, h3, h4 {
   .login-visual { height: clamp(15rem, 68vw, 21rem); }
 }
 
+.site-footer {
+  border-top: 1px solid var(--line);
+  background: var(--card);
+}
+.footer-link {
+  background: none;
+  border: 0;
+  padding: 1px 3px;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+@media (min-width: 640px) {
+  .footer-link {
+    font-size: 12px;
+    padding: 2px 4px;
+  }
+}
+
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: var(--canvas); }
 ::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 99px; }
@@ -2781,6 +2878,8 @@ h1, h2, h3, h4 {
   flex-direction: column;
   align-items: flex-end;
   gap: 12px;
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .assistant-fab {
@@ -3102,31 +3201,36 @@ h1, h2, h3, h4 {
 @media (max-width: 639px) {
   .complaint-assistant {
     left: auto;
-    right: 12px;
-    bottom: max(12px, env(safe-area-inset-bottom, 0px));
+    right: 10px;
+    bottom: max(10px, env(safe-area-inset-bottom, 0px));
     align-items: flex-end;
   }
   .assistant-panel {
-    width: calc(100vw - 24px);
-    height: min(600px, calc(100vh - 92px));
-    height: min(600px, calc(100dvh - 92px));
+    width: calc(100vw - 20px);
+    height: min(560px, calc(100vh - 80px));
+    height: min(560px, calc(100dvh - 80px));
     border-radius: 16px;
   }
   .assistant-fab {
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
     padding: 0;
     justify-content: center;
+    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.4);
+  }
+  .assistant-fab svg {
+    width: 17px;
+    height: 17px;
   }
   .assistant-fab-label { display: none; }
   .assistant-quick-prompts { margin-left: 0; }
 }
 
-/* Theme-Responsive Hero Banner: Seamless Edge-to-Edge Artwork */
+/* Theme-Responsive Hero Banner: Seamless Edge-Aligned Artwork */
 .hub-hero-banner {
   background-color: var(--card) !important;
   background-image: url('./assets/hero-banner.png') !important;
-  background-size: 106% 114% !important;
+  background-size: 104.5% 106.5% !important;
   background-position: center center !important;
   background-repeat: no-repeat !important;
 }
@@ -3143,7 +3247,7 @@ h1, h2, h3, h4 {
 
 @media (max-width: 640px) {
   .hub-hero-banner {
-    background-size: cover !important;
+    background-size: 104.5% 106.5% !important;
     background-position: center center !important;
   }
 }
@@ -3200,8 +3304,7 @@ h1, h2, h3, h4 {
   background: var(--card);
   box-shadow: 0 12px 32px -6px rgba(0, 0, 0, 0.14), 0 4px 12px -2px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.95);
   overflow: hidden;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  transform: translate3d(0, 0, 0);
   animation: selectMenuFadeIn 0.16s cubic-bezier(0.16, 1, 0.3, 1);
 }
 

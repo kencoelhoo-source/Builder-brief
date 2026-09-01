@@ -95,6 +95,26 @@ export const App: React.FC = () => {
     }
   });
 
+  const isAnyModalOpen = Boolean(
+    showPetitionModal ||
+    showReceiptModal ||
+    showFIRModal ||
+    showMockedHub ||
+    showTipsModal ||
+    showQuiz ||
+    cyberSafetyTool
+  );
+
+  useEffect(() => {
+    if (isAnyModalOpen) {
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = prevOverflow;
+      };
+    }
+  }, [isAnyModalOpen]);
+
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     try {

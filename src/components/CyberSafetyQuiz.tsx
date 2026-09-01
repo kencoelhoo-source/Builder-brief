@@ -30,30 +30,50 @@ export const CyberSafetyQuiz: React.FC<CyberSafetyQuizProps> = ({ currentLang, o
     setAnswers({});
   };
 
+  const [isClosing, setIsClosing] = useState(false);
+
+  const handleSmoothClose = () => {
+    if (isClosing) return;
+    setIsClosing(true);
+    setTimeout(onClose, 150);
+  };
+
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-fadeIn">
+    <div
+      className={`fixed inset-0 z-50 bg-black/65 flex items-center justify-center p-3 sm:p-4 overflow-y-auto overscroll-contain ${
+        isClosing ? 'modal-backdrop-exit' : 'modal-backdrop-enter'
+      }`}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) handleSmoothClose();
+      }}
+    >
       <section
-        className="bg-card border border-line rounded-2xl w-full max-w-2xl max-h-[94vh] flex flex-col shadow-2xl"
+        className={`bg-card border border-line-strong rounded-2xl w-full max-w-2xl max-h-[94vh] flex flex-col shadow-2xl overflow-hidden overscroll-contain ${
+          isClosing ? 'modal-content-exit' : 'modal-content-enter'
+        }`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="cyber-safety-quiz-title"
       >
-        <header className="flex items-center justify-between gap-4 p-4 sm:p-5 border-b border-line bg-soft rounded-t-2xl">
+        <header className="flex items-center justify-between gap-4 p-4 sm:p-5 border-b border-line bg-soft/40">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-[#15803d] text-white flex items-center justify-center">
-              <ShieldCheck size={18} />
-            </div>
+            <ShieldCheck size={22} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
             <div>
-              <h2 id="cyber-safety-quiz-title" className="text-lg font-bold">
+              <h2 id="cyber-safety-quiz-title" className="text-base sm:text-lg font-bold text-ink leading-tight">
                 {hi ? 'साइबर सुरक्षा क्विज़' : 'Cyber-safety quiz'}
               </h2>
-              <p className="text-xs text-muted">
+              <p className="text-xs text-muted mt-0.5">
                 {hi ? '90 सेकंड में ठगी के संकेत पहचानें' : 'Spot scam signals in 90 seconds'}
               </p>
             </div>
           </div>
-          <button type="button" onClick={onClose} className="btn-icon !w-9 !h-9" aria-label={hi ? 'क्विज़ बंद करें' : 'Close quiz'}>
-            <X size={18} />
+          <button
+            type="button"
+            onClick={handleSmoothClose}
+            className="w-8 h-8 rounded-full bg-soft hover:bg-line border border-line flex items-center justify-center text-muted hover:text-ink transition-colors shrink-0 cursor-pointer"
+            aria-label={hi ? 'क्विज़ बंद करें' : 'Close quiz'}
+          >
+            <X size={18} strokeWidth={2} />
           </button>
         </header>
 
@@ -82,7 +102,7 @@ export const CyberSafetyQuiz: React.FC<CyberSafetyQuizProps> = ({ currentLang, o
                 <button type="button" className="btn-secondary" onClick={restart}>
                   {hi ? 'फिर से शुरू करें' : 'Try again'}
                 </button>
-                <button type="button" className="btn-primary" onClick={onClose}>
+                <button type="button" className="btn-primary" onClick={handleSmoothClose}>
                   {hi ? 'बंद करें' : 'Close'}
                 </button>
               </div>
@@ -153,7 +173,7 @@ export const CyberSafetyQuiz: React.FC<CyberSafetyQuizProps> = ({ currentLang, o
               )}
 
               <div className="btn-group justify-between mt-7">
-                <button type="button" className="btn-secondary" onClick={onClose}>
+                <button type="button" className="btn-secondary" onClick={handleSmoothClose}>
                   {hi ? 'बंद करें' : 'Close'}
                 </button>
                 <button

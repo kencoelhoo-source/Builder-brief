@@ -55,7 +55,9 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
         <figure className="login-visual">
           <img
             src={loginHero}
-          alt={hi ? 'सुबह की रोशनी से भरा शांत घर का प्रवेश द्वार' : 'A calm home entryway filled with morning light'}
+            alt={hi ? 'सुबह की रोशनी से भरा शांत घर का प्रवेश द्वार' : 'A calm home entryway filled with morning light'}
+            loading="eager"
+            decoding="async"
           />
           <div className="login-utility-controls" role="group" aria-label={hi ? 'भाषा और थीम' : 'Language and theme'}>
             <div className="lang-switch">

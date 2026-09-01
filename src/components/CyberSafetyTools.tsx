@@ -58,23 +58,38 @@ export const CyberSafetyTools: React.FC<CyberSafetyToolsProps> = ({
     setActivity(updateCyberSafetyActivity('securityChecksCompleted'));
   };
 
+  const [isClosing, setIsClosing] = useState(false);
+
+  const handleSmoothClose = () => {
+    if (isClosing) return;
+    setIsClosing(true);
+    setTimeout(onClose, 150);
+  };
+
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-fadeIn">
+    <div
+      className={`fixed inset-0 z-50 bg-black/65 flex items-center justify-center p-3 sm:p-4 overflow-y-auto overscroll-contain ${
+        isClosing ? 'modal-backdrop-exit' : 'modal-backdrop-enter'
+      }`}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) handleSmoothClose();
+      }}
+    >
       <section
-        className="bg-card border border-line-strong rounded-2xl w-full max-w-3xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden"
+        className={`bg-card border border-line-strong rounded-2xl w-full max-w-3xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden overscroll-contain ${
+          isClosing ? 'modal-content-exit' : 'modal-content-enter'
+        }`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="cyber-safety-tools-title"
       >
-        <header className="flex items-center justify-between gap-4 px-4 py-3.5 sm:px-5 sm:py-4 border-b border-line bg-soft">
+        <header className="flex items-center justify-between gap-4 px-4 py-3.5 sm:px-5 sm:py-4 border-b border-line bg-soft/40">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-card text-ink border border-line flex items-center justify-center shrink-0 shadow-2xs">
-              {activeTool === 'analyzer' && <AlertTriangle size={17} />}
-              {activeTool === 'link' && <Link2 size={17} />}
-              {activeTool === 'dashboard' && <BarChart3 size={17} />}
-            </div>
+            {activeTool === 'analyzer' && <AlertTriangle size={20} className="text-amber-600 dark:text-amber-400 shrink-0" />}
+            {activeTool === 'link' && <Link2 size={20} className="text-sky-600 dark:text-sky-400 shrink-0" />}
+            {activeTool === 'dashboard' && <BarChart3 size={20} className="text-emerald-600 dark:text-emerald-400 shrink-0" />}
             <div className="min-w-0">
-              <h2 id="cyber-safety-tools-title" className="text-sm sm:text-base font-extrabold text-ink leading-tight m-0 p-0 truncate">
+              <h2 id="cyber-safety-tools-title" className="text-sm sm:text-base font-bold text-ink leading-tight m-0 p-0 truncate">
                 {activeTool === 'analyzer' && (hi ? 'AI स्कैम विश्लेषक' : 'AI Scam Analyzer')}
                 {activeTool === 'link' && (hi ? 'संदिग्ध लिंक चेकर' : 'Suspicious Link Checker')}
                 {activeTool === 'dashboard' && (hi ? 'साइबर सुरक्षा डैशबोर्ड' : 'Cyber Safety Dashboard')}
@@ -86,8 +101,13 @@ export const CyberSafetyTools: React.FC<CyberSafetyToolsProps> = ({
               </p>
             </div>
           </div>
-          <button type="button" onClick={onClose} className="btn-icon !w-8 !h-8 shrink-0 cursor-pointer" aria-label={hi ? 'बंद करें' : 'Close'}>
-            <X size={16} />
+          <button
+            type="button"
+            onClick={handleSmoothClose}
+            className="w-8 h-8 rounded-full bg-soft hover:bg-line border border-line flex items-center justify-center text-muted hover:text-ink transition-colors shrink-0 cursor-pointer"
+            aria-label={hi ? 'बंद करें' : 'Close'}
+          >
+            <X size={18} strokeWidth={2} />
           </button>
         </header>
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
   Bot,
   Globe,
@@ -138,61 +138,6 @@ export const HomeHub: React.FC<HomeHubProps> = ({
   const targetTitle = hi ? activePair.hiTitle : activePair.enTitle;
   const targetSub = hi ? activePair.hiSub : activePair.enSub;
 
-  // Smooth Typewriter State
-  const [displayedTitle, setDisplayedTitle] = useState('');
-  const [displayedSub, setDisplayedSub] = useState('');
-  const [isTitleDone, setIsTitleDone] = useState(false);
-
-  const titleTimeoutRef = useRef<number | null>(null);
-  const subTimeoutRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    setDisplayedTitle('');
-    setDisplayedSub('');
-    setIsTitleDone(false);
-
-    let charIdx = 0;
-    const typeSpeed = 36;
-
-    const typeNextTitleChar = () => {
-      if (charIdx < targetTitle.length) {
-        setDisplayedTitle(targetTitle.slice(0, charIdx + 1));
-        charIdx++;
-        titleTimeoutRef.current = window.setTimeout(typeNextTitleChar, typeSpeed);
-      } else {
-        setIsTitleDone(true);
-      }
-    };
-
-    titleTimeoutRef.current = window.setTimeout(typeNextTitleChar, 80);
-
-    return () => {
-      if (titleTimeoutRef.current) clearTimeout(titleTimeoutRef.current);
-      if (subTimeoutRef.current) clearTimeout(subTimeoutRef.current);
-    };
-  }, [targetTitle]);
-
-  useEffect(() => {
-    if (!isTitleDone) return;
-
-    let subIdx = 0;
-    const subSpeed = 16;
-
-    const typeNextSubChar = () => {
-      if (subIdx < targetSub.length) {
-        setDisplayedSub(targetSub.slice(0, subIdx + 1));
-        subIdx++;
-        subTimeoutRef.current = window.setTimeout(typeNextSubChar, subSpeed);
-      }
-    };
-
-    subTimeoutRef.current = window.setTimeout(typeNextSubChar, 120);
-
-    return () => {
-      if (subTimeoutRef.current) clearTimeout(subTimeoutRef.current);
-    };
-  }, [isTitleDone, targetSub]);
-
   return (
     <div className="page-wrap page-stack hub w-full mx-auto space-y-4 sm:space-y-6 lg:space-y-8">
       {/* 1. Hero Reassurance Banner */}
@@ -201,28 +146,24 @@ export const HomeHub: React.FC<HomeHubProps> = ({
           {/* Left Column: Reassuring Empathetic Message */}
           <div className="lg:col-span-7 flex flex-col justify-center">
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight text-ink min-h-[32px] sm:min-h-[44px] flex items-center flex-wrap leading-tight">
-              <span>{displayedTitle}</span>
-              {!isTitleDone && <span className="inline-block w-0.5 h-4 sm:h-7 bg-ink ml-1.5 animate-pulse" />}
+              <span>{targetTitle}</span>
             </h1>
 
             <p className="mt-2 sm:mt-3 text-xs sm:text-sm lg:text-base text-muted leading-snug sm:leading-relaxed min-h-[30px] sm:min-h-[44px] font-medium max-w-2xl">
-              <span>{displayedSub}</span>
-              {isTitleDone && displayedSub.length < targetSub.length && (
-                <span className="inline-block w-0.5 h-3.5 bg-ink/80 ml-1 animate-pulse" />
-              )}
+              <span>{targetSub}</span>
             </p>
 
             {/* Mobile Pill Strip for 3 Pillars */}
             <div className="grid grid-cols-3 gap-1.5 sm:hidden mt-3.5 pt-3 border-t border-line/60">
-              <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-card/60 dark:bg-white/[0.04] backdrop-blur-sm border border-line/60 dark:border-white/[0.08]">
+              <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-card/85 dark:bg-[#18181d] border border-line/60 dark:border-white/[0.08]">
                 <HeartHandshake size={12} className="shrink-0 text-ink" />
                 <span className="text-[10px] font-bold text-ink truncate">{hi ? 'नागरिक सहायता' : 'Support'}</span>
               </div>
-              <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-card/60 dark:bg-white/[0.04] backdrop-blur-sm border border-line/60 dark:border-white/[0.08]">
+              <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-card/85 dark:bg-[#18181d] border border-line/60 dark:border-white/[0.08]">
                 <Scale size={12} className="shrink-0 text-ink" />
                 <span className="text-[10px] font-bold text-ink truncate">{hi ? 'कानूनी नोटिस' : 'Notices'}</span>
               </div>
-              <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-card/60 dark:bg-white/[0.04] backdrop-blur-sm border border-line/60 dark:border-white/[0.08]">
+              <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-card/85 dark:bg-[#18181d] border border-line/60 dark:border-white/[0.08]">
                 <Lock size={12} className="shrink-0 text-ink" />
                 <span className="text-[10px] font-bold text-ink truncate">{hi ? '१००% सुरक्षित' : '100% Safe'}</span>
               </div>
@@ -232,7 +173,7 @@ export const HomeHub: React.FC<HomeHubProps> = ({
           {/* Right Column: 3 Trust Pillars (Tablet & Desktop) */}
           <div className="hidden sm:grid sm:grid-cols-3 lg:grid-cols-1 lg:col-span-5 gap-2.5 lg:gap-3">
             {/* Pillar 1 */}
-            <div className="p-3 lg:p-3.5 rounded-xl bg-card/50 dark:bg-white/[0.03] backdrop-blur-md border border-line/70 dark:border-white/[0.08] hover:border-line-strong hover:bg-card/70 dark:hover:bg-white/[0.06] transition-all flex items-start gap-2.5 shadow-2xs">
+            <div className="p-3 lg:p-3.5 rounded-xl bg-card/85 dark:bg-[#18181d] border border-line/70 dark:border-white/[0.08] hover:border-line-strong hover:bg-card dark:hover:bg-[#202026] transition-all flex items-start gap-2.5 shadow-2xs">
               <HeartHandshake size={18} className="text-ink shrink-0 mt-0.5" />
               <div>
                 <h2 className="text-xs font-bold text-ink">
@@ -247,7 +188,7 @@ export const HomeHub: React.FC<HomeHubProps> = ({
             </div>
 
             {/* Pillar 2 */}
-            <div className="p-3 lg:p-3.5 rounded-xl bg-card/50 dark:bg-white/[0.03] backdrop-blur-md border border-line/70 dark:border-white/[0.08] hover:border-line-strong hover:bg-card/70 dark:hover:bg-white/[0.06] transition-all flex items-start gap-2.5 shadow-2xs">
+            <div className="p-3 lg:p-3.5 rounded-xl bg-card/85 dark:bg-[#18181d] border border-line/70 dark:border-white/[0.08] hover:border-line-strong hover:bg-card dark:hover:bg-[#202026] transition-all flex items-start gap-2.5 shadow-2xs">
               <Scale size={18} className="text-ink shrink-0 mt-0.5" />
               <div>
                 <h2 className="text-xs font-bold text-ink">
@@ -262,7 +203,7 @@ export const HomeHub: React.FC<HomeHubProps> = ({
             </div>
 
             {/* Pillar 3 */}
-            <div className="p-3 lg:p-3.5 rounded-xl bg-card/50 dark:bg-white/[0.03] backdrop-blur-md border border-line/70 dark:border-white/[0.08] hover:border-line-strong hover:bg-card/70 dark:hover:bg-white/[0.06] transition-all flex items-start gap-2.5 shadow-2xs">
+            <div className="p-3 lg:p-3.5 rounded-xl bg-card/85 dark:bg-[#18181d] border border-line/70 dark:border-white/[0.08] hover:border-line-strong hover:bg-card dark:hover:bg-[#202026] transition-all flex items-start gap-2.5 shadow-2xs">
               <Lock size={18} className="text-ink shrink-0 mt-0.5" />
               <div>
                 <h2 className="text-xs font-bold text-ink">

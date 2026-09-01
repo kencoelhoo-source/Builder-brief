@@ -9,43 +9,57 @@ interface PrototypeBoundaryModalProps {
 
 export const PrototypeBoundaryModal: React.FC<PrototypeBoundaryModalProps> = ({ currentLang, onClose }) => {
   const hi = currentLang === 'hi';
+  const [isClosing, setIsClosing] = React.useState(false);
+
+  const handleSmoothClose = () => {
+    if (isClosing) return;
+    setIsClosing(true);
+    setTimeout(onClose, 150);
+  };
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
+      if (event.key === 'Escape') handleSmoothClose();
     };
 
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
-  }, [onClose]);
+  }, []);
 
   return (
-    <div className="prototype-boundary-modal fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-fadeIn">
+    <div
+      className={`prototype-boundary-modal fixed inset-0 z-50 bg-black/65 flex items-center justify-center p-3 sm:p-4 overscroll-contain ${
+        isClosing ? 'modal-backdrop-exit' : 'modal-backdrop-enter'
+      }`}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) handleSmoothClose();
+      }}
+    >
       <section
-        className="bg-card border border-line rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden"
+        className={`bg-card border border-line-strong rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden overscroll-contain ${
+          isClosing ? 'modal-content-exit' : 'modal-content-enter'
+        }`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="prototype-boundary-title"
       >
-        <header className="flex items-start justify-between gap-4 p-5 sm:p-6 border-b border-line bg-soft">
+        <header className="flex items-start justify-between gap-4 p-5 sm:p-6 border-b border-line bg-soft/40">
           <div className="flex items-start gap-3">
-            <div className="prototype-boundary-modal-icon w-9 h-9 rounded-full flex items-center justify-center shrink-0">
-              <Info size={18} aria-hidden="true" />
-            </div>
+            <Info size={22} className="text-muted mt-0.5 shrink-0" aria-hidden="true" />
             <div>
               <p className="eyebrow">{hi ? 'कवच · प्रोटोटाइप' : 'Kavach · Prototype'}</p>
-              <h2 id="prototype-boundary-title" className="text-xl sm:text-2xl font-bold leading-tight mt-1">
+              <h2 id="prototype-boundary-title" className="text-xl sm:text-2xl font-bold leading-tight mt-1 text-ink">
                 {hi ? 'यह डेमो कैसे काम करता है' : 'How this demo works'}
               </h2>
             </div>
           </div>
           <button
             type="button"
-            onClick={onClose}
-            className="btn-icon !w-9 !h-9 shrink-0"
+            onClick={handleSmoothClose}
+            className="w-8 h-8 rounded-full bg-soft hover:bg-line border border-line flex items-center justify-center text-muted hover:text-ink transition-colors shrink-0 cursor-pointer"
             aria-label={hi ? 'प्रोटोटाइप जानकारी बंद करें' : 'Close prototype information'}
           >
-            <X size={18} />
+            <X size={18} strokeWidth={2} />
           </button>
         </header>
 
@@ -61,19 +75,19 @@ export const PrototypeBoundaryModal: React.FC<PrototypeBoundaryModalProps> = ({ 
               <div className="flex items-center gap-2">
                 <CheckCircle2 size={16} className="text-success shrink-0" aria-hidden="true" />
                 <span className="text-xs font-bold uppercase tracking-wide text-success">
-                  {hi ? 'आज काम करता है' : 'Working today'}
+                  {hi ? 'कार्यशील' : 'Works now'}
                 </span>
               </div>
               <p className="text-sm text-muted leading-relaxed mt-2">
-                {hi ? 'गाइडेड रिपोर्ट, सबूत चेकलिस्ट, द्विभाषी ड्राफ्ट और सुरक्षा सलाह।' : 'Guided intake, evidence checklists, bilingual drafts and safety guidance.'}
+                {hi ? 'क्लाइंट-साइड सत्यापन, साक्ष्य बंडल, UTR चेक, शिकायत तैयारी।' : 'Client-side verification, evidence bundle, UTR checks, complaint preparation.'}
               </p>
             </div>
 
             <div className="border border-line rounded-xl p-4">
               <div className="flex items-center gap-2">
-                <Info size={16} className="text-warning shrink-0" aria-hidden="true" />
-                <span className="text-xs font-bold uppercase tracking-wide text-warning">
-                  {hi ? 'मॉक / सिमुलेटेड' : 'Mocked / simulated'}
+                <Info size={16} className="text-ink shrink-0" aria-hidden="true" />
+                <span className="text-xs font-bold uppercase tracking-wide text-ink">
+                  {hi ? 'सिम्युलेटेड' : 'Simulated'}
                 </span>
               </div>
               <p className="text-sm text-muted leading-relaxed mt-2">
@@ -104,7 +118,7 @@ export const PrototypeBoundaryModal: React.FC<PrototypeBoundaryModalProps> = ({ 
           </div>
 
           <div className="flex justify-end mt-6">
-            <button type="button" className="btn-primary" onClick={onClose}>
+            <button type="button" className="btn-primary !h-10 !px-8 !text-xs !font-bold !rounded-full cursor-pointer" onClick={handleSmoothClose}>
               {hi ? 'समझ गया' : 'Got it'}
             </button>
           </div>

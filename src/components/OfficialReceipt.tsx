@@ -36,13 +36,32 @@ export const OfficialReceipt: React.FC<OfficialReceiptProps> = ({
     }
   };
 
+  const [isClosing, setIsClosing] = useState(false);
+
+  const handleSmoothClose = () => {
+    if (isClosing) return;
+    setIsClosing(true);
+    setTimeout(onClose, 150);
+  };
+
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto animate-fadeIn">
-      <div className="bg-card border border-line rounded-xl w-full max-w-2xl max-h-[94vh] flex flex-col p-0 shadow-2xl relative">
+    <div
+      className={`fixed inset-0 z-50 bg-black/65 flex items-center justify-center p-2 sm:p-4 overflow-y-auto overscroll-contain ${
+        isClosing ? 'modal-backdrop-exit' : 'modal-backdrop-enter'
+      }`}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) handleSmoothClose();
+      }}
+    >
+      <div
+        className={`bg-card border border-line-strong rounded-2xl w-full max-w-2xl max-h-[94vh] flex flex-col p-0 shadow-2xl relative overflow-hidden overscroll-contain ${
+          isClosing ? 'modal-content-exit' : 'modal-content-enter'
+        }`}
+      >
         {/* Header Bar */}
-        <div className="flex items-center justify-between p-3.5 sm:p-4 border-b border-line bg-soft rounded-t-xl no-print">
+        <div className="flex items-center justify-between p-3.5 sm:p-4 border-b border-line bg-soft/40 no-print">
           <div className="flex items-center gap-2">
-            <ShieldCheck size={18} className="text-[#15803d]" />
+            <ShieldCheck size={18} className="text-emerald-600 dark:text-emerald-400" />
             <h3 className="text-sm font-bold text-ink">
               {currentLang === 'hi'
                 ? 'कवच प्रोटोटाइप डेमो रसीद'
@@ -50,11 +69,12 @@ export const OfficialReceipt: React.FC<OfficialReceiptProps> = ({
             </h3>
           </div>
           <button
-            onClick={onClose}
-            className="btn-icon !w-8 !h-8"
+            type="button"
+            onClick={handleSmoothClose}
+            className="w-8 h-8 rounded-full bg-soft hover:bg-line border border-line flex items-center justify-center text-muted hover:text-ink transition-colors shrink-0 cursor-pointer"
             aria-label="Close"
           >
-            <X size={18} />
+            <X size={18} strokeWidth={2} />
           </button>
         </div>
 
@@ -186,7 +206,7 @@ export const OfficialReceipt: React.FC<OfficialReceiptProps> = ({
             Prototype-generated demo copy; not an official acknowledgment
           </span>
           <div className="btn-group w-full sm:w-auto sm:ml-auto">
-            <button onClick={onClose} className="btn-secondary">
+            <button type="button" onClick={handleSmoothClose} className="btn-secondary">
               {currentLang === 'hi' ? 'बंद करें' : 'Close'}
             </button>
             <button onClick={handlePrint} className="btn-primary" disabled={isExporting}>
