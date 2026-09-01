@@ -2,23 +2,23 @@
 
 Kavach is an independent citizen prototype for the Build What Moves India hackathon presented by Varun Mayya and OpenAI. It rethinks the first few minutes of an Indian cybercrime report by starting with the evidence a victim already has, such as a UPI receipt, bank SMS, chat, or social profile screenshot.
 
-> The existing portal asks a victim to describe the crime. Kavach reads the evidence, makes the missing details visible, and prepares the next action. 1930, banks, police, platforms, and the National Cybercrime Reporting Portal remain the real authorities.
+> The existing portal asks a victim to describe the crime. Kavach reads the evidence, makes the missing details visible, and prepares the next action. The 1930 National Cybercrime Helpline, banks, police, platforms, and the National Cybercrime Reporting Portal remain the real authorities.
 
 Kavach is not an official government service. It does not freeze accounts, submit an NCRP complaint, file an FIR, send a platform notice, or recover money.
 
-## 250-word submission summary
+## Project Summary
 
 Kavach is an independent civic prototype for India’s cybercrime reporting journey. It is designed for the first 90 seconds after a UPI debit or fake social profile, when a victim is stressed, on a phone, and unsure which details a complaint needs.
 
-The National Cybercrime Reporting Portal is valuable, but its journey separates registration, tracking, suspect reporting, and the 1930 emergency channel. Its checklist asks for incident details, identity, bank or wallet information, a 12 digit UTR, amount, date, and evidence. MoSPI’s 2025 survey found only 17.7% of people aged 15+ said they could report cybercrime, including 12.7% of women and 22.7% of men. Kavach starts with evidence: upload a receipt, chat, or profile screenshot; parse it in the browser with Tesseract.js; review fields; then follow the relevant path.
+The National Cybercrime Reporting Portal is valuable, but its journey separates registration, tracking, suspect reporting, and the 1930 emergency helpline (India’s toll-free National Cybercrime Helpline). Its checklist asks for incident details, identity, bank or wallet information, a 12 digit UTR, amount, date, and evidence. MoSPI’s 2025 survey found only 17.7% of people aged 15+ said they could report cybercrime, including 12.7% of women and 22.7% of men. Kavach starts with evidence: upload a receipt, chat, or profile screenshot; parse it in the browser with Tesseract.js; review fields; then follow the relevant path.
 
 Financial cases create a labelled simulated dual bank freeze payload, illustrative fund trail, tracking view, and court petition and receipt templates. Social cases create a simulated Section 79 notice, 36 hour demo window, escalation view, and FIR draft. Hindi and English UI, voice input, editable fields, saved drafts, and clear boundaries reduce cognitive load without pretending to contact banks, police, platforms, or NCRP.
 
-I used Codex as a product and engineering partner to scan the repository, shape the four step state machine, implement the bilingual mobile journey, reason through OCR failure states, define safe mock boundaries, and verify the documentation. Kavach turns a screenshot into understandable next actions while keeping 1930 and real authorities in the loop.
+I used Codex as a product and engineering partner to scan the repository, shape the four step state machine, implement the bilingual mobile journey, reason through OCR failure states, define safe mock boundaries, and verify the documentation. Kavach turns a screenshot into understandable next actions while keeping the 1930 National Cybercrime Helpline and real authorities in the loop.
 
 ## The problem and the evidence
 
-The National Cybercrime Reporting Portal is an important national service. Its official site directs financial-fraud victims to the 24 by 7 helpline 1930, supports complaint tracking, and provides suspect-search and suspect-reporting facilities. MHA reports that CFCFRMS had onboarded more than 375 financial intermediaries and saved more than ₹4,725 crore for more than 14.47 lakh victims by 31 March 2025. Kavach is designed to improve the citizen handoff into that ecosystem, not to replace it.
+The National Cybercrime Reporting Portal is an important national service. Its official site directs financial-fraud victims to the 24x7 National Cybercrime Helpline 1930 (Citizen Financial Cyber Fraud Reporting and Management System - CFCFRMS), supports complaint tracking, and provides suspect-search and suspect-reporting facilities. MHA reports that CFCFRMS had onboarded more than 375 financial intermediaries and saved more than ₹4,725 crore for more than 14.47 lakh victims by 31 March 2025. Kavach is designed to improve the citizen handoff into that ecosystem, not to replace it.
 
 The usability problem is the effort required at the moment of highest urgency:
 
@@ -27,7 +27,7 @@ The usability problem is the effort required at the moment of highest urgency:
 | The official portal exposes separate entry points for registration, tracking, suspect reporting, social-media abuse reporting, and learning resources. | A panicked user must understand which door to open before they can explain what happened. | One guided intake routes a financial or social incident into the relevant path. |
 | The published complaint checklist asks for incident time, a description, identity, bank or wallet details, a 12 digit transaction ID or UTR, amount, date, and evidence. | A victim has to find and retype facts from a receipt, SMS, or screenshot. | Screenshot-first intake extracts visible fields in the browser, then presents a human Check step with editable fields. |
 | MoSPI’s Comprehensive Modular Survey: Telecom 2025 found that only 17.7% of people aged 15 and above reported being able to complain about cybercrime or report cyber fraud. The figure was 12.7% for women and 22.7% for men. | The flow must explain itself to people with limited digital confidence. | Plain-language copy, bilingual UI, voice input, visible fallbacks, and no hidden assumptions. |
-| MHA data records reported cyber-fraud losses of ₹2,290.24 crore in 2022, ₹7,465.18 crore in 2023, and ₹22,845.73 crore in 2024. | Reporting speed matters, especially for financial fraud. | 1930 is visible throughout the flow, and the demo keeps the bank call separate from the prototype action. |
+| MHA data records reported cyber-fraud losses of ₹2,290.24 crore in 2022, ₹7,465.18 crore in 2023, and ₹22,845.73 crore in 2024. | Reporting speed matters, especially for financial fraud. | 1930 (National Cybercrime Helpline) is visible throughout the flow, and the demo keeps the bank call separate from the prototype action. |
 
 These are not claims that the official service lacks capability. They are product reasons to reduce the work a citizen must do before reaching the real response system.
 
@@ -86,7 +86,7 @@ Codex was a meaningful part of the build, not a label added after the fact. It w
 - Mock personas for fast reviewer demos.
 - Back navigation, draft resume, language preference, theme preference, and draft clearing.
 - Simulated payload previews, timers, trackers, and client-side PDF generation.
-- A visible `tel:1930` link. The browser does not place the call automatically.
+- A visible `tel:1930` link to the National Cybercrime Helpline. The browser does not place the call automatically.
 
 ### Simulated or not connected
 
@@ -135,7 +135,7 @@ The Build What Moves India brief requires a public browser link, a video of no m
 2. Record the first minute as a citizen uploading a real synthetic screenshot, then use the second minute to explain the design, mock boundaries, and Codex contribution.
 3. Consider moving the simulated sign-in off the emergency path. The current code requires sign-in before Report, which adds friction for the exact user Kavach is meant to serve.
 4. Test the real upload path on a phone, including an unreadable image. The reviewer should see an editable or empty field, never an invented UTR.
-5. Keep the 1930 call and official NCRP submission visible in the demo. Kavach is a preparation and handoff layer, not a replacement for either.
+5. Keep the 1930 National Cybercrime Helpline call and official NCRP submission visible in the demo. Kavach is a preparation and handoff layer, not a replacement for either.
 
 ## Research sources
 
