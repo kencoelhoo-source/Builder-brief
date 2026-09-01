@@ -127,16 +127,6 @@ npm run lint
 npm run preview
 ```
 
-## Submission readiness and next steps
-
-The Build What Moves India brief requires a public browser link, a video of no more than two minutes, and a summary under 250 words. Before submission:
-
-1. Publish a public URL that opens without access requests.
-2. Record the first minute as a citizen uploading a real synthetic screenshot, then use the second minute to explain the design, mock boundaries, and Codex contribution.
-3. Consider moving the simulated sign-in off the emergency path. The current code requires sign-in before Report, which adds friction for the exact user Kavach is meant to serve.
-4. Test the real upload path on a phone, including an unreadable image. The reviewer should see an editable or empty field, never an invented UTR.
-5. Keep the 1930 National Cybercrime Helpline call and official NCRP submission visible in the demo. Kavach is a preparation and handoff layer, not a replacement for either.
-
 ## Research sources
 
 Research snapshot: 28 August 2026.
